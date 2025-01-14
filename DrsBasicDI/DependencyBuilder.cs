@@ -17,6 +17,10 @@ public class DependencyBuilder
 
     public static DependencyBuilder Empty => new();
 
+    public string DependencyTypeName => _dependencyType is null ? "N/A" : _dependencyType.GetFriendlyName();
+
+    public string ResolvingTypeName => _resolvingType is null ? "N/A" : _resolvingType.GetFriendlyName();
+
     public Dependency Build()
     {
         Validate();
@@ -31,14 +35,18 @@ public class DependencyBuilder
     }
 
     public DependencyBuilder WithDependencyType<T>() where T : class
-    {
-        _dependencyType = typeof(T);
-        return this;
-    }
+        => WithDependencyType(typeof(T));
 
     public DependencyBuilder WithDependencyType(Type dependencyType)
     {
         ArgumentNullException.ThrowIfNull(dependencyType, nameof(dependencyType));
+
+        if (_dependencyType is not null)
+        {
+            string msg = string.Format(MsgDependencyTypeAlreadySpecified, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
+
         _dependencyType = dependencyType;
         return this;
     }
@@ -46,25 +54,42 @@ public class DependencyBuilder
     public DependencyBuilder WithFactory(Func<object> factory)
     {
         ArgumentNullException.ThrowIfNull(factory, nameof(factory));
+
+        if (_factory is not null)
+        {
+            string msg = string.Format(MsgFactoryAlreadySpecified, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
+
         _factory = factory;
         return this;
     }
 
     public DependencyBuilder WithLifetime(DependencyLifetime lifetime)
     {
+        if (_lifetime is not DependencyLifetime.Undefined)
+        {
+            string msg = string.Format(MsgLifetimeAlreadySpecified, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
+
         _lifetime = lifetime;
         return this;
     }
 
     public DependencyBuilder WithResolvingType<T>() where T : class
-    {
-        _resolvingType = typeof(T);
-        return this;
-    }
+        => WithResolvingType(typeof(T));
 
     public DependencyBuilder WithResolvingType(Type resolvingType)
     {
         ArgumentNullException.ThrowIfNull(resolvingType, nameof(resolvingType));
+
+        if (_resolvingType is not null)
+        {
+            string msg = string.Format(MsgResolvingTypeAlreadySpecified, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
+
         _resolvingType = resolvingType;
         return this;
     }
@@ -87,13 +112,13 @@ public class DependencyBuilder
 
         if (!_dependencyType.IsClass && !_dependencyType.IsInterface)
         {
-            string msg = string.Format(MsgInvalidDependencyType, _dependencyType.GetFriendlyName());
+            string msg = string.Format(MsgInvalidDependencyType, DependencyTypeName);
             throw new DependencyBuildException(msg);
         }
 
         if (_dependencyType.IsGenericType && !_dependencyType.IsConstructedGenericType)
         {
-            string msg = string.Format(MsgGenericDependencyTypeIsOpen, _dependencyType.GetFriendlyName());
+            string msg = string.Format(MsgGenericDependencyTypeIsOpen, DependencyTypeName);
             throw new DependencyBuildException(msg);
         }
     }
@@ -106,7 +131,7 @@ public class DependencyBuilder
 
             if (!returnType.IsAssignableTo(_dependencyType))
             {
-                string msg = string.Format(MsgIncompatibleFactory, _dependencyType!.GetFriendlyName());
+                string msg = string.Format(MsgIncompatibleFactory, DependencyTypeName);
                 throw new DependencyBuildException(msg);
             }
         }
@@ -116,7 +141,7 @@ public class DependencyBuilder
     {
         if (_lifetime is DependencyLifetime.Undefined)
         {
-            string msg = string.Format(MsgUndefinedLifetime, _dependencyType!.GetFriendlyName());
+            string msg = string.Format(MsgUndefinedLifetime, DependencyTypeName);
             throw new DependencyBuildException(msg);
         }
     }
@@ -125,31 +150,31 @@ public class DependencyBuilder
     {
         if (_resolvingType is null)
         {
-            string msg = string.Format(MsgUnspecifiedResolvingType, _dependencyType!.GetFriendlyName());
+            string msg = string.Format(MsgUnspecifiedResolvingType, DependencyTypeName);
             throw new DependencyBuildException(msg);
         }
 
         if (!_resolvingType.IsClass)
         {
-            string msg = string.Format(MsgInvalidResolvingType, _resolvingType.GetFriendlyName(), _dependencyType!.GetFriendlyName());
+            string msg = string.Format(MsgInvalidResolvingType, ResolvingTypeName, DependencyTypeName);
             throw new DependencyBuildException(msg);
         }
 
         if (_resolvingType.IsAbstract)
         {
-            string msg = string.Format(MsgAbstractResolvingType, _resolvingType.GetFriendlyName(), _dependencyType!.GetFriendlyName());
+            string msg = string.Format(MsgAbstractResolvingType, ResolvingTypeName, DependencyTypeName);
             throw new DependencyBuildException(msg);
         }
 
         if (_resolvingType.IsGenericType && !_resolvingType.IsConstructedGenericType)
         {
-            string msg = string.Format(MsgResolvingGenericTypeIsOpen, _resolvingType.GetFriendlyName(), _dependencyType!.GetFriendlyName());
+            string msg = string.Format(MsgResolvingGenericTypeIsOpen, ResolvingTypeName, DependencyTypeName);
             throw new DependencyBuildException(msg);
         }
 
         if (!_resolvingType.IsAssignableTo(_dependencyType))
         {
-            string msg = string.Format(MsgIncompatibleResolvingType, _resolvingType.GetFriendlyName(), _dependencyType!.GetFriendlyName());
+            string msg = string.Format(MsgIncompatibleResolvingType, ResolvingTypeName, DependencyTypeName);
             throw new DependencyBuildException(msg);
         }
     }

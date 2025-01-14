@@ -7,17 +7,14 @@ public class DependencyBuilderTests
     {
         // Arrange
         DependencyBuilder builder = DependencyBuilder.Empty;
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(typeof(IClass1))
             .WithResolvingType(typeof(Class1))
             .Build();
         string msg = string.Format(MsgUndefinedLifetime, nameof(IClass1));
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -55,17 +52,14 @@ public class DependencyBuilderTests
     {
         // Arrange
         DependencyBuilder builder = DependencyBuilder.Empty;
-        Action action = () => builder
+        void action() => builder
             .WithLifetime(DependencyLifetime.Transient)
             .WithResolvingType(typeof(Class1))
             .Build();
         string msg = MsgUnspecifiedDependencyType;
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(action, msg);
     }
 
     [Fact]
@@ -105,7 +99,7 @@ public class DependencyBuilderTests
         Type dependencyType = typeof(IGenericClass1<,>);
         string dependencyTypeName = "IGenericClass1<S, T>";
         Type resolvingType = typeof(GenericClass1<int, string>);
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(dependencyType)
             .WithResolvingType(resolvingType)
             .WithLifetime(DependencyLifetime.Transient)
@@ -113,10 +107,7 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgGenericDependencyTypeIsOpen, dependencyTypeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -126,7 +117,7 @@ public class DependencyBuilderTests
         DependencyBuilder builder = DependencyBuilder.Empty;
         Type type = typeof(Struct1);
         string typeName = type.Name;
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(type)
             .WithLifetime(DependencyLifetime.Transient)
             .WithResolvingType(type)
@@ -134,10 +125,28 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgInvalidDependencyType, typeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
+    }
+
+    [Fact]
+    public void DependencyTypeSpecifiedMoreThanOnce_ShouldThrowException()
+    {
+        // Arrange
+        DependencyBuilder builder = DependencyBuilder.Empty;
+        Type dependencyType = typeof(IClass1);
+        string dependencyTypeName = dependencyType.Name;
+        Type resolvingType = typeof(Class1);
+        DependencyLifetime lifetime = DependencyLifetime.Singleton;
+        void buildAction() => builder
+            .WithDependencyType(dependencyType)
+            .WithResolvingType(resolvingType)
+            .WithDependencyType(dependencyType)
+            .WithLifetime(lifetime)
+            .Build();
+        string msg = string.Format(MsgDependencyTypeAlreadySpecified, dependencyTypeName);
+
+        // Act/Assert
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -179,6 +188,50 @@ public class DependencyBuilderTests
     }
 
     [Fact]
+    public void FactorySpecifiedMoreThanOnce_ShouldThrowException()
+    {
+        // Arrange
+        DependencyBuilder builder = DependencyBuilder.Empty;
+        Type dependencyType = typeof(IClass1);
+        string dependencyTypeName = "N/A";
+        Type resolvingType = typeof(Class1);
+        DependencyLifetime lifetime = DependencyLifetime.Scoped;
+        static Class1 factory() => new();
+        void buildAction() => builder
+            .WithResolvingType(resolvingType)
+            .WithFactory(factory)
+            .WithLifetime(lifetime)
+            .WithFactory(factory)
+            .WithDependencyType(dependencyType)
+            .Build();
+        string msg = string.Format(MsgFactoryAlreadySpecified, dependencyTypeName);
+
+        // Act/Assert
+        AssertException(buildAction, msg);
+    }
+
+    [Fact]
+    public void LifetimeSpecifiedMoreThanOnce_ShouldThrowException()
+    {
+        // Arrange
+        DependencyBuilder builder = DependencyBuilder.Empty;
+        Type dependencyType = typeof(IClass1);
+        string dependencyTypeName = dependencyType.Name;
+        Type resolvingType = typeof(Class1);
+        DependencyLifetime lifetime = DependencyLifetime.Transient;
+        void buildAction() => builder
+            .WithDependencyType(dependencyType)
+            .WithLifetime(lifetime)
+            .WithResolvingType(resolvingType)
+            .WithLifetime(lifetime)
+            .Build();
+        string msg = string.Format(MsgLifetimeAlreadySpecified, dependencyTypeName);
+
+        // Act/Assert
+        AssertException(buildAction, msg);
+    }
+
+    [Fact]
     public void ResolvingGenericClassTypeNotAssignableToDependencyType_ShouldThrowException()
     {
         // Arrange
@@ -187,7 +240,7 @@ public class DependencyBuilderTests
         string dependencyTypeName = "IGenericClass1<int, string>";
         Type resolvingType = typeof(GenericClass1<string, int>);
         string resolvingTypeName = "GenericClass1<string, int>";
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(dependencyType)
             .WithResolvingType(resolvingType)
             .WithLifetime(DependencyLifetime.Transient)
@@ -195,10 +248,7 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgIncompatibleResolvingType, resolvingTypeName, dependencyTypeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -210,7 +260,7 @@ public class DependencyBuilderTests
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Class2);
         string resolvingTypeName = resolvingType.Name;
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(dependencyType)
             .WithResolvingType(resolvingType)
             .WithLifetime(DependencyLifetime.Transient)
@@ -218,10 +268,7 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgIncompatibleResolvingType, resolvingTypeName, dependencyTypeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -233,7 +280,7 @@ public class DependencyBuilderTests
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(AbstractClass1);
         string resolvingTypeName = resolvingType.Name;
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(dependencyType)
             .WithResolvingType(resolvingType)
             .WithLifetime(DependencyLifetime.Scoped)
@@ -241,10 +288,7 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgAbstractResolvingType, resolvingTypeName, dependencyTypeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -254,7 +298,7 @@ public class DependencyBuilderTests
         DependencyBuilder builder = DependencyBuilder.Empty;
         Type type = typeof(IClass1);
         string typeName = type.Name;
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(type)
             .WithResolvingType(type)
             .WithLifetime(DependencyLifetime.Scoped)
@@ -262,10 +306,7 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgInvalidResolvingType, typeName, typeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -275,17 +316,14 @@ public class DependencyBuilderTests
         DependencyBuilder builder = DependencyBuilder.Empty;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = dependencyType.Name;
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(dependencyType)
             .WithLifetime(DependencyLifetime.Singleton)
             .Build();
         string msg = string.Format(MsgUnspecifiedResolvingType, dependencyTypeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -297,7 +335,7 @@ public class DependencyBuilderTests
         string dependencyTypeName = "IGenericClass1<int, string>";
         Type resolvingType = typeof(GenericClass1<,>);
         string resolvingTypeName = "GenericClass1<S, T>";
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(dependencyType)
             .WithResolvingType(resolvingType)
             .WithLifetime(DependencyLifetime.Transient)
@@ -305,10 +343,7 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgResolvingGenericTypeIsOpen, resolvingTypeName, dependencyTypeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -320,7 +355,7 @@ public class DependencyBuilderTests
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Struct1);
         string resolvingTypeName = resolvingType.Name;
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(dependencyType)
             .WithResolvingType(resolvingType)
             .WithLifetime(DependencyLifetime.Transient)
@@ -328,10 +363,28 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgInvalidResolvingType, resolvingTypeName, dependencyTypeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
+    }
+
+    [Fact]
+    public void ResolvingTypeSpecifiedMoreThanOnce_ShouldThrowException()
+    {
+        // Arrange
+        DependencyBuilder builder = DependencyBuilder.Empty;
+        Type dependencyType = typeof(IClass1);
+        string dependencyTypeName = dependencyType.Name;
+        Type resolvingType = typeof(Class1);
+        DependencyLifetime lifetime = DependencyLifetime.Transient;
+        void buildAction() => builder
+            .WithDependencyType(dependencyType)
+            .WithResolvingType(resolvingType)
+            .WithLifetime(lifetime)
+            .WithResolvingType(resolvingType)
+            .Build();
+        string msg = string.Format(MsgResolvingTypeAlreadySpecified, dependencyTypeName);
+
+        // Act/Assert
+        AssertException(buildAction, msg);
     }
 
     [Fact]
@@ -343,7 +396,7 @@ public class DependencyBuilderTests
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Class1);
         static Class2 factory() => new();
-        Action action = () => builder
+        void buildAction() => builder
             .WithDependencyType(dependencyType)
             .WithResolvingType(resolvingType)
             .WithFactory(factory)
@@ -352,10 +405,7 @@ public class DependencyBuilderTests
         string msg = string.Format(MsgIncompatibleFactory, dependencyTypeName);
 
         // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyBuildException>()
-            .WithMessage(msg);
+        AssertException(buildAction, msg);
     }
 
     [Theory]
@@ -418,5 +468,14 @@ public class DependencyBuilderTests
         dependency.Factory
             .Should()
             .BeNull();
+    }
+
+    private static void AssertException(Action action, string msg)
+    {
+        // Act/Assert
+        action
+            .Should()
+            .ThrowExactly<DependencyBuildException>()
+            .WithMessage(msg);
     }
 }
