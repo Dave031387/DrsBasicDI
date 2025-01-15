@@ -3,48 +3,7 @@
 public class ContainerBuilderTests
 {
     [Fact]
-    public void TryToAddDuplicateDependencyToContainer_ShouldThrowException()
-    {
-        // Arrange
-        ContainerBuilder builder = ContainerBuilder.Empty;
-        Type type = typeof(IClass1);
-        string typeName = nameof(IClass1);
-        Action action = () => builder
-            .AddDependency(b => b
-                .WithDependencyType(type)
-                .WithResolvingType(typeof(Class1))
-                .WithLifetime(DependencyLifetime.Singleton))
-            .AddDependency(b => b
-                .WithDependencyType(type)
-                .WithResolvingType<Class1A>()
-                .WithLifetime(DependencyLifetime.Transient))
-            .Build();
-        string msg = string.Format(MsgDuplicateDependency, typeName);
-
-        // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<ContainerBuildException>()
-            .WithMessage(msg);
-    }
-
-    [Fact]
-    public void TryToBuildEmptyContainer_ShouldThrowException()
-    {
-        // Arrange
-        ContainerBuilder builder = ContainerBuilder.Empty;
-        Action action = () => builder.Build();
-        string msg = MsgContainerIsEmpty;
-
-        // Act/Assert
-        action
-            .Should()
-            .ThrowExactly<ContainerBuildException>()
-            .WithMessage(msg);
-    }
-
-    [Fact]
-    public void ValidDependenciesAddedToContainer_ShouldBuildContainer()
+    public void AddValidDependenciesToContainer_ShouldBuildContainer()
     {
         // Arrange
         ContainerBuilder builder = ContainerBuilder.Empty;
@@ -110,5 +69,184 @@ public class ContainerBuilderTests
         actual
             .Should()
             .Be(expected);
+    }
+
+    [Fact]
+    public void AddValidScopedDependencyToContainer_ShouldBuildContainer()
+    {
+        // Arrange
+        ContainerBuilder builder = ContainerBuilder.Empty;
+        Type dependencyType = typeof(IClass2);
+        Type resolvingType = typeof(Class2);
+
+        // Act
+        Container container = builder
+            .AddScoped(b => b
+                .WithDependencyType(dependencyType)
+                .WithResolvingType(resolvingType))
+            .Build();
+
+        // Assert
+        AssertValidContainer(container, DependencyLifetime.Scoped);
+    }
+
+    [Fact]
+    public void AddValidSingletonDependencyToContainer_ShouldBuildContainer()
+    {
+        // Arrange
+        ContainerBuilder builder = ContainerBuilder.Empty;
+        Type dependencyType = typeof(IClass2);
+        Type resolvingType = typeof(Class2);
+
+        // Act
+        Container container = builder
+            .AddSingleton(b => b
+                .WithDependencyType(dependencyType)
+                .WithResolvingType(resolvingType))
+            .Build();
+
+        // Assert
+        AssertValidContainer(container, DependencyLifetime.Singleton);
+    }
+
+    [Fact]
+    public void AddValidTransientDependencyToContainer_ShouldBuildContainer()
+    {
+        // Arrange
+        ContainerBuilder builder = ContainerBuilder.Empty;
+        Type dependencyType = typeof(IClass2);
+        Type resolvingType = typeof(Class2);
+
+        // Act
+        Container container = builder
+            .AddTransient(b => b
+                .WithDependencyType(dependencyType)
+                .WithResolvingType(resolvingType))
+            .Build();
+
+        // Assert
+        AssertValidContainer(container, DependencyLifetime.Transient);
+    }
+
+    [Fact]
+    public void GenericAddValidScopedDependencyToContainer_ShouldBuildContainer()
+    {
+        // Arrange
+        ContainerBuilder builder = ContainerBuilder.Empty;
+        Type resolvingType = typeof(Class2);
+
+        // Act
+        Container container = builder
+            .AddScoped<IClass2>(b => b
+                .WithResolvingType(resolvingType))
+            .Build();
+
+        // Assert
+        AssertValidContainer(container, DependencyLifetime.Scoped);
+    }
+
+    [Fact]
+    public void GenericAddValidSingletonDependencyToContainer_ShouldBuildContainer()
+    {
+        // Arrange
+        ContainerBuilder builder = ContainerBuilder.Empty;
+        Type resolvingType = typeof(Class2);
+
+        // Act
+        Container container = builder
+            .AddSingleton<IClass2>(b => b
+                .WithResolvingType(resolvingType))
+            .Build();
+
+        // Assert
+        AssertValidContainer(container, DependencyLifetime.Singleton);
+    }
+
+    [Fact]
+    public void GenericAddValidTransientDependencyToContainer_ShouldBuildContainer()
+    {
+        // Arrange
+        ContainerBuilder builder = ContainerBuilder.Empty;
+        Type resolvingType = typeof(Class2);
+
+        // Act
+        Container container = builder
+            .AddTransient<IClass2>(b => b
+                .WithResolvingType(resolvingType))
+            .Build();
+
+        // Assert
+        AssertValidContainer(container, DependencyLifetime.Transient);
+    }
+
+    [Fact]
+    public void TryToAddDuplicateDependencyTypeToContainer_ShouldThrowException()
+    {
+        // Arrange
+        ContainerBuilder builder = ContainerBuilder.Empty;
+        Type type = typeof(IClass1);
+        string typeName = nameof(IClass1);
+        void action() => builder
+            .AddDependency(b => b
+                .WithDependencyType(type)
+                .WithResolvingType(typeof(Class1))
+                .WithLifetime(DependencyLifetime.Singleton))
+            .AddDependency(b => b
+                .WithDependencyType(type)
+                .WithResolvingType<Class1A>()
+                .WithLifetime(DependencyLifetime.Transient))
+            .Build();
+        string msg = string.Format(MsgDuplicateDependency, typeName);
+
+        // Act/Assert
+        AssertException(action, msg);
+    }
+
+    [Fact]
+    public void TryToBuildEmptyContainer_ShouldThrowException()
+    {
+        // Arrange
+        ContainerBuilder builder = ContainerBuilder.Empty;
+        void action() => builder.Build();
+        string msg = MsgContainerIsEmpty;
+
+        // Act/Assert
+        AssertException(action, msg);
+    }
+
+    private static void AssertException(Action action, string msg)
+    {
+        // Act/Assert
+        action
+            .Should()
+            .ThrowExactly<ContainerBuildException>()
+            .WithMessage(msg);
+    }
+
+    private static void AssertValidContainer(Container container, DependencyLifetime lifetime)
+    {
+        // Assert
+        container
+            .Should()
+            .NotBeNull();
+        container._dependencies
+            .Should()
+            .ContainSingle();
+        container._dependencies
+            .Should()
+            .ContainKey(typeof(IClass2));
+        Dependency dependency = container._dependencies[typeof(IClass2)];
+        dependency.DependencyType
+            .Should()
+            .Be(typeof(IClass2));
+        dependency.ResolvingType
+            .Should()
+            .Be(typeof(Class2));
+        dependency.Lifetime
+            .Should()
+            .Be(lifetime);
+        dependency.Factory
+            .Should()
+            .BeNull();
     }
 }
