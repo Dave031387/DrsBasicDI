@@ -4,7 +4,7 @@
 /// The <see cref="ContainerBuilder" /> class is used for constructing new <see cref="Container" />
 /// objects.
 /// </summary>
-public class ContainerBuilder
+public sealed class ContainerBuilder
 {
     /// <summary>
     /// A list of <see cref="Dependency" /> objects that have been added to this

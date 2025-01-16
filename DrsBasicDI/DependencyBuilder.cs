@@ -8,7 +8,7 @@ namespace DrsBasicDI;
 /// The <see cref="DependencyBuilder" /> class is used to construct a valid
 /// <see cref="Dependency" /> object.
 /// </summary>
-public class DependencyBuilder
+public sealed class DependencyBuilder
 {
     private Type? _dependencyType;
     private Func<object>? _factory;

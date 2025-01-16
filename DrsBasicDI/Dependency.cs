@@ -7,13 +7,13 @@
 /// <remarks>
 /// This class is immutable.
 /// </remarks>
-public class Dependency
+public sealed class Dependency
 {
     /// <summary>
     /// Default constructor for the <see cref="Dependency" /> class.
     /// </summary>
     /// <remarks>
-    /// This constructor is marked <see langword="internal" /> to force the user to use the
+    /// This constructor is declared <see langword="internal" /> to force the user to use the
     /// <see cref="DependencyBuilder" /> object for constructing new <see cref="Dependency" />
     /// objects.
     /// </remarks>
@@ -40,7 +40,8 @@ public class Dependency
     }
 
     /// <summary>
-    /// Gets the enumeration representing the dependency lifetime.
+    /// Gets the <see cref="DependencyLifetime" /> enumeration value representing the dependency
+    /// lifetime.
     /// </summary>
     public DependencyLifetime Lifetime
     {

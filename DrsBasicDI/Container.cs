@@ -3,7 +3,7 @@
 /// <summary>
 /// The <see cref="Container" /> class implements a basic dependency injection container.
 /// </summary>
-public class Container
+public sealed class Container
 {
     /// <summary>
     /// A dictionary of <see cref="Dependency" /> objects whose keys are the corresponding
