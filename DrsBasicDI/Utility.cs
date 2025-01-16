@@ -1,7 +1,15 @@
 ﻿namespace DrsBasicDI;
 
+/// <summary>
+/// The <see cref="Utility" /> class provides utility services for the rest of the classes in the
+/// <see cref="DrsBasicDI" /> class library.
+/// </summary>
 internal static class Utility
 {
+    /// <summary>
+    /// A dictionary of predefined types whose key is the predefined type and whose value is the
+    /// friendly name for the predefined type.
+    /// </summary>
     private static readonly Dictionary<Type, string> _typeTranslationDictionary = new()
     {
         {typeof(bool), "bool"},
@@ -22,12 +30,27 @@ internal static class Utility
         {typeof(void), "void"}
     };
 
+    /// <summary>
+    /// An extension method for the <see cref="Type" /> class that returns a user-friendly name for
+    /// the <see cref="Type" /> instance.
+    /// </summary>
+    /// <param name="type">
+    /// The current instance of the <see cref="Type" /> class.
+    /// </param>
+    /// <returns>
+    /// The friendly name for the current <see cref="Type" /> instance.
+    /// </returns>
+    /// <remarks>
+    /// This method is recursive and is able to handle nested types.
+    /// </remarks>
     internal static string GetFriendlyName(this Type type)
     {
+        // Handle predefined types.
         if (_typeTranslationDictionary.TryGetValue(type, out string? predefinedTypeName))
         {
             return predefinedTypeName;
         }
+        // Handle array types.
         else if (type.IsArray)
         {
             int rank = type.GetArrayRank();
@@ -39,12 +62,14 @@ internal static class Utility
             string arrayElementTypeName = arrayElementType.GetFriendlyName();
             return $"{arrayElementTypeName}[{commas}]";
         }
+        // Handle nullable value types.
         else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
             Type nullableType = type.GetGenericArguments()[0];
             string nullableTypeName = nullableType.GetFriendlyName();
             return $"{nullableTypeName}?";
         }
+        // Handle generic types.
         else if (type.IsGenericType)
         {
             char genericSeparator = '`';
@@ -54,6 +79,7 @@ internal static class Utility
             string genericParameterTypeNames = string.Join(listSeparator, genericParameterTypes.Select(GetFriendlyName));
             return $"{genericTypeName}<{genericParameterTypeNames}>";
         }
+        // Everything else is a simple class type.
         else
         {
             return type.Name;

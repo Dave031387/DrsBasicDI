@@ -184,15 +184,16 @@ public class ContainerBuilderTests
     {
         // Arrange
         ContainerBuilder builder = ContainerBuilder.Empty;
-        Type type = typeof(IClass1);
+        Type dependencyType = typeof(IClass1);
+        Type resolvingType1 = typeof(Class1);
         string typeName = nameof(IClass1);
         void action() => builder
             .AddDependency(b => b
-                .WithDependencyType(type)
-                .WithResolvingType(typeof(Class1))
+                .WithDependencyType(dependencyType)
+                .WithResolvingType(resolvingType1)
                 .WithLifetime(DependencyLifetime.Singleton))
             .AddDependency(b => b
-                .WithDependencyType(type)
+                .WithDependencyType(dependencyType)
                 .WithResolvingType<Class1A>()
                 .WithLifetime(DependencyLifetime.Transient))
             .Build();
@@ -238,10 +239,10 @@ public class ContainerBuilderTests
         Dependency dependency = container._dependencies[typeof(IClass2)];
         dependency.DependencyType
             .Should()
-            .Be(typeof(IClass2));
+            .Be<IClass2>();
         dependency.ResolvingType
             .Should()
-            .Be(typeof(Class2));
+            .Be<Class2>();
         dependency.Lifetime
             .Should()
             .Be(lifetime);

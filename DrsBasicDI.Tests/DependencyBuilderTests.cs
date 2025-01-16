@@ -7,9 +7,11 @@ public class DependencyBuilderTests
     {
         // Arrange
         DependencyBuilder builder = DependencyBuilder.Empty;
+        Type dependencyType = typeof(IClass1);
+        Type resolvingType = typeof(Class1);
         void buildAction() => builder
-            .WithDependencyType(typeof(IClass1))
-            .WithResolvingType(typeof(Class1))
+            .WithDependencyType(dependencyType)
+            .WithResolvingType(resolvingType)
             .Build();
         string msg = string.Format(MsgUndefinedLifetime, nameof(IClass1));
 
@@ -52,9 +54,10 @@ public class DependencyBuilderTests
     {
         // Arrange
         DependencyBuilder builder = DependencyBuilder.Empty;
+        Type resolvingType = typeof(Class1);
         void action() => builder
             .WithLifetime(DependencyLifetime.Transient)
-            .WithResolvingType(typeof(Class1))
+            .WithResolvingType(resolvingType)
             .Build();
         string msg = MsgUnspecifiedDependencyType;
 
