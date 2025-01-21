@@ -47,6 +47,7 @@ public sealed class Container : IContainer
     /// An instance of the resolving object corresponding to the given dependency type
     /// <typeparamref name="T" />.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     public T GetDependency<T>() where T : class
     {
         DependencyResolver resolver = new(_dependencies,

@@ -25,5 +25,6 @@ public interface IContainer
     /// An instance of the resolving object corresponding to the given dependency type
     /// <typeparamref name="T" />.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     T? GetDependency<T>() where T : class;
 }

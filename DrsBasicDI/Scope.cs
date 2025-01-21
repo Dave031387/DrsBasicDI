@@ -54,6 +54,7 @@ internal class Scope : IScope
     /// The resolving object for the given dependency type <typeparamref name="T" />, or
     /// <see langword="null" /> if the resolving object can't be determined.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     public T GetDependency<T>() where T : class
     {
         DependencyResolver resolver = new(_container._dependencies,

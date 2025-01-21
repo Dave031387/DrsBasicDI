@@ -102,15 +102,27 @@ internal class DependencyResolver
     /// <exception cref="DependencyInjectionException" />
     private T ConstructResolvingInstance<T>(ConstructorInfo constructorInfo, object[] parameterValues) where T : class
     {
-        if (constructorInfo.Invoke(parameterValues) is not T resolvingInstance)
+        string typeName = typeof(T).GetFriendlyName();
+        T resolvingObject;
+
+        try
         {
-            string typeName = (typeof(T)).GetFriendlyName();
-            string msg = string.Format(MsgResolvingObjectNotCreated, typeName);
-            throw new DependencyInjectionException(msg);
+            if (constructorInfo.Invoke(parameterValues) is not T resolvingInstance)
+            {
+                string msg = string.Format(MsgResolvingObjectNotCreated, typeName);
+                throw new DependencyInjectionException(msg);
+            }
+
+            resolvingObject = resolvingInstance;
+        }
+        catch (Exception ex)
+        {
+            string msg = string.Format(MsgErrorDuringConstruction, typeName);
+            throw new DependencyInjectionException(msg, ex);
         }
 
-        SaveResolvedDependency(resolvingInstance);
-        return resolvingInstance;
+        resolvingObject = SaveResolvedDependency(resolvingObject);
+        return resolvingObject;
     }
 
     /// <summary>
@@ -155,6 +167,7 @@ internal class DependencyResolver
     /// <returns>
     /// An instance of the resolving object for the given dependency type <typeparamref name="T" />.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     private T GetResolvingInstance<T>() where T : class
     {
         Type dependencyType = typeof(T);
@@ -174,11 +187,11 @@ internal class DependencyResolver
     /// An array of resolving objects corresponding to the parameters of the given
     /// <paramref name="constructorInfo" />.
     /// </returns>
-    /// <exception cref="DependencyInjectionException" />
     /// <remarks>
     /// This method makes recursive calls to <see cref="Resolve{T}" /> until all nested dependencies
     /// have been resolved.
     /// </remarks>
+    /// <exception cref="DependencyInjectionException" />
     private object[] ResolveNestedDependencies(ConstructorInfo constructorInfo)
     {
         ParameterInfo[] parameters = constructorInfo.GetParameters();
@@ -187,12 +200,34 @@ internal class DependencyResolver
         foreach (ParameterInfo parameter in parameters)
         {
             Type parameterType = parameter.ParameterType;
-            MethodInfo resolveMethodInfo = _resolveMethodInfo.MakeGenericMethod(parameterType);
-            object? resolvingObject = resolveMethodInfo.Invoke(this, []);
+            string parameterTypeName = parameterType.GetFriendlyName();
+            MethodInfo resolveMethodInfo;
+
+            try
+            {
+                resolveMethodInfo = _resolveMethodInfo.MakeGenericMethod(parameterType);
+            }
+            catch (Exception ex)
+            {
+                string msg = string.Format(MsgUnableToMakeGenericResolveMethod, parameterTypeName);
+                throw new DependencyInjectionException(msg, ex);
+            }
+
+            object? resolvingObject;
+
+            try
+            {
+                resolvingObject = resolveMethodInfo.Invoke(this, []);
+            }
+            catch (Exception ex)
+            {
+                string msg = string.Format(MsgResolveMethodInvocationError, parameterTypeName);
+                throw new DependencyInjectionException(msg, ex);
+            }
 
             if (resolvingObject is null)
             {
-                string msg = string.Format(MsgResolvingObjectNotCreated, parameterType.GetFriendlyName());
+                string msg = string.Format(MsgResolvingObjectNotCreated, parameterTypeName);
                 throw new DependencyInjectionException(msg);
             }
 
@@ -212,22 +247,28 @@ internal class DependencyResolver
     /// An instance of the resolving type that was mapped to the dependency type
     /// <typeparamref name="T" />.
     /// </param>
+    /// <returns>
+    /// The <paramref name="resolvedDependency" /> that was passed in, or the resolving instance
+    /// that was saved by another application thread.
+    /// </returns>
     /// <remarks>
     /// Only scoped and singleton dependencies are saved. Transient dependencies by definition are
     /// created new every time they're requested.
     /// </remarks>
-    private void SaveResolvedDependency<T>(T resolvedDependency) where T : class
+    private T SaveResolvedDependency<T>(T resolvedDependency) where T : class
     {
         Dependency dependency = GetDependency<T>();
 
         if (dependency.Lifetime is DependencyLifetime.Scoped && _scoped is not null)
         {
-            _scoped.Add(resolvedDependency);
+            return _scoped.Add(resolvedDependency);
         }
         else if (dependency.Lifetime is DependencyLifetime.Scoped or DependencyLifetime.Singleton)
         {
-            _nonscoped.Add(resolvedDependency);
+            return _nonscoped.Add(resolvedDependency);
         }
+
+        return resolvedDependency;
     }
 
     /// <summary>
@@ -245,22 +286,31 @@ internal class DependencyResolver
     /// <see langword="true" /> if a valid resolving object is returned from the
     /// <see cref="Dependency.Factory" /> method. Otherwise, returns <see langword="false" />.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     private bool TryGetFactoryValue<T>(out T? factoryValue) where T : class
     {
-        factoryValue = default;
         Dependency dependency = GetDependency<T>();
 
         if (dependency.Factory is not null)
         {
-            factoryValue = (T?)dependency.Factory();
+            try
+            {
+                factoryValue = (T?)dependency.Factory();
+            }
+            catch (Exception ex)
+            {
+                string msg = string.Format(MsgFactoryInvocationError, typeof(T).GetFriendlyName());
+                throw new DependencyInjectionException(msg, ex);
+            }
 
             if (factoryValue is not null)
             {
-                SaveResolvedDependency(factoryValue);
+                factoryValue = SaveResolvedDependency(factoryValue);
                 return true;
             }
         }
 
+        factoryValue = default;
         return false;
     }
 

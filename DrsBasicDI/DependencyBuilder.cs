@@ -258,7 +258,7 @@ public sealed class DependencyBuilder
             // specified dependency type.
             if (!returnType.IsAssignableTo(_dependencyType))
             {
-                string msg = string.Format(MsgIncompatibleFactory, DependencyTypeName);
+                string msg = string.Format(MsgIncompatibleFactory, returnType.GetFriendlyName(), DependencyTypeName);
                 throw new DependencyBuildException(msg);
             }
         }

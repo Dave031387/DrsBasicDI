@@ -17,5 +17,6 @@ public interface IScope : IDisposable
     /// The resolving object for the given dependency type <typeparamref name="T" />, or
     /// <see langword="null" /> if the resolving object can't be determined.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     T? GetDependency<T>() where T : class;
 }
