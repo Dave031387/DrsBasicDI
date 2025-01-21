@@ -35,13 +35,13 @@ public sealed class DependencyBuilder
     /// Gets the friendly name of the dependency type, or "N/A" if the dependency type hasn't yet
     /// been given.
     /// </summary>
-    public string DependencyTypeName => _dependencyType is null ? "N/A" : _dependencyType.GetFriendlyName();
+    private string DependencyTypeName => _dependencyType is null ? "N/A" : _dependencyType.GetFriendlyName();
 
     /// <summary>
     /// Gets the friendly name of the resolving type, or "N/A" if the resolving type hasn't yet been
     /// given.
     /// </summary>
-    public string ResolvingTypeName => _resolvingType is null ? "N/A" : _resolvingType.GetFriendlyName();
+    private string ResolvingTypeName => _resolvingType is null ? "N/A" : _resolvingType.GetFriendlyName();
 
     /// <summary>
     /// Build the <see cref="Dependency" /> object after verifying that the supplied information is

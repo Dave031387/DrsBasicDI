@@ -205,6 +205,14 @@ public sealed class ContainerBuilder
         }
 
         Container container = new();
+        Dependency containerDependency = new()
+        {
+            DependencyType = typeof(IContainer),
+            ResolvingType = typeof(Container),
+            Lifetime = DependencyLifetime.Singleton
+        };
+        container._dependencies[typeof(IContainer)] = containerDependency;
+        container._resolvedDependencies._resolvedDependencies[typeof(IContainer)] = container;
 
         foreach (Dependency dependency in _dependencies)
         {

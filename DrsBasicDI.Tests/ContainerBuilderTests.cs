@@ -2,6 +2,8 @@
 
 public class ContainerBuilderTests
 {
+    private readonly Type _containerType = typeof(IContainer);
+
     [Fact]
     public void AddValidDependenciesToContainer_ShouldBuildContainer()
     {
@@ -35,10 +37,32 @@ public class ContainerBuilderTests
             .NotBeNull();
         container._dependencies
             .Should()
-            .HaveCount(2);
+            .HaveCount(3);
         container._dependencies
             .Should()
-            .ContainKeys(dependencyType1, dependencyType2);
+            .ContainKeys(dependencyType1, dependencyType2, _containerType);
+        Dependency containerDependency = container._dependencies[_containerType];
+        containerDependency.DependencyType
+            .Should()
+            .Be(_containerType);
+        containerDependency.ResolvingType
+            .Should()
+            .Be<Container>();
+        containerDependency.Lifetime
+            .Should()
+            .Be(DependencyLifetime.Singleton);
+        containerDependency.Factory
+            .Should()
+            .BeNull();
+        container._resolvedDependencies._resolvedDependencies
+            .Should()
+            .ContainSingle();
+        container._resolvedDependencies._resolvedDependencies
+            .Should()
+            .ContainKey(_containerType);
+        container._resolvedDependencies._resolvedDependencies[_containerType]
+            .Should()
+            .BeSameAs(container);
         Dependency dependency1 = container._dependencies[dependencyType1];
         dependency1.DependencyType
             .Should()
@@ -224,7 +248,7 @@ public class ContainerBuilderTests
             .WithMessage(msg);
     }
 
-    private static void AssertValidContainer(Container container, DependencyLifetime lifetime)
+    private void AssertValidContainer(Container container, DependencyLifetime lifetime)
     {
         // Assert
         container
@@ -232,10 +256,10 @@ public class ContainerBuilderTests
             .NotBeNull();
         container._dependencies
             .Should()
-            .ContainSingle();
+            .HaveCount(2);
         container._dependencies
             .Should()
-            .ContainKey(typeof(IClass2));
+            .ContainKeys(typeof(IClass2), _containerType);
         Dependency dependency = container._dependencies[typeof(IClass2)];
         dependency.DependencyType
             .Should()
