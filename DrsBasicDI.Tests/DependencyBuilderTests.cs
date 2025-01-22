@@ -405,7 +405,7 @@ public class DependencyBuilderTests
             .WithFactory(factory)
             .WithLifetime(DependencyLifetime.Transient)
             .Build();
-        string msg = string.Format(MsgIncompatibleFactory, dependencyTypeName);
+        string msg = string.Format(MsgIncompatibleFactory, nameof(Class2), dependencyTypeName);
 
         // Act/Assert
         AssertException(buildAction, msg);

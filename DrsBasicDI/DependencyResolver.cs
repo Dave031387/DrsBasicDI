@@ -172,8 +172,8 @@ internal class DependencyResolver
     {
         Type dependencyType = typeof(T);
         ConstructorInfo constructorInfo = dependencyType.GetConstructorInfo();
-        object[] resolvingObjects = ResolveNestedDependencies(constructorInfo);
-        return ConstructResolvingInstance<T>(constructorInfo, resolvingObjects);
+        object[] resolvedParameters = ResolveNestedDependencies(constructorInfo);
+        return ConstructResolvingInstance<T>(constructorInfo, resolvedParameters);
     }
 
     /// <summary>
@@ -195,7 +195,7 @@ internal class DependencyResolver
     private object[] ResolveNestedDependencies(ConstructorInfo constructorInfo)
     {
         ParameterInfo[] parameters = constructorInfo.GetParameters();
-        List<object> resolvingObjects = [];
+        List<object> resolvedParameters = [];
 
         foreach (ParameterInfo parameter in parameters)
         {
@@ -205,6 +205,8 @@ internal class DependencyResolver
 
             try
             {
+                // Create a generic version of the Resolve<T>() method using the current parameter
+                // type as the generic type parameter T.
                 resolveMethodInfo = _resolveMethodInfo.MakeGenericMethod(parameterType);
             }
             catch (Exception ex)
@@ -213,11 +215,13 @@ internal class DependencyResolver
                 throw new DependencyInjectionException(msg, ex);
             }
 
-            object? resolvingObject;
+            object? resolvedParameter;
 
             try
             {
-                resolvingObject = resolveMethodInfo.Invoke(this, []);
+                // Recursively invoke the generic Resolve<T>() method for the current parameter
+                // type.
+                resolvedParameter = resolveMethodInfo.Invoke(this, []);
             }
             catch (Exception ex)
             {
@@ -225,16 +229,17 @@ internal class DependencyResolver
                 throw new DependencyInjectionException(msg, ex);
             }
 
-            if (resolvingObject is null)
+            // We should not get a null value returned from the generic Resolve<T>() method.
+            if (resolvedParameter is null)
             {
                 string msg = string.Format(MsgResolvingObjectNotCreated, parameterTypeName);
                 throw new DependencyInjectionException(msg);
             }
 
-            resolvingObjects.Add(resolvingObject);
+            resolvedParameters.Add(resolvedParameter);
         }
 
-        return [.. resolvingObjects];
+        return [.. resolvedParameters];
     }
 
     /// <summary>
@@ -249,7 +254,7 @@ internal class DependencyResolver
     /// </param>
     /// <returns>
     /// The <paramref name="resolvedDependency" /> that was passed in, or the resolving instance
-    /// that was saved by another application thread.
+    /// that was previously saved by another application thread.
     /// </returns>
     /// <remarks>
     /// Only scoped and singleton dependencies are saved. Transient dependencies by definition are

@@ -192,11 +192,11 @@ public sealed class ContainerBuilder
     /// Build the <see cref="Container" /> object.
     /// </summary>
     /// <returns>
-    /// A new <see cref="Container" /> object containing all the <see cref="Dependency" /> objects
+    /// A new <see cref="IContainer" /> object containing all the <see cref="Dependency" /> objects
     /// that were added.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
-    public Container Build()
+    public IContainer Build()
     {
         if (_dependencies.Count is 0)
         {
@@ -204,15 +204,17 @@ public sealed class ContainerBuilder
             throw new ContainerBuildException(msg);
         }
 
+        Type containerDependencyType = typeof(IContainer);
+        Type containerResolvingType = typeof(Container);
         Container container = new();
         Dependency containerDependency = new()
         {
-            DependencyType = typeof(IContainer),
-            ResolvingType = typeof(Container),
+            DependencyType = containerDependencyType,
+            ResolvingType = containerResolvingType,
             Lifetime = DependencyLifetime.Singleton
         };
-        container._dependencies[typeof(IContainer)] = containerDependency;
-        container._resolvedDependencies._resolvedDependencies[typeof(IContainer)] = container;
+        container._dependencies[containerDependencyType] = containerDependency;
+        container._resolvedDependencies._resolvedDependencies[containerDependencyType] = container;
 
         foreach (Dependency dependency in _dependencies)
         {

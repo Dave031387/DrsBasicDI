@@ -19,7 +19,7 @@ public class ContainerBuilderTests
         string expected = "GenericClass1<int, string>.DoWork\n  arg1=5\n  arg2=test";
 
         // Act
-        Container container = builder
+        IContainer container = builder
             .AddDependency(b => b
                 .WithDependencyType(dependencyType1)
                 .WithResolvingType(resolvingType1)
@@ -35,13 +35,14 @@ public class ContainerBuilderTests
         container
             .Should()
             .NotBeNull();
-        container._dependencies
+        Dictionary<Type, Dependency> dependencies = GetDependencies(container);
+        dependencies
             .Should()
             .HaveCount(3);
-        container._dependencies
+        dependencies
             .Should()
             .ContainKeys(dependencyType1, dependencyType2, _containerType);
-        Dependency containerDependency = container._dependencies[_containerType];
+        Dependency containerDependency = dependencies[_containerType];
         containerDependency.DependencyType
             .Should()
             .Be(_containerType);
@@ -54,16 +55,17 @@ public class ContainerBuilderTests
         containerDependency.Factory
             .Should()
             .BeNull();
-        container._resolvedDependencies._resolvedDependencies
+        Dictionary<Type, object> resolvedDependencies = GetResolvedDependencies(container);
+        resolvedDependencies
             .Should()
             .ContainSingle();
-        container._resolvedDependencies._resolvedDependencies
+        resolvedDependencies
             .Should()
             .ContainKey(_containerType);
-        container._resolvedDependencies._resolvedDependencies[_containerType]
+        resolvedDependencies[_containerType]
             .Should()
             .BeSameAs(container);
-        Dependency dependency1 = container._dependencies[dependencyType1];
+        Dependency dependency1 = dependencies[dependencyType1];
         dependency1.DependencyType
             .Should()
             .Be(dependencyType1);
@@ -76,7 +78,7 @@ public class ContainerBuilderTests
         dependency1.Factory
             .Should()
             .BeNull();
-        Dependency dependency2 = container._dependencies[dependencyType2];
+        Dependency dependency2 = dependencies[dependencyType2];
         dependency2.DependencyType
             .Should()
             .Be(dependencyType2);
@@ -104,7 +106,7 @@ public class ContainerBuilderTests
         Type resolvingType = typeof(Class2);
 
         // Act
-        Container container = builder
+        IContainer container = builder
             .AddScoped(b => b
                 .WithDependencyType(dependencyType)
                 .WithResolvingType(resolvingType))
@@ -123,7 +125,7 @@ public class ContainerBuilderTests
         Type resolvingType = typeof(Class2);
 
         // Act
-        Container container = builder
+        IContainer container = builder
             .AddSingleton(b => b
                 .WithDependencyType(dependencyType)
                 .WithResolvingType(resolvingType))
@@ -142,7 +144,7 @@ public class ContainerBuilderTests
         Type resolvingType = typeof(Class2);
 
         // Act
-        Container container = builder
+        IContainer container = builder
             .AddTransient(b => b
                 .WithDependencyType(dependencyType)
                 .WithResolvingType(resolvingType))
@@ -160,7 +162,7 @@ public class ContainerBuilderTests
         Type resolvingType = typeof(Class2);
 
         // Act
-        Container container = builder
+        IContainer container = builder
             .AddScoped<IClass2>(b => b
                 .WithResolvingType(resolvingType))
             .Build();
@@ -177,7 +179,7 @@ public class ContainerBuilderTests
         Type resolvingType = typeof(Class2);
 
         // Act
-        Container container = builder
+        IContainer container = builder
             .AddSingleton<IClass2>(b => b
                 .WithResolvingType(resolvingType))
             .Build();
@@ -194,7 +196,7 @@ public class ContainerBuilderTests
         Type resolvingType = typeof(Class2);
 
         // Act
-        Container container = builder
+        IContainer container = builder
             .AddTransient<IClass2>(b => b
                 .WithResolvingType(resolvingType))
             .Build();
@@ -248,19 +250,26 @@ public class ContainerBuilderTests
             .WithMessage(msg);
     }
 
-    private void AssertValidContainer(Container container, DependencyLifetime lifetime)
+    private static Dictionary<Type, Dependency> GetDependencies(IContainer container)
+                                                => ((Container)container)._dependencies;
+
+    private static Dictionary<Type, object> GetResolvedDependencies(IContainer container)
+        => ((Container)container)._resolvedDependencies._resolvedDependencies;
+
+    private void AssertValidContainer(IContainer container, DependencyLifetime lifetime)
     {
         // Assert
         container
             .Should()
             .NotBeNull();
-        container._dependencies
+        Dictionary<Type, Dependency> dependencies = GetDependencies(container);
+        dependencies
             .Should()
             .HaveCount(2);
-        container._dependencies
+        dependencies
             .Should()
             .ContainKeys(typeof(IClass2), _containerType);
-        Dependency dependency = container._dependencies[typeof(IClass2)];
+        Dependency dependency = dependencies[typeof(IClass2)];
         dependency.DependencyType
             .Should()
             .Be<IClass2>();

@@ -3,7 +3,7 @@
 /// <summary>
 /// The <see cref="ResolvedDependencies" /> class manages a dictionary of
 /// </summary>
-internal class ResolvedDependencies
+internal sealed class ResolvedDependencies
 {
     /// <summary>
     /// A lock object used to ensure thread safety when accessing/modifying the
@@ -16,6 +16,13 @@ internal class ResolvedDependencies
     /// are an instance of the resolving type.
     /// </summary>
     internal readonly Dictionary<Type, object> _resolvedDependencies = [];
+
+    /// <summary>
+    /// Create an instance of the <see cref="ResolvedDependencies" /> class.
+    /// </summary>
+    internal ResolvedDependencies()
+    {
+    }
 
     /// <summary>
     /// Add the given <paramref name="resolvingObject" /> to the list of resolving objects if no
@@ -37,10 +44,8 @@ internal class ResolvedDependencies
         {
             if (TryGetResolvingObject(out T? dependency))
             {
-                if (dependency is not null)
-                {
-                    return dependency;
-                }
+                // If we get here then the dependency isn't null.
+                return dependency!;
             }
 
             _resolvedDependencies[typeof(T)] = resolvingObject;
@@ -107,11 +112,11 @@ internal class ResolvedDependencies
     /// </returns>
     private bool TryGetResolvingObject<T>(out T? resolvingObject) where T : class
     {
-        if (_resolvedDependencies.TryGetValue(typeof(T), out object? value))
+        if (_resolvedDependencies.TryGetValue(typeof(T), out object? resolvingInstance))
         {
-            if (value is not null)
+            if (resolvingInstance is not null)
             {
-                resolvingObject = (T)value;
+                resolvingObject = (T)resolvingInstance;
                 return true;
             }
         }
