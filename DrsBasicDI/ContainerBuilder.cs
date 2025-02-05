@@ -7,6 +7,11 @@
 public sealed class ContainerBuilder
 {
     /// <summary>
+    /// A lazy initializer for the singleton instance of the <see cref="ContainerBuilder" /> object.
+    /// </summary>
+    private static readonly Lazy<ContainerBuilder> _lazy = new(() => new ContainerBuilder());
+
+    /// <summary>
     /// A list of <see cref="Dependency" /> objects that have been added to this
     /// <see cref="Container" /> instance.
     /// </summary>
@@ -19,20 +24,39 @@ public sealed class ContainerBuilder
     private readonly List<Type> _dependencyTypes = [];
 
     /// <summary>
+    /// A boolean flag that gets set to <see langword="true" /> once the <see cref="IContainer" />
+    /// object has been built.
+    /// </summary>
+    private bool _containerHasBeenBuilt = false;
+
+    /// <summary>
     /// Default constructor for the <see cref="ContainerBuilder" /> class.
     /// </summary>
     /// <remarks>
-    /// This constructor is declared <see langword="private" />. Use the static <see cref="Empty" />
-    /// property to create a new, empty <see cref="ContainerBuilder" /> object.
+    /// This constructor is declared <see langword="private" />. Use the static
+    /// <see cref="Current" /> property to create a new, empty <see cref="ContainerBuilder" />
+    /// object.
     /// </remarks>
     private ContainerBuilder()
     {
     }
 
     /// <summary>
-    /// Gets a new instance of an empty <see cref="ContainerBuilder" /> object.
+    /// Get the current <see cref="ContainerBuilder" /> instance.
     /// </summary>
-    public static ContainerBuilder Empty => new();
+    /// <remarks>
+    /// This returns a thread safe singleton instance of the <see cref="ContainerBuilder" /> class.
+    /// </remarks>
+    public static ContainerBuilder Current => _lazy.Value;
+
+    /// <summary>
+    /// Get a new instance of the <see cref="ContainerBuilder" /> class.
+    /// </summary>
+    /// <remarks>
+    /// This static property returns a new instance of the <see cref="ContainerBuilder" /> class
+    /// every time it is called.
+    /// </remarks>
+    internal static ContainerBuilder TestInstance => new();
 
     /// <summary>
     /// Add the specified <see cref="Dependency" /> object to the container.
@@ -47,6 +71,7 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     public ContainerBuilder AddDependency(Func<DependencyBuilder, DependencyBuilder> builder)
     {
+        CheckForContainerAlreadyBuilt();
         Dependency dependency = builder(DependencyBuilder.Empty)
             .Build();
         Add(dependency);
@@ -66,6 +91,7 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     public ContainerBuilder AddScoped(Func<DependencyBuilder, DependencyBuilder> builder)
     {
+        CheckForContainerAlreadyBuilt();
         Dependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Scoped)
             .Build();
@@ -90,6 +116,7 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     public ContainerBuilder AddScoped<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
     {
+        CheckForContainerAlreadyBuilt();
         Dependency dependency = builder(DependencyBuilder.Empty)
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Scoped)
@@ -111,6 +138,7 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     public ContainerBuilder AddSingleton(Func<DependencyBuilder, DependencyBuilder> builder)
     {
+        CheckForContainerAlreadyBuilt();
         Dependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Singleton)
             .Build();
@@ -135,6 +163,7 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     public ContainerBuilder AddSingleton<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
     {
+        CheckForContainerAlreadyBuilt();
         Dependency dependency = builder(DependencyBuilder.Empty)
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Singleton)
@@ -156,6 +185,7 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     public ContainerBuilder AddTransient(Func<DependencyBuilder, DependencyBuilder> builder)
     {
+        CheckForContainerAlreadyBuilt();
         Dependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Transient)
             .Build();
@@ -180,6 +210,7 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     public ContainerBuilder AddTransient<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
     {
+        CheckForContainerAlreadyBuilt();
         Dependency dependency = builder(DependencyBuilder.Empty)
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Transient)
@@ -198,29 +229,17 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     public IContainer Build()
     {
+        CheckForContainerAlreadyBuilt(true);
+
         if (_dependencies.Count is 0)
         {
             string msg = MsgContainerIsEmpty;
             throw new ContainerBuildException(msg);
         }
 
-        Type containerDependencyType = typeof(IContainer);
-        Type containerResolvingType = typeof(Container);
-        Container container = new();
-        Dependency containerDependency = new()
-        {
-            DependencyType = containerDependencyType,
-            ResolvingType = containerResolvingType,
-            Lifetime = DependencyLifetime.Singleton
-        };
-        container._dependencies[containerDependencyType] = containerDependency;
-        container._resolvedDependencies._resolvedDependencies[containerDependencyType] = container;
+        IContainer container = new Container(_dependencies, new ResolvingObjects());
 
-        foreach (Dependency dependency in _dependencies)
-        {
-            container._dependencies[dependency.DependencyType] = dependency;
-        }
-
+        _containerHasBeenBuilt = true;
         return container;
     }
 
@@ -242,5 +261,29 @@ public sealed class ContainerBuilder
 
         _dependencyTypes.Add(dependency.DependencyType);
         _dependencies.Add(dependency);
+    }
+
+    /// <summary>
+    /// Check to see if the <see cref="IContainer" /> object has already been built. Throw an
+    /// appropriate exception if it has.
+    /// </summary>
+    /// <param name="isBuildAction">
+    /// A boolean flag indicating whether or not this method is being called from the
+    /// <see cref="Build" /> method.
+    /// </param>
+    /// <exception cref="ContainerBuildException" />
+    private void CheckForContainerAlreadyBuilt(bool isBuildAction = false)
+    {
+        if (_containerHasBeenBuilt)
+        {
+            if (isBuildAction)
+            {
+                throw new ContainerBuildException(MsgContainerCantBeBuiltMoreThanOnce);
+            }
+            else
+            {
+                throw new ContainerBuildException(MsgCantAddToContainerAfterBuild);
+            }
+        }
     }
 }

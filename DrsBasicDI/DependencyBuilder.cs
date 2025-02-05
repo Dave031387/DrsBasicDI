@@ -1,8 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("DrsBasicDI.Tests")]
-
-namespace DrsBasicDI;
+﻿namespace DrsBasicDI;
 
 /// <summary>
 /// The <see cref="DependencyBuilder" /> class is used to construct a valid
@@ -10,9 +6,25 @@ namespace DrsBasicDI;
 /// </summary>
 public sealed class DependencyBuilder
 {
+    /// <summary>
+    /// The dependency type for this <see cref="Dependency" /> object.
+    /// </summary>
     private Type? _dependencyType;
+
+    /// <summary>
+    /// An optional factory method for creating instances of the resolving type for this
+    /// <see cref="Dependency" /> object.
+    /// </summary>
     private Func<object>? _factory;
+
+    /// <summary>
+    /// The lifetime of this dependency.
+    /// </summary>
     private DependencyLifetime _lifetime = DependencyLifetime.Undefined;
+
+    /// <summary>
+    /// The type of the resolving object for this <see cref="Dependency" />.
+    /// </summary>
     private Type? _resolvingType;
 
     /// <summary>

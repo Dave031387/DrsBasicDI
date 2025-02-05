@@ -2,7 +2,11 @@
 
 using System.Reflection;
 
-internal class DependencyResolver
+/// <summary>
+/// The <see cref="DependencyResolver" /> class is responsible for creating an instance of the
+/// resolving object for a given dependency type.
+/// </summary>
+internal sealed class DependencyResolver : IDependencyResolver
 {
     /// <summary>
     /// A dictionary of <see cref="Dependency" /> objects whose keys are the corresponding
@@ -11,10 +15,15 @@ internal class DependencyResolver
     private readonly Dictionary<Type, Dependency> _dependencies;
 
     /// <summary>
-    /// This <see cref="ResolvedDependencies" /> instance contains all the non-scoped resolved
+    /// A lock object used to ensure thread safety when accessing or saving resolved dependencies.
+    /// </summary>
+    private readonly object _lock = new();
+
+    /// <summary>
+    /// This <see cref="IResolvingObjects" /> instance contains all the non-scoped resolved
     /// dependencies.
     /// </summary>
-    private readonly ResolvedDependencies _nonscoped;
+    private readonly IResolvingObjects _nonscoped;
 
     /// <summary>
     /// Save the <see cref="MethodInfo" /> details for the <see cref="Resolve{T}()" /> method so
@@ -23,10 +32,10 @@ internal class DependencyResolver
     private readonly MethodInfo _resolveMethodInfo;
 
     /// <summary>
-    /// This <see cref="ResolvedDependencies" /> instance contains all the scoped resolved
-    /// dependencies for a specific dependency scope.
+    /// This <see cref="IResolvingObjects" /> instance contains all the resolved dependencies for a
+    /// specific dependency scope.
     /// </summary>
-    private readonly ResolvedDependencies? _scoped;
+    private readonly IResolvingObjects? _scoped;
 
     /// <summary>
     /// Create an instance of the <see cref="DependencyResolver" /> class.
@@ -35,24 +44,25 @@ internal class DependencyResolver
     /// A dictionary of dependency type-to-resolving type mappings.
     /// </param>
     /// <param name="nonscoped">
-    /// A <see cref="ResolvedDependencies" /> object containing all of the resolved non-scoped
+    /// A <see cref="ResolvingObjects" /> object containing all of the resolved non-scoped
     /// dependency objects.
     /// </param>
     /// <param name="scoped">
-    /// A <see cref="ResolvedDependencies" /> object containing all of the resolved scoped
-    /// dependency objects.
+    /// A <see cref="ResolvingObjects" /> object containing all of the resolved scoped dependency
+    /// objects.
     /// <para>
     /// This parameter is optional when only non-scoped dependencies are being resolved.
     /// </para>
     /// </param>
     internal DependencyResolver(Dictionary<Type, Dependency> dependencies,
-                                ResolvedDependencies nonscoped,
-                                ResolvedDependencies? scoped = null)
+                                IResolvingObjects nonscoped,
+                                IResolvingObjects? scoped = null)
     {
         _dependencies = dependencies;
         _nonscoped = nonscoped;
         _scoped = scoped;
-        _resolveMethodInfo = typeof(DependencyResolver).GetMethod(nameof(Resolve), BindingFlags.Public | BindingFlags.Instance)
+        BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;
+        _resolveMethodInfo = typeof(DependencyResolver).GetMethod(nameof(RecursiveResolve), bindingFlags)
             ?? throw new DependencyInjectionException(MsgResolverMethodInfoNotFound);
     }
 
@@ -66,22 +76,12 @@ internal class DependencyResolver
     /// An instance of the resolving class type.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    internal T Resolve<T>() where T : class
+    public T Resolve<T>() where T : class
     {
-        if (TryGetResolvedDependency(out T? resolvedDependency))
+        lock (_lock)
         {
-            // The only way we will get to this point is if the resolvedDependency value is not
-            // null.
-            return resolvedDependency!;
+            return RecursiveResolve<T>();
         }
-
-        if (TryGetFactoryValue(out T? factoryValue))
-        {
-            // The only way we will get to this point is if the factoryValue is not null.
-            return factoryValue!;
-        }
-
-        return GetResolvingInstance<T>();
     }
 
     /// <summary>
@@ -177,6 +177,38 @@ internal class DependencyResolver
     }
 
     /// <summary>
+    /// Retrieve the resolving object for the given dependency type <typeparamref name="T" />.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The dependency type that is to be resolved.
+    /// </typeparam>
+    /// <returns>
+    /// An instance of the resolving class type.
+    /// </returns>
+    /// <remarks>
+    /// This method will be called recursively until all nested dependency types have been resolved.
+    /// </remarks>
+    /// <exception cref="DependencyInjectionException" />
+    private T RecursiveResolve<T>() where T : class
+    {
+        if (TryGetResolvedDependency(out T? resolvedDependency))
+        {
+            // The only way we will get to this point is if the resolvedDependency value is not
+            // null.
+            return resolvedDependency!;
+        }
+
+        if (TryGetFactoryValue(out T? factoryValue))
+        {
+            // The only way we will get to this point is if the factoryValue is not null.
+            return factoryValue!;
+        }
+
+        // If we get here the dependency hasn't been resolved yet, so go resolve it.
+        return GetResolvingInstance<T>();
+    }
+
+    /// <summary>
     /// Gets the resolving objects corresponding to each of the parameters in the constructor passed
     /// in through the <paramref name="constructorInfo" /> parameter.
     /// </summary>
@@ -205,8 +237,8 @@ internal class DependencyResolver
 
             try
             {
-                // Create a generic version of the Resolve<T>() method using the current parameter
-                // type as the generic type parameter T.
+                // Create a generic version of the RecursiveResolve<T>() method using the current
+                // parameter type as the generic type parameter T.
                 resolveMethodInfo = _resolveMethodInfo.MakeGenericMethod(parameterType);
             }
             catch (Exception ex)
@@ -219,8 +251,7 @@ internal class DependencyResolver
 
             try
             {
-                // Recursively invoke the generic Resolve<T>() method for the current parameter
-                // type.
+                // Invoke the generic RecursiveResolve<T>() method for the current parameter type.
                 resolvedParameter = resolveMethodInfo.Invoke(this, []);
             }
             catch (Exception ex)
@@ -229,7 +260,8 @@ internal class DependencyResolver
                 throw new DependencyInjectionException(msg, ex);
             }
 
-            // We should not get a null value returned from the generic Resolve<T>() method.
+            // We should not get a null value returned from the generic RecursiveResolve<T>()
+            // method.
             if (resolvedParameter is null)
             {
                 string msg = string.Format(MsgResolvingObjectNotCreated, parameterTypeName);
@@ -338,7 +370,7 @@ internal class DependencyResolver
     {
         if (_scoped is not null)
         {
-            if (_scoped.TryGetResolvedDependency(out resolvedDependency))
+            if (_scoped.TryGetResolvingObject(out resolvedDependency))
             {
                 if (resolvedDependency is not null)
                 {
@@ -346,7 +378,7 @@ internal class DependencyResolver
                 }
             }
         }
-        else if (_nonscoped.TryGetResolvedDependency(out resolvedDependency))
+        else if (_nonscoped.TryGetResolvingObject(out resolvedDependency))
         {
             if (resolvedDependency is not null)
             {
