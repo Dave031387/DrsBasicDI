@@ -20,10 +20,10 @@ internal sealed class DependencyResolver : IDependencyResolver
     private readonly object _lock = new();
 
     /// <summary>
-    /// This <see cref="IResolvingObjects" /> instance contains all the non-scoped resolved
+    /// This <see cref="IResolvingObjectsService" /> instance contains all the non-scoped resolved
     /// dependencies.
     /// </summary>
-    private readonly IResolvingObjects _nonscoped;
+    private readonly IResolvingObjectsService _nonscoped;
 
     /// <summary>
     /// Save the <see cref="MethodInfo" /> details for the <see cref="Resolve{T}()" /> method so
@@ -32,10 +32,10 @@ internal sealed class DependencyResolver : IDependencyResolver
     private readonly MethodInfo _resolveMethodInfo;
 
     /// <summary>
-    /// This <see cref="IResolvingObjects" /> instance contains all the resolved dependencies for a
+    /// This <see cref="IResolvingObjectsService" /> instance contains all the resolved dependencies for a
     /// specific dependency scope.
     /// </summary>
-    private readonly IResolvingObjects? _scoped;
+    private readonly IResolvingObjectsService? _scoped;
 
     /// <summary>
     /// Create an instance of the <see cref="DependencyResolver" /> class.
@@ -44,19 +44,19 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// A dictionary of dependency type-to-resolving type mappings.
     /// </param>
     /// <param name="nonscoped">
-    /// A <see cref="ResolvingObjects" /> object containing all of the resolved non-scoped
+    /// A <see cref="ResolvingObjectsService" /> object containing all of the resolved non-scoped
     /// dependency objects.
     /// </param>
     /// <param name="scoped">
-    /// A <see cref="ResolvingObjects" /> object containing all of the resolved scoped dependency
+    /// A <see cref="ResolvingObjectsService" /> object containing all of the resolved scoped dependency
     /// objects.
     /// <para>
     /// This parameter is optional when only non-scoped dependencies are being resolved.
     /// </para>
     /// </param>
     internal DependencyResolver(Dictionary<Type, Dependency> dependencies,
-                                IResolvingObjects nonscoped,
-                                IResolvingObjects? scoped = null)
+                                IResolvingObjectsService nonscoped,
+                                IResolvingObjectsService? scoped = null)
     {
         _dependencies = dependencies;
         _nonscoped = nonscoped;

@@ -11,10 +11,16 @@ internal sealed class Scope : IScope
     internal readonly IContainerInternal _container;
 
     /// <summary>
-    /// This <see cref="IResolvingObjects" /> instance is used to manage all the scoped resolved
+    /// This <see cref="IResolvingObjectsService" /> instance is used to manage all the scoped resolved
     /// dependencies in this dependency injection container.
     /// </summary>
-    internal readonly IResolvingObjects _resolvingObjects;
+    internal readonly IResolvingObjectsService _resolvingObjectsService;
+
+    /// <summary>
+    /// An instance of <see cref="IDependencyResolver" /> used for resolving dependencies and
+    /// returning the corresponding resolving object.
+    /// </summary>
+    private readonly IDependencyResolver _resolver;
 
     /// <summary>
     /// Flag to detect redundant calls to the <see cref="Dispose(bool)" /> method.
@@ -28,18 +34,26 @@ internal sealed class Scope : IScope
     /// A reference to the <see cref="Container" /> object that is creating this
     /// <see cref="Scope" /> object.
     /// </param>
-    /// <param name="resolvingObjects">
-    /// An empty <see cref="IResolvingObjects" /> instance that will be used for saving resolved
+    /// <param name="resolvingObjectsService">
+    /// An empty <see cref="IResolvingObjectsService" /> instance that will be used for saving resolved
     /// scoped dependency objects.
+    /// </param>
+    /// <param name="resolver">
+    /// An optional <see cref="DependencyResolver" /> object used only in unit tests.
     /// </param>
     /// <remarks>
     /// This constructor is marked <see langword="internal" />. Only the <see cref="Container" />
     /// object can be used to create new <see cref="Scope" /> objects.
     /// </remarks>
-    internal Scope(IContainerInternal container, IResolvingObjects resolvingObjects)
+    internal Scope(IContainerInternal container,
+                   IResolvingObjectsService resolvingObjectsService,
+                   IDependencyResolver? resolver = null)
     {
         _container = container;
-        _resolvingObjects = resolvingObjects;
+        _resolvingObjectsService = resolvingObjectsService;
+        _resolver = resolver is null
+            ? new DependencyResolver(container.Dependencies, container.ResolvingObjectsService, resolvingObjectsService)
+            : resolver;
     }
 
     /// <summary>
@@ -67,7 +81,7 @@ internal sealed class Scope : IScope
 
         if (disposing)
         {
-            _resolvingObjects.Clear();
+            _resolvingObjectsService.Clear();
         }
 
         // Unmanaged resources would be freed here if there were any.
@@ -87,11 +101,5 @@ internal sealed class Scope : IScope
     /// <see langword="null" /> if the resolving object can't be determined.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    public T GetDependency<T>() where T : class
-    {
-        DependencyResolver resolver = new(_container.Dependencies,
-                                          _container.ResolvingObjects,
-                                          _resolvingObjects);
-        return resolver.Resolve<T>();
-    }
+    public T GetDependency<T>() where T : class => _resolver.Resolve<T>();
 }

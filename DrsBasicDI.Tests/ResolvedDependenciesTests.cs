@@ -9,20 +9,20 @@ public class ResolvedDependenciesTests
         Class1 myNewObject = new();
         Class1 myExistingObject = new();
         Type dependencyType = typeof(IClass1);
-        ResolvingObjects resolvedDependencies = new();
-        resolvedDependencies._resolvingObjects[dependencyType] = myExistingObject;
+        ResolvingObjectsService resolvingObjectsService = new();
+        resolvingObjectsService.ResolvingObjects[dependencyType] = myExistingObject;
 
         // Act
-        IClass1 actual = resolvedDependencies.Add<IClass1>(myNewObject);
+        IClass1 actual = resolvingObjectsService.Add<IClass1>(myNewObject);
 
         // Assert
-        resolvedDependencies._resolvingObjects
+        resolvingObjectsService.ResolvingObjects
             .Should()
             .ContainSingle();
-        resolvedDependencies._resolvingObjects
+        resolvingObjectsService.ResolvingObjects
             .Should()
             .ContainKey(dependencyType);
-        resolvedDependencies._resolvingObjects[dependencyType]
+        resolvingObjectsService.ResolvingObjects[dependencyType]
             .Should()
             .BeSameAs(myExistingObject);
         actual
@@ -36,20 +36,20 @@ public class ResolvedDependenciesTests
         // Arrange
         Class1 myObject = new();
         Type dependencyType = typeof(IClass1);
-        ResolvingObjects resolvedDependencies = new();
-        resolvedDependencies._resolvingObjects[dependencyType] = null!;
+        ResolvingObjectsService resolvingObjectsService = new();
+        resolvingObjectsService.ResolvingObjects[dependencyType] = null!;
 
         // Act
-        IClass1 actual = resolvedDependencies.Add<IClass1>(myObject);
+        IClass1 actual = resolvingObjectsService.Add<IClass1>(myObject);
 
         // Assert
-        resolvedDependencies._resolvingObjects
+        resolvingObjectsService.ResolvingObjects
             .Should()
             .ContainSingle();
-        resolvedDependencies._resolvingObjects
+        resolvingObjectsService.ResolvingObjects
             .Should()
             .ContainKey(dependencyType);
-        resolvedDependencies._resolvingObjects[dependencyType]
+        resolvingObjectsService.ResolvingObjects[dependencyType]
             .Should()
             .BeSameAs(myObject);
         actual
@@ -63,19 +63,19 @@ public class ResolvedDependenciesTests
         // Arrange
         Class1 myObject = new();
         Type dependencyType = typeof(IClass1);
-        ResolvingObjects resolvedDependencies = new();
+        ResolvingObjectsService resolvingObjectsService = new();
 
         // Act
-        IClass1 actual = resolvedDependencies.Add<IClass1>(myObject);
+        IClass1 actual = resolvingObjectsService.Add<IClass1>(myObject);
 
         // Assert
-        resolvedDependencies._resolvingObjects
+        resolvingObjectsService.ResolvingObjects
             .Should()
             .ContainSingle();
-        resolvedDependencies._resolvingObjects
+        resolvingObjectsService.ResolvingObjects
             .Should()
             .ContainKey(dependencyType);
-        resolvedDependencies._resolvingObjects[dependencyType]
+        resolvingObjectsService.ResolvingObjects[dependencyType]
             .Should()
             .BeSameAs(myObject);
         actual
@@ -87,15 +87,15 @@ public class ResolvedDependenciesTests
     public void ClearTheResolvedDependencies_ShouldRemoveAllDependenciesFromTheList()
     {
         // Arrange
-        ResolvingObjects resolvedDependencies = new();
-        resolvedDependencies._resolvingObjects[typeof(IClass1)] = new Class1();
-        resolvedDependencies._resolvingObjects[typeof(ICanDispose)] = new CanDispose();
+        ResolvingObjectsService resolvingObjectsService = new();
+        resolvingObjectsService.ResolvingObjects[typeof(IClass1)] = new Class1();
+        resolvingObjectsService.ResolvingObjects[typeof(ICanDispose)] = new CanDispose();
 
         // Act
-        resolvedDependencies.Clear();
+        resolvingObjectsService.Clear();
 
         // Assert
-        resolvedDependencies._resolvingObjects
+        resolvingObjectsService.ResolvingObjects
             .Should()
             .BeEmpty();
     }
@@ -104,10 +104,10 @@ public class ResolvedDependenciesTests
     public void TryToGetResolvingObjectThatDoesNotExist_ShouldReturnFalseAndSetObjectToNull()
     {
         // Arrange
-        ResolvingObjects resolvedDependencies = new();
+        ResolvingObjectsService resolvingObjectsService = new();
 
         // Act
-        bool actual = resolvedDependencies.TryGetResolvingObject(out IClass1? resolvingObject);
+        bool actual = resolvingObjectsService.TryGetResolvingObject(out IClass1? resolvingObject);
 
         // Assert
         actual
@@ -123,11 +123,11 @@ public class ResolvedDependenciesTests
     {
         // Arrange
         Class1 myObject = new();
-        ResolvingObjects resolvedDependencies = new();
-        resolvedDependencies._resolvingObjects[typeof(IClass1)] = myObject;
+        ResolvingObjectsService resolvingObjectsService = new();
+        resolvingObjectsService.ResolvingObjects[typeof(IClass1)] = myObject;
 
         // Act
-        bool actual = resolvedDependencies.TryGetResolvingObject(out IClass1? resolvingObject);
+        bool actual = resolvingObjectsService.TryGetResolvingObject(out IClass1? resolvingObject);
 
         // Assert
         actual
@@ -142,11 +142,11 @@ public class ResolvedDependenciesTests
     public void TryToGetResolvingObjectThatExistsAndIsNull_ShouldReturnFalseAndSetObjectToNull()
     {
         // Arrange
-        ResolvingObjects resolvedDependencies = new();
-        resolvedDependencies._resolvingObjects[typeof(IClass1)] = null!;
+        ResolvingObjectsService resolvingObjectsService = new();
+        resolvingObjectsService.ResolvingObjects[typeof(IClass1)] = null!;
 
         // Act
-        bool actual = resolvedDependencies.TryGetResolvingObject(out IClass1? resolvingObject);
+        bool actual = resolvingObjectsService.TryGetResolvingObject(out IClass1? resolvingObject);
 
         // Assert
         actual

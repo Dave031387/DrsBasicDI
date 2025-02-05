@@ -1,11 +1,23 @@
 ﻿namespace DrsBasicDI;
 
+using System;
+using System.Collections.Generic;
+
 /// <summary>
-/// The <see cref="IResolvingObjects" /> interface defines the methods used for maintaining the list
+/// The <see cref="IResolvingObjectsService" /> interface defines the methods used for maintaining the list
 /// of resolved dependency objects.
 /// </summary>
-public interface IResolvingObjects
+public interface IResolvingObjectsService
 {
+    /// <summary>
+    /// Get the dictionary of resolving objects whose keys are the type of the dependencies being
+    /// resolved.
+    /// </summary>
+    Dictionary<Type, object> ResolvingObjects
+    {
+        get;
+    }
+
     /// <summary>
     /// Add the given <paramref name="resolvingObject" /> to the list of resolving objects if no
     /// object currently exists for the given dependency type <typeparamref name="T" />.

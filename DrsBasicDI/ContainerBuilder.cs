@@ -237,7 +237,7 @@ public sealed class ContainerBuilder
             throw new ContainerBuildException(msg);
         }
 
-        IContainer container = new Container(_dependencies, new ResolvingObjects());
+        IContainer container = new Container(_dependencies, new ResolvingObjectsService());
 
         _containerHasBeenBuilt = true;
         return container;

@@ -1,29 +1,29 @@
 ﻿namespace DrsBasicDI;
 
 /// <summary>
-/// The <see cref="ResolvingObjects" /> class manages a dictionary of resolving objects for the
-/// singleton and scoped dependencies contained in the dependency injection container.
+/// The <see cref="ResolvingObjectsService" /> class manages a dictionary of resolving objects for
+/// the singleton and scoped dependencies contained in the dependency injection container.
 /// </summary>
-internal sealed class ResolvingObjects : IResolvingObjects
+internal sealed class ResolvingObjectsService : IResolvingObjectsService
 {
     /// <summary>
-    /// A dictionary of resolving objects whose keys are the dependency types that have been
-    /// resolved and whose values are instances of the corresponding resolving types.
-    /// </summary>
-    internal readonly Dictionary<Type, object> _resolvingObjects = [];
-
-    /// <summary>
     /// A lock object used to ensure thread safety when accessing/modifying the
-    /// <see cref="_resolvingObjects" /> field.
+    /// <see cref="ResolvingObjects" /> field.
     /// </summary>
     private readonly object _lock = new();
 
     /// <summary>
-    /// Create an instance of the <see cref="ResolvingObjects" /> class.
+    /// Create an instance of the <see cref="ResolvingObjectsService" /> class.
     /// </summary>
-    internal ResolvingObjects()
+    internal ResolvingObjectsService()
     {
     }
+
+    /// <summary>
+    /// Get the dictionary of resolving objects whose keys are the type of the dependencies being
+    /// resolved.
+    /// </summary>
+    public Dictionary<Type, object> ResolvingObjects { get; } = [];
 
     /// <summary>
     /// Add the given <paramref name="resolvingObject" /> to the list of resolving objects if no
@@ -52,7 +52,7 @@ internal sealed class ResolvingObjects : IResolvingObjects
         {
             // If we get here then a resolving object hasn't yet been added to the container for the
             // given dependency type.
-            _resolvingObjects[typeof(T)] = resolvingObject;
+            ResolvingObjects[typeof(T)] = resolvingObject;
             return resolvingObject;
         }
     }
@@ -65,14 +65,14 @@ internal sealed class ResolvingObjects : IResolvingObjects
     {
         lock (_lock)
         {
-            foreach (Type type in _resolvingObjects.Keys)
+            foreach (Type type in ResolvingObjects.Keys)
             {
-                if (_resolvingObjects[type] is IDisposable disposable)
+                if (ResolvingObjects[type] is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
 
-                _ = _resolvingObjects.Remove(type);
+                _ = ResolvingObjects.Remove(type);
             }
         }
     }
@@ -96,7 +96,7 @@ internal sealed class ResolvingObjects : IResolvingObjects
     {
         lock (_lock)
         {
-            if (_resolvingObjects.TryGetValue(typeof(T), out object? value))
+            if (ResolvingObjects.TryGetValue(typeof(T), out object? value))
             {
                 if (value is not null)
                 {

@@ -8,7 +8,8 @@
 internal interface IContainerInternal : IContainer
 {
     /// <summary>
-    /// Get the dictionary of <see cref="Dependency" /> objects.
+    /// Get the dictionary of <see cref="Dependency" /> objects whose keys are the corresponding
+    /// dependency type specified by the <see cref="Dependency.DependencyType" /> property.
     /// </summary>
     Dictionary<Type, Dependency> Dependencies
     {
@@ -16,9 +17,10 @@ internal interface IContainerInternal : IContainer
     }
 
     /// <summary>
-    /// Get the <see cref="IResolvingObjects" /> instance.
+    /// Get the <see cref="IResolvingObjectsService" /> instance used to manage all the non-scoped
+    /// resolved dependencies in this dependency injection container.
     /// </summary>
-    IResolvingObjects ResolvingObjects
+    IResolvingObjectsService ResolvingObjectsService
     {
         get;
     }

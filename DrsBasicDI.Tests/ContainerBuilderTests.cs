@@ -301,13 +301,13 @@ public class ContainerBuilderTests
     }
 
     private static Dictionary<Type, Dependency> GetDependencies(IContainer container)
-                                                => ((Container)container)._dependencies;
+                                                => ((Container)container).Dependencies;
 
     private static Dictionary<Type, object> GetResolvingObjects(IContainer container)
     {
         Container theContainer = (Container)container;
-        ResolvingObjects resolvingObjects = (ResolvingObjects)theContainer._resolvingObjects;
-        return resolvingObjects._resolvingObjects;
+        ResolvingObjectsService resolvingObjects = (ResolvingObjectsService)theContainer.ResolvingObjectsService;
+        return resolvingObjects.ResolvingObjects;
     }
 
     private void AssertValidContainer(IContainer container, DependencyLifetime lifetime)
