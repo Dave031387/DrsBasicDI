@@ -11,16 +11,16 @@ internal sealed class Scope : IScope
     internal readonly IContainerInternal _container;
 
     /// <summary>
-    /// This <see cref="IResolvingObjectsService" /> instance is used to manage all the scoped resolved
-    /// dependencies in this dependency injection container.
-    /// </summary>
-    internal readonly IResolvingObjectsService _resolvingObjectsService;
-
-    /// <summary>
     /// An instance of <see cref="IDependencyResolver" /> used for resolving dependencies and
     /// returning the corresponding resolving object.
     /// </summary>
-    private readonly IDependencyResolver _resolver;
+    internal readonly IDependencyResolver _resolver;
+
+    /// <summary>
+    /// This <see cref="IResolvingObjectsService" /> instance is used to manage all the scoped
+    /// resolved dependencies in this dependency injection container.
+    /// </summary>
+    internal readonly IResolvingObjectsService _resolvingObjectsService;
 
     /// <summary>
     /// Flag to detect redundant calls to the <see cref="Dispose(bool)" /> method.
@@ -35,8 +35,8 @@ internal sealed class Scope : IScope
     /// <see cref="Scope" /> object.
     /// </param>
     /// <param name="resolvingObjectsService">
-    /// An empty <see cref="IResolvingObjectsService" /> instance that will be used for saving resolved
-    /// scoped dependency objects.
+    /// An empty <see cref="IResolvingObjectsService" /> instance that will be used for saving
+    /// resolved scoped dependency objects.
     /// </param>
     /// <param name="resolver">
     /// An optional <see cref="DependencyResolver" /> object used only in unit tests.

@@ -1,6 +1,6 @@
 ﻿namespace DrsBasicDI;
 
-public class UtilityTests
+public class ExtensionsTests
 {
     [Theory]
     [MemberData(nameof(TestDataGenerator.GetArrayTypes), MemberType = typeof(TestDataGenerator))]
