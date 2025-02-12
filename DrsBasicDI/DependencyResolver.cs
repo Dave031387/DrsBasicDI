@@ -54,10 +54,13 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// This parameter is optional when only non-scoped dependencies are being resolved.
     /// </para>
     /// </param>
+    /// <exception cref="ArgumentNullException" />
     internal DependencyResolver(Dictionary<Type, Dependency> dependencies,
                                 IResolvingObjectsService nonscoped,
                                 IResolvingObjectsService? scoped = null)
     {
+        ArgumentNullException.ThrowIfNull(dependencies, nameof(dependencies));
+        ArgumentNullException.ThrowIfNull(nonscoped, nameof(nonscoped));
         _dependencies = dependencies;
         _nonscoped = nonscoped;
         _scoped = scoped;

@@ -54,7 +54,7 @@ internal static class Extensions
 
         if (constructorInfo.Length < 1)
         {
-            string msg = string.Format(Messages.MsgNoSuitableConstructors, type.GetFriendlyName());
+            string msg = string.Format(MsgNoSuitableConstructors, type.GetFriendlyName());
             throw new DependencyInjectionException(msg);
         }
 

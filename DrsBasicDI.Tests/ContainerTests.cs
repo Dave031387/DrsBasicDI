@@ -35,10 +35,12 @@ public class ContainerTests
         Container container;
         _mockDependencyResolver.Reset();
         _mockResolvingObjectsService.Reset();
-        Action action = () => container = new(null!,
+        List<Dependency> dependencies = null!;
+        Action action = () => container = new(dependencies,
                                               _mockResolvingObjectsService.Object,
                                               _mockDependencyResolver.Object);
-        string expected = "Value cannot be null. (Parameter 'dependencies')";
+        string parameterName = "dependencies";
+        string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
         // Act/Assert
         action
@@ -55,10 +57,13 @@ public class ContainerTests
         // Arrange
         Container container;
         _mockDependencyResolver.Reset();
-        Action action = () => container = new([],
-                                              null!,
+        List<Dependency> dependencies = [];
+        IResolvingObjectsService resolvingObjectsService = null!;
+        Action action = () => container = new(dependencies,
+                                              resolvingObjectsService,
                                               _mockDependencyResolver.Object);
-        string expected = "Value cannot be null. (Parameter 'resolvingObjectsService')";
+        string parameterName = "resolvingObjectsService";
+        string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
         // Act/Assert
         action
@@ -93,6 +98,9 @@ public class ContainerTests
                         _mockDependencyResolver.Object);
 
         // Assert
+        container
+            .Should()
+            .NotBeNull();
         container.ResolvingObjectsService
             .Should()
             .BeSameAs(_mockResolvingObjectsService.Object);

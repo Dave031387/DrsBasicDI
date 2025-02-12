@@ -111,7 +111,9 @@ public sealed class Container : IContainer, IContainerInternal
     {
         foreach (Dependency dependency in dependencies)
         {
-            Dependencies[dependency.DependencyType] = dependency;
+            // It is impossible for the DependencyType to be null because the Dependency object is
+            // validated before being added to the container.
+            Dependencies[dependency.DependencyType!] = dependency;
         }
     }
 }

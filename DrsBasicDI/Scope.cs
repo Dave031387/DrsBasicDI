@@ -25,7 +25,7 @@ internal sealed class Scope : IScope
     /// <summary>
     /// Flag to detect redundant calls to the <see cref="Dispose(bool)" /> method.
     /// </summary>
-    private bool _isDisposed;
+    internal bool _isDisposed;
 
     /// <summary>
     /// Create a new <see cref="Scope" /> object.
@@ -45,10 +45,13 @@ internal sealed class Scope : IScope
     /// This constructor is marked <see langword="internal" />. Only the <see cref="Container" />
     /// object can be used to create new <see cref="Scope" /> objects.
     /// </remarks>
+    /// <exception cref="ArgumentNullException" />
     internal Scope(IContainerInternal container,
                    IResolvingObjectsService resolvingObjectsService,
                    IDependencyResolver? resolver = null)
     {
+        ArgumentNullException.ThrowIfNull(container, nameof(container));
+        ArgumentNullException.ThrowIfNull(resolvingObjectsService, nameof(resolvingObjectsService));
         _container = container;
         _resolvingObjectsService = resolvingObjectsService;
         _resolver = resolver is null

@@ -253,10 +253,19 @@ public sealed class ContainerBuilder
     /// <exception cref="ContainerBuildException" />
     private void Add(Dependency dependency)
     {
-        if (_dependencyTypes.Contains(dependency.DependencyType))
+        if (dependency.DependencyType is null)
         {
-            string msg = string.Format(MsgDuplicateDependency, dependency.DependencyType.GetFriendlyName());
-            throw new ContainerBuildException(msg);
+            // This exception should never occur since the Dependency object is validated before
+            // this method is called.
+            throw new ContainerBuildException(MsgDependencyHasNullDependencyType);
+        }
+        else
+        {
+            if (_dependencyTypes.Contains(dependency.DependencyType))
+            {
+                string msg = string.Format(MsgDuplicateDependency, dependency.DependencyType.GetFriendlyName());
+                throw new ContainerBuildException(msg);
+            }
         }
 
         _dependencyTypes.Add(dependency.DependencyType);
