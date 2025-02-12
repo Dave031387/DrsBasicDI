@@ -36,13 +36,15 @@ public class ContainerTests
         _mockDependencyResolver.Reset();
         _mockResolvingObjectsService.Reset();
         List<Dependency> dependencies = null!;
-        Action action = () => container = new(dependencies,
-                                              _mockResolvingObjectsService.Object,
-                                              _mockDependencyResolver.Object);
         string parameterName = "dependencies";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
-        // Act/Assert
+        // Act
+        Action action = () => container = new(dependencies,
+                                              _mockResolvingObjectsService.Object,
+                                              _mockDependencyResolver.Object);
+
+        // Assert
         action
             .Should()
             .ThrowExactly<ArgumentNullException>()
@@ -59,13 +61,15 @@ public class ContainerTests
         _mockDependencyResolver.Reset();
         List<Dependency> dependencies = [];
         IResolvingObjectsService resolvingObjectsService = null!;
-        Action action = () => container = new(dependencies,
-                                              resolvingObjectsService,
-                                              _mockDependencyResolver.Object);
         string parameterName = "resolvingObjectsService";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
-        // Act/Assert
+        // Act
+        Action action = () => container = new(dependencies,
+                                              resolvingObjectsService,
+                                              _mockDependencyResolver.Object);
+
+        // Assert
         action
             .Should()
             .ThrowExactly<ArgumentNullException>()

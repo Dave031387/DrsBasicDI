@@ -110,13 +110,15 @@ public class ScopeTests
         IContainerInternal container = null!;
         _mockResolvingObjectsService.Reset();
         _mockDependencyResolver.Reset();
-        Action action = () => _ = new Scope(container,
-                                            _mockResolvingObjectsService.Object,
-                                            _mockDependencyResolver.Object);
         string parameterName = "container";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
-        // Act/Assert
+        // Act
+        Action action = () => _ = new Scope(container,
+                                            _mockResolvingObjectsService.Object,
+                                            _mockDependencyResolver.Object);
+
+        // Assert
         action
             .Should()
             .ThrowExactly<ArgumentNullException>()
@@ -134,13 +136,15 @@ public class ScopeTests
         IResolvingObjectsService resolvingObjectsService = null!;
         _mockContainer.Reset();
         _mockDependencyResolver.Reset();
-        Action action = () => _ = new Scope(_mockContainer.Object,
-                                            resolvingObjectsService,
-                                            _mockDependencyResolver.Object);
         string parameterName = "resolvingObjectsService";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
-        // Act/Assert
+        // Act
+        Action action = () => _ = new Scope(_mockContainer.Object,
+                                            resolvingObjectsService,
+                                            _mockDependencyResolver.Object);
+
+        // Assert
         action
             .Should()
             .ThrowExactly<ArgumentNullException>()

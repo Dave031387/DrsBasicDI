@@ -1,10 +1,12 @@
 ﻿namespace DrsBasicDI;
 
+using System.Reflection;
+
 public class ExtensionsTests
 {
     [Theory]
     [MemberData(nameof(TestDataGenerator.GetArrayTypes), MemberType = typeof(TestDataGenerator))]
-    public void ArrayTypes_ShouldGenerateFriendlyName(Type type, string expected)
+    public void GetFriendlyNameForArrayTypes_ShouldGenerateFriendlyName(Type type, string expected)
     {
         // Arrange/Act
         string actual = type.GetFriendlyName();
@@ -17,7 +19,7 @@ public class ExtensionsTests
 
     [Theory]
     [MemberData(nameof(TestDataGenerator.GetGenericTypes), MemberType = typeof(TestDataGenerator))]
-    public void GenericTypes_ShouldGenerateFriendlyName(Type type, string expected)
+    public void GetFriendlyNameForGenericTypes_ShouldGenerateFriendlyName(Type type, string expected)
     {
         // Arrange/Act
         string actual = type.GetFriendlyName();
@@ -30,7 +32,7 @@ public class ExtensionsTests
 
     [Theory]
     [MemberData(nameof(TestDataGenerator.GetNullableTypes), MemberType = typeof(TestDataGenerator))]
-    public void NullableTypes_ShouldGenerateFriendlyName(Type type, string expected)
+    public void GetFriendlyNameForNullableTypes_ShouldGenerateFriendlyName(Type type, string expected)
     {
         // Arrange/Act
         string actual = type.GetFriendlyName();
@@ -43,7 +45,7 @@ public class ExtensionsTests
 
     [Theory]
     [MemberData(nameof(TestDataGenerator.GetPredefinedTypes), MemberType = typeof(TestDataGenerator))]
-    public void PredefinedTypes_ShouldGenerateFriendlyName(Type type, string expected)
+    public void GetFriendlyNameForPredefinedTypes_ShouldGenerateFriendlyName(Type type, string expected)
     {
         // Arrange/Act
         string actual = type.GetFriendlyName();
@@ -52,5 +54,55 @@ public class ExtensionsTests
         actual
             .Should()
             .Be(expected);
+    }
+
+    [Fact]
+    public void GetFriendlyNameForSimpleClassType_ShouldGenerateFriendlyName()
+    {
+        // Arrange
+        Type type = typeof(Class1);
+        string expected = nameof(Class1);
+
+        // Act
+        string actual = type.GetFriendlyName();
+
+        // Assert
+        actual
+            .Should()
+            .Be(expected);
+    }
+
+    [Fact]
+    public void GetPrimaryConstructorInfoForClassType_ShouldReturnConstructorInfoWithMostParameters()
+    {
+        // Arrange
+        Type type = typeof(Class1);
+        ConstructorInfo expected = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, [typeof(int), typeof(string)])!;
+
+        // Act
+        ConstructorInfo actual = type.GetPrimaryConstructorInfo();
+
+        // Assert
+        actual
+            .Should()
+            .BeSameAs(expected);
+    }
+
+    [Fact]
+    public void GetPrimaryConstructorInfoForValueType_ShouldThrowException()
+    {
+        // Arrange
+        Type type = typeof(int);
+        string typeName = "int";
+        string expected = string.Format(MsgNoSuitableConstructors, typeName);
+
+        // Act
+        Action action = () => type.GetPrimaryConstructorInfo();
+
+        // Assert
+        action
+            .Should()
+            .ThrowExactly<DependencyInjectionException>()
+            .WithMessage(expected);
     }
 }

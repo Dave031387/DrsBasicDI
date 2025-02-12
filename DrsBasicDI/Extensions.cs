@@ -33,49 +33,6 @@ internal static class Extensions
     };
 
     /// <summary>
-    /// An extension method for the <see cref="Type" /> class that returns the constructor info for
-    /// the <see cref="Type" />.
-    /// </summary>
-    /// <param name="type">
-    /// The class type for which we want to retrieve the constructor info.
-    /// </param>
-    /// <returns>
-    /// The <see cref="ConstructorInfo" /> object for the given class type.
-    /// </returns>
-    /// <remarks>
-    /// If there is more than one constructor for the given class type, then the info for the
-    /// constructor having the most parameters will be returned.
-    /// </remarks>
-    /// <exception cref="DependencyInjectionException" />
-    internal static ConstructorInfo GetConstructorInfo(this Type type)
-    {
-        BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-        ConstructorInfo[] constructorInfo = type.GetConstructors(bindingFlags);
-
-        if (constructorInfo.Length < 1)
-        {
-            string msg = string.Format(MsgNoSuitableConstructors, type.GetFriendlyName());
-            throw new DependencyInjectionException(msg);
-        }
-
-        int maxParameterCount = -1;
-        int constructorIndex = -1;
-
-        for (int i = 0; i < constructorInfo.Length; i++)
-        {
-            int parameterCount = constructorInfo[i].GetParameters().Length;
-
-            if (parameterCount > maxParameterCount)
-            {
-                maxParameterCount = parameterCount;
-                constructorIndex = i;
-            }
-        }
-
-        return constructorInfo[constructorIndex];
-    }
-
-    /// <summary>
     /// An extension method for the <see cref="Type" /> class that returns a user-friendly name for
     /// the <see cref="Type" /> instance.
     /// </summary>
@@ -129,5 +86,48 @@ internal static class Extensions
         {
             return type.Name;
         }
+    }
+
+    /// <summary>
+    /// An extension method for the <see cref="Type" /> class that returns the primary constructor
+    /// info for the <see cref="Type" />.
+    /// </summary>
+    /// <param name="type">
+    /// The class type for which we want to retrieve the constructor info.
+    /// </param>
+    /// <returns>
+    /// The <see cref="ConstructorInfo" /> object for the given class type.
+    /// </returns>
+    /// <remarks>
+    /// If there is more than one constructor for the given class type, then the info for the
+    /// constructor having the most parameters will be returned.
+    /// </remarks>
+    /// <exception cref="DependencyInjectionException" />
+    internal static ConstructorInfo GetPrimaryConstructorInfo(this Type type)
+    {
+        BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+        ConstructorInfo[] constructorInfo = type.GetConstructors(bindingFlags);
+
+        if (constructorInfo.Length < 1)
+        {
+            string msg = string.Format(MsgNoSuitableConstructors, type.GetFriendlyName());
+            throw new DependencyInjectionException(msg);
+        }
+
+        int maxParameterCount = -1;
+        int constructorIndex = -1;
+
+        for (int i = 0; i < constructorInfo.Length; i++)
+        {
+            int parameterCount = constructorInfo[i].GetParameters().Length;
+
+            if (parameterCount > maxParameterCount)
+            {
+                maxParameterCount = parameterCount;
+                constructorIndex = i;
+            }
+        }
+
+        return constructorInfo[constructorIndex];
     }
 }

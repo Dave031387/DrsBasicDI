@@ -231,11 +231,13 @@ public class ContainerBuilderTests
             .AddTransient<IClass1>(b => b
                 .WithResolvingType<Class1>())
             .Build();
+
+        // Act
         void action() => builder
             .AddTransient<IClass2>(b => b
                 .WithResolvingType<Class2>());
 
-        // Act/Assert
+        // Assert
         AssertException(action, MsgCantAddToContainerAfterBuild);
     }
 
@@ -247,6 +249,9 @@ public class ContainerBuilderTests
         Type dependencyType = typeof(IClass1);
         Type resolvingType1 = typeof(Class1);
         string typeName = nameof(IClass1);
+        string msg = string.Format(MsgDuplicateDependency, typeName);
+
+        // Act
         void action() => builder
             .AddDependency(b => b
                 .WithDependencyType(dependencyType)
@@ -257,9 +262,8 @@ public class ContainerBuilderTests
                 .WithResolvingType<Class1A>()
                 .WithLifetime(DependencyLifetime.Transient))
             .Build();
-        string msg = string.Format(MsgDuplicateDependency, typeName);
 
-        // Act/Assert
+        // Assert
         AssertException(action, msg);
     }
 
@@ -272,10 +276,12 @@ public class ContainerBuilderTests
             .AddTransient<IClass1>(b => b
                 .WithResolvingType<Class1>())
             .Build();
+
+        // Act
         void action() => builder
             .Build();
 
-        // Act/Assert
+        // Assert
         AssertException(action, MsgContainerCantBeBuiltMoreThanOnce);
     }
 
@@ -284,16 +290,18 @@ public class ContainerBuilderTests
     {
         // Arrange
         ContainerBuilder builder = ContainerBuilder.TestInstance;
-        void action() => builder.Build();
         string msg = MsgContainerIsEmpty;
 
-        // Act/Assert
+        // Act
+        void action() => builder.Build();
+
+        // Assert
         AssertException(action, msg);
     }
 
     private static void AssertException(Action action, string msg)
     {
-        // Act/Assert
+        // Assert
         action
             .Should()
             .ThrowExactly<ContainerBuildException>()
