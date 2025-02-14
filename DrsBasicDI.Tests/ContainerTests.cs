@@ -5,60 +5,56 @@ public class ContainerTests
     private static readonly Type _class1DependencyType = typeof(IClass1);
     private static readonly DependencyLifetime _class1Lifetime = DependencyLifetime.Transient;
     private static readonly Type _class1ResolvingType = typeof(Class1);
+    private static readonly Type _class2DependencyType = typeof(IClass2);
+    private static readonly DependencyLifetime _class2Lifetime = DependencyLifetime.Singleton;
+    private static readonly Type _class2ResolvingType = typeof(Class2);
 
-    private static readonly Dependency _class1Dependency = new()
+    private static readonly Dependency _myClass1Dependency = new()
     {
         DependencyType = _class1DependencyType,
         ResolvingType = _class1ResolvingType,
         Lifetime = _class1Lifetime
     };
 
-    private static readonly Type _class2DependencyType = typeof(IClass2);
-    private static readonly DependencyLifetime _class2Lifetime = DependencyLifetime.Singleton;
-    private static readonly Type _class2ResolvingType = typeof(Class2);
-
-    private static readonly Dependency _class2Dependency = new()
+    private static readonly Dependency _myClass2Dependency = new()
     {
         DependencyType = _class2DependencyType,
         ResolvingType = _class2ResolvingType,
         Lifetime = _class2Lifetime
     };
 
-    private readonly List<Dependency> _dependencies = [_class1Dependency, _class2Dependency];
-    private readonly Mock<IDependencyResolver> _mockDependencyResolver = new(MockBehavior.Strict);
-    private readonly Mock<IResolvingObjectsService> _mockResolvingObjectsService = new(MockBehavior.Strict);
+    private readonly List<Dependency> _dependencyList = [_myClass1Dependency, _myClass2Dependency];
 
     [Fact]
     public void ConstructContainerUsingNullDependenciesObject_ShouldThrowException()
     {
         // Arrange
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
         Container container;
-        _mockDependencyResolver.Reset();
-        _mockResolvingObjectsService.Reset();
         List<Dependency> dependencies = null!;
         string parameterName = "dependencies";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
         // Act
         Action action = () => container = new(dependencies,
-                                              _mockResolvingObjectsService.Object,
-                                              _mockDependencyResolver.Object);
+                                              mockResolvingObjectsService.Object,
+                                              mockDependencyResolver.Object);
 
         // Assert
         action
             .Should()
             .ThrowExactly<ArgumentNullException>()
             .WithMessage(expected);
-        _mockDependencyResolver.VerifyAll();
-        _mockResolvingObjectsService.VerifyAll();
+        VerifyMocks(mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
     public void ConstructContainerUsingNullResolvingObjectsService_ShouldThrowException()
     {
         // Arrange
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
         Container container;
-        _mockDependencyResolver.Reset();
         List<Dependency> dependencies = [];
         IResolvingObjectsService resolvingObjectsService = null!;
         string parameterName = "resolvingObjectsService";
@@ -67,23 +63,29 @@ public class ContainerTests
         // Act
         Action action = () => container = new(dependencies,
                                               resolvingObjectsService,
-                                              _mockDependencyResolver.Object);
+                                              mockDependencyResolver.Object);
 
         // Assert
         action
             .Should()
             .ThrowExactly<ArgumentNullException>()
             .WithMessage(expected);
-        _mockDependencyResolver.VerifyAll();
+        VerifyMocks(mockDependencyResolver);
     }
 
     [Fact]
     public void ConstructContainerUsingValidDependencies_ShouldConstructValidContainer()
     {
         // Arrange
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
+        IContainer? passedContainer = null;
+        mockResolvingObjectsService
+            .Setup(x => x.Add<IContainer>(It.IsAny<Container>()))
+            .Returns(It.IsAny<IContainer>())
+            .Callback<IContainer>(x => passedContainer = x)
+            .Verifiable(Times.Once);
         Container container;
-        _mockDependencyResolver.Reset();
-        _mockResolvingObjectsService.Reset();
         Type containerType = typeof(IContainer);
         Dependency containerDependency = new()
         {
@@ -91,23 +93,25 @@ public class ContainerTests
             ResolvingType = typeof(Container),
             Lifetime = DependencyLifetime.Singleton
         };
-        _mockResolvingObjectsService
-            .Setup(x => x.Add<IContainer>(It.IsAny<Container>()))
-            .Returns(It.IsAny<Container>())
-            .Verifiable(Times.Once);
 
         // Act
-        container = new(_dependencies,
-                        _mockResolvingObjectsService.Object,
-                        _mockDependencyResolver.Object);
+        container = new(_dependencyList,
+                        mockResolvingObjectsService.Object,
+                        mockDependencyResolver.Object);
 
         // Assert
         container
             .Should()
             .NotBeNull();
+        passedContainer
+            .Should()
+            .NotBeNull();
+        passedContainer
+            .Should()
+            .BeSameAs(container);
         container.ResolvingObjectsService
             .Should()
-            .BeSameAs(_mockResolvingObjectsService.Object);
+            .BeSameAs(mockResolvingObjectsService.Object);
         container.Dependencies
             .Should()
             .NotBeEmpty();
@@ -122,19 +126,20 @@ public class ContainerTests
             .ContainKeys(_class1DependencyType, _class2DependencyType);
         container.Dependencies[_class1DependencyType]
             .Should()
-            .BeEquivalentTo(_class1Dependency);
+            .BeEquivalentTo(_myClass1Dependency);
         container.Dependencies[_class2DependencyType]
             .Should()
-            .BeEquivalentTo(_class2Dependency);
-        _mockDependencyResolver.VerifyAll();
-        _mockResolvingObjectsService.VerifyAll();
+            .BeEquivalentTo(_myClass2Dependency);
+        VerifyMocks(mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
     public void CreateMultipleScopes_ShouldCreateUniqueScopes()
     {
         // Arrange
-        Container container = GetTestContainer();
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
+        Container container = GetTestContainer(mockResolvingObjectsService.Object, mockDependencyResolver.Object);
 
         // Act
         IScope scope1 = container.CreateScope();
@@ -162,15 +167,16 @@ public class ContainerTests
         ((Scope)scope1)._resolver
             .Should()
             .NotBeSameAs(((Scope)scope2)._resolver);
-        _mockDependencyResolver.VerifyAll();
-        _mockResolvingObjectsService.VerifyAll();
+        VerifyMocks(mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
     public void CreateScope_ShouldCreateValidScope()
     {
         // Arrange
-        Container container = GetTestContainer();
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
+        Container container = GetTestContainer(mockResolvingObjectsService.Object, mockDependencyResolver.Object);
 
         // Act
         IScope scope = container.CreateScope();
@@ -188,17 +194,18 @@ public class ContainerTests
         ((Scope)scope)._resolver
             .Should()
             .NotBeNull();
-        _mockDependencyResolver.VerifyAll();
-        _mockResolvingObjectsService.VerifyAll();
+        VerifyMocks(mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
     public void GetDependency_ShouldCallDependencyResolver()
     {
         // Arrange
-        Container container = GetTestContainer();
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
+        Container container = GetTestContainer(mockResolvingObjectsService.Object, mockDependencyResolver.Object);
         Class1 expected = new();
-        _mockDependencyResolver
+        mockDependencyResolver
             .Setup(x => x.Resolve<IClass1>())
             .Returns(expected)
             .Verifiable(Times.Once);
@@ -213,20 +220,41 @@ public class ContainerTests
         actual
             .Should()
             .BeSameAs(expected);
-        _mockDependencyResolver.VerifyAll();
-        _mockResolvingObjectsService.VerifyAll();
+        VerifyMocks(mockDependencyResolver, mockResolvingObjectsService);
     }
 
-    private Container GetTestContainer()
+    private static void VerifyMocks(Mock<IDependencyResolver>? mockDependencyResolver = null, Mock<IResolvingObjectsService>? mockResolvingObjectsService = null)
     {
-        _mockDependencyResolver.Reset();
-        _mockResolvingObjectsService.Reset();
-        _mockResolvingObjectsService
+        if (mockDependencyResolver is not null)
+        {
+            if (mockDependencyResolver.Setups.Any())
+            {
+                mockDependencyResolver.VerifyAll();
+            }
+
+            mockDependencyResolver.VerifyNoOtherCalls();
+        }
+
+        if (mockResolvingObjectsService is not null)
+        {
+            if (mockResolvingObjectsService.Setups.Any())
+            {
+                mockResolvingObjectsService.VerifyAll();
+            }
+
+            mockResolvingObjectsService.VerifyNoOtherCalls();
+        }
+    }
+
+    private Container GetTestContainer(IResolvingObjectsService resolvingObjectsService, IDependencyResolver dependencyResolver)
+    {
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = Mock.Get(resolvingObjectsService);
+        mockResolvingObjectsService
             .Setup(x => x.Add<IContainer>(It.IsAny<Container>()))
-            .Returns(It.IsAny<Container>())
+            .Returns(It.IsAny<IContainer>())
             .Verifiable(Times.Once);
-        return new(_dependencies,
-                   _mockResolvingObjectsService.Object,
-                   _mockDependencyResolver.Object);
+        return new(_dependencyList,
+                   resolvingObjectsService,
+                   dependencyResolver);
     }
 }

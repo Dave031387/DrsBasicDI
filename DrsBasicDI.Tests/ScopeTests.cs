@@ -2,18 +2,19 @@
 
 public class ScopeTests
 {
-    private readonly Mock<IContainerInternal> _mockContainer = new(MockBehavior.Strict);
-    private readonly Mock<IDependencyResolver> _mockDependencyResolver = new(MockBehavior.Strict);
-    private readonly Mock<IResolvingObjectsService> _mockResolvingObjectsService = new(MockBehavior.Strict);
-
     [Fact]
     public void CallDisposeMoreThanOnce_ShouldDisposeOfResolvingObjectsServiceOnlyOnce()
     {
         // Arrange
-        Scope scope = GetScope();
-        _mockResolvingObjectsService
+        Mock<IContainerInternal> mockContainer = new(MockBehavior.Strict);
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
+        mockResolvingObjectsService
             .Setup(o => o.Clear())
             .Verifiable(Times.Once);
+        Scope scope = new(mockContainer.Object,
+                          mockResolvingObjectsService.Object,
+                          mockDependencyResolver.Object);
         bool disposing = true;
 
         // Act
@@ -24,22 +25,22 @@ public class ScopeTests
         scope._isDisposed
             .Should()
             .BeTrue();
-        _mockResolvingObjectsService
-            .VerifyAll();
-        _mockContainer
-            .VerifyAll();
-        _mockDependencyResolver
-            .VerifyAll();
+        VerifyMocks(mockContainer, mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
     public void CallDisposeWithNoParameters_ShouldDisposeOfResolvingObjectsService()
     {
         // Arrange
-        Scope scope = GetScope();
-        _mockResolvingObjectsService
+        Mock<IContainerInternal> mockContainer = new(MockBehavior.Strict);
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
+        mockResolvingObjectsService
             .Setup(o => o.Clear())
             .Verifiable(Times.Once);
+        Scope scope = new(mockContainer.Object,
+                          mockResolvingObjectsService.Object,
+                          mockDependencyResolver.Object);
 
         // Act
         scope.Dispose();
@@ -48,19 +49,19 @@ public class ScopeTests
         scope._isDisposed
             .Should()
             .BeTrue();
-        _mockResolvingObjectsService
-            .VerifyAll();
-        _mockContainer
-            .VerifyAll();
-        _mockDependencyResolver
-            .VerifyAll();
+        VerifyMocks(mockContainer, mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
     public void CallDisposeWithParameterSetToFalse_ShouldNotDisposeOfResolvingObjectsService()
     {
         // Arrange
-        Scope scope = GetScope();
+        Mock<IContainerInternal> mockContainer = new(MockBehavior.Strict);
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
+        Scope scope = new(mockContainer.Object,
+                          mockResolvingObjectsService.Object,
+                          mockDependencyResolver.Object);
         bool disposing = false;
 
         // Act
@@ -70,22 +71,22 @@ public class ScopeTests
         scope._isDisposed
             .Should()
             .BeTrue();
-        _mockResolvingObjectsService
-            .VerifyAll();
-        _mockContainer
-            .VerifyAll();
-        _mockDependencyResolver
-            .VerifyAll();
+        VerifyMocks(mockContainer, mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
     public void CallDisposeWithParameterSetToTrue_ShouldDisposeOfResolvingObjectsService()
     {
         // Arrange
-        Scope scope = GetScope();
-        _mockResolvingObjectsService
+        Mock<IContainerInternal> mockContainer = new(MockBehavior.Strict);
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
+        mockResolvingObjectsService
             .Setup(o => o.Clear())
             .Verifiable(Times.Once);
+        Scope scope = new(mockContainer.Object,
+                          mockResolvingObjectsService.Object,
+                          mockDependencyResolver.Object);
         bool disposing = true;
 
         // Act
@@ -95,12 +96,7 @@ public class ScopeTests
         scope._isDisposed
             .Should()
             .BeTrue();
-        _mockResolvingObjectsService
-            .VerifyAll();
-        _mockContainer
-            .VerifyAll();
-        _mockDependencyResolver
-            .VerifyAll();
+        VerifyMocks(mockContainer, mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
@@ -108,25 +104,22 @@ public class ScopeTests
     {
         // Arrange
         IContainerInternal container = null!;
-        _mockResolvingObjectsService.Reset();
-        _mockDependencyResolver.Reset();
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
         string parameterName = "container";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
         // Act
         Action action = () => _ = new Scope(container,
-                                            _mockResolvingObjectsService.Object,
-                                            _mockDependencyResolver.Object);
+                                            mockResolvingObjectsService.Object,
+                                            mockDependencyResolver.Object);
 
         // Assert
         action
             .Should()
             .ThrowExactly<ArgumentNullException>()
             .WithMessage(expected);
-        _mockResolvingObjectsService
-            .VerifyAll();
-        _mockDependencyResolver
-            .VerifyAll();
+        VerifyMocks(null, mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
@@ -134,25 +127,22 @@ public class ScopeTests
     {
         // Arrange
         IResolvingObjectsService resolvingObjectsService = null!;
-        _mockContainer.Reset();
-        _mockDependencyResolver.Reset();
+        Mock<IContainerInternal> mockContainer = new(MockBehavior.Strict);
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
         string parameterName = "resolvingObjectsService";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
         // Act
-        Action action = () => _ = new Scope(_mockContainer.Object,
+        Action action = () => _ = new Scope(mockContainer.Object,
                                             resolvingObjectsService,
-                                            _mockDependencyResolver.Object);
+                                            mockDependencyResolver.Object);
 
         // Assert
         action
             .Should()
             .ThrowExactly<ArgumentNullException>()
             .WithMessage(expected);
-        _mockContainer
-            .VerifyAll();
-        _mockDependencyResolver
-            .VerifyAll();
+        VerifyMocks(mockContainer, mockDependencyResolver);
     }
 
     [Fact]
@@ -160,14 +150,14 @@ public class ScopeTests
     {
         // Arrange
         Scope scope;
-        _mockContainer.Reset();
-        _mockResolvingObjectsService.Reset();
-        _mockDependencyResolver.Reset();
+        Mock<IContainerInternal> mockContainer = new(MockBehavior.Strict);
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
 
         // Act
-        scope = new Scope(_mockContainer.Object,
-                          _mockResolvingObjectsService.Object,
-                          _mockDependencyResolver.Object);
+        scope = new Scope(mockContainer.Object,
+                          mockResolvingObjectsService.Object,
+                          mockDependencyResolver.Object);
 
         // Assert
         scope
@@ -175,31 +165,31 @@ public class ScopeTests
             .NotBeNull();
         scope._container
             .Should()
-            .BeSameAs(_mockContainer.Object);
+            .BeSameAs(mockContainer.Object);
         scope._resolver
             .Should()
-            .BeSameAs(_mockDependencyResolver.Object);
+            .BeSameAs(mockDependencyResolver.Object);
         scope._resolvingObjectsService
             .Should()
-            .BeSameAs(_mockResolvingObjectsService.Object);
-        _mockContainer
-            .VerifyAll();
-        _mockResolvingObjectsService
-            .VerifyAll();
-        _mockDependencyResolver
-            .VerifyAll();
+            .BeSameAs(mockResolvingObjectsService.Object);
+        VerifyMocks(mockContainer, mockDependencyResolver, mockResolvingObjectsService);
     }
 
     [Fact]
     public void GetDependency_ShouldCallDependencyResolver()
     {
         // Arrange
-        Scope scope = GetScope();
+        Mock<IContainerInternal> mockContainer = new(MockBehavior.Strict);
+        Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
         Class1 expected = new();
-        _mockDependencyResolver
+        mockDependencyResolver
             .Setup(o => o.Resolve<IClass1>())
             .Returns(expected)
             .Verifiable(Times.Once);
+        Scope scope = new(mockContainer.Object,
+                          mockResolvingObjectsService.Object,
+                          mockDependencyResolver.Object);
 
         // Act
         IClass1 actual = scope.GetDependency<IClass1>();
@@ -211,21 +201,39 @@ public class ScopeTests
         actual
             .Should()
             .BeSameAs(expected);
-        _mockDependencyResolver
-            .VerifyAll();
-        _mockResolvingObjectsService
-            .VerifyAll();
-        _mockContainer
-            .VerifyAll();
+        VerifyMocks(mockContainer, mockDependencyResolver, mockResolvingObjectsService);
     }
 
-    private Scope GetScope()
+    private static void VerifyMocks(Mock<IContainerInternal>? mockContainer = null,
+                                    Mock<IDependencyResolver>? mockDependencyResolver = null,
+                                    Mock<IResolvingObjectsService>? mockResolvingObjectsService = null)
     {
-        _mockContainer.Reset();
-        _mockResolvingObjectsService.Reset();
-        _mockDependencyResolver.Reset();
-        return new(_mockContainer.Object,
-                   _mockResolvingObjectsService.Object,
-                   _mockDependencyResolver.Object);
+        if (mockContainer is not null)
+        {
+            if (mockContainer.Setups.Any())
+            {
+                mockContainer.VerifyAll();
+            }
+
+            mockContainer.VerifyNoOtherCalls();
+        }
+
+        if (mockDependencyResolver is not null)
+        {
+            if (mockDependencyResolver.Setups.Any())
+            {
+                mockDependencyResolver.VerifyAll();
+            }
+            mockDependencyResolver.VerifyNoOtherCalls();
+        }
+
+        if (mockResolvingObjectsService is not null)
+        {
+            if (mockResolvingObjectsService.Setups.Any())
+            {
+                mockResolvingObjectsService.VerifyAll();
+            }
+            mockResolvingObjectsService.VerifyNoOtherCalls();
+        }
     }
 }

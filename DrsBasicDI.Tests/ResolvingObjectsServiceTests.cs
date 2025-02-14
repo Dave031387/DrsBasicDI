@@ -1,6 +1,6 @@
 ﻿namespace DrsBasicDI;
 
-public class ResolvedDependenciesTests
+public class ResolvingObjectsServiceTests
 {
     [Fact]
     public void AddNewObjectThatAlreadyExistsAndIsNotNull_ShouldReturnExistingObjectAndNotAddNewObject()
