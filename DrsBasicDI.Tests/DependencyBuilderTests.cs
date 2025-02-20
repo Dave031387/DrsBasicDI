@@ -30,7 +30,7 @@ public class DependencyBuilderTests
         DependencyLifetime lifetime = DependencyLifetime.Scoped;
 
         // Act
-        Dependency dependency = builder
+        IDependency dependency = builder
             .WithDependencyType(type)
             .WithResolvingType(type)
             .WithLifetime(lifetime)
@@ -77,7 +77,7 @@ public class DependencyBuilderTests
         DependencyLifetime lifetime = DependencyLifetime.Transient;
 
         // Act
-        Dependency dependency = builder
+        IDependency dependency = builder
             .WithDependencyType<Class1>()
             .WithResolvingType<Class1A>()
             .WithLifetime(lifetime)
@@ -175,7 +175,7 @@ public class DependencyBuilderTests
         };
 
         // Act
-        Dependency dependency = builder
+        IDependency dependency = builder
             .WithDependencyType<IClass1>()
             .WithResolvingType<Class1A>()
             .WithLifetime(lifetime)
@@ -453,7 +453,7 @@ public class DependencyBuilderTests
         DependencyBuilder builder = DependencyBuilder.Empty;
 
         // Act
-        Dependency dependency = builder
+        IDependency dependency = builder
             .WithDependencyType<IClass1>()
             .WithResolvingType<Class1>()
             .WithLifetime(lifetime)
@@ -484,7 +484,7 @@ public class DependencyBuilderTests
         DependencyLifetime lifetime = DependencyLifetime.Singleton;
 
         // Act
-        Dependency dependency = builder
+        IDependency dependency = builder
             .WithDependencyType(dependencyType)
             .WithResolvingType(resolvingType)
             .WithLifetime(lifetime)

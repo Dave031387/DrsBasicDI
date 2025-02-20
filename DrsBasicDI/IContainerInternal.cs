@@ -8,10 +8,10 @@
 internal interface IContainerInternal : IContainer
 {
     /// <summary>
-    /// Get the dictionary of <see cref="Dependency" /> objects whose keys are the corresponding
-    /// dependency type specified by the <see cref="Dependency.DependencyType" /> property.
+    /// Get the dictionary of <see cref="IDependency" /> objects whose keys are the corresponding
+    /// dependency type specified by the <see cref="IDependency.DependencyType" /> property.
     /// </summary>
-    Dictionary<Type, Dependency> Dependencies
+    Dictionary<Type, IDependency> Dependencies
     {
         get;
     }

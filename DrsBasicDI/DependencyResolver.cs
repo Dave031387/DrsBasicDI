@@ -12,7 +12,7 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// A dictionary of <see cref="Dependency" /> objects whose keys are the corresponding
     /// dependency type specified by the <see cref="Dependency.DependencyType" /> property.
     /// </summary>
-    private readonly Dictionary<Type, Dependency> _dependencies;
+    private readonly Dictionary<Type, IDependency> _dependencies;
 
     /// <summary>
     /// A lock object used to ensure thread safety when accessing or saving resolved dependencies.
@@ -55,7 +55,7 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// </para>
     /// </param>
     /// <exception cref="ArgumentNullException" />
-    internal DependencyResolver(Dictionary<Type, Dependency> dependencies,
+    internal DependencyResolver(Dictionary<Type, IDependency> dependencies,
                                 IResolvingObjectsService nonscoped,
                                 IResolvingObjectsService? scoped = null)
     {
@@ -66,7 +66,7 @@ internal sealed class DependencyResolver : IDependencyResolver
         _scoped = scoped;
         BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;
         _resolveMethodInfo = typeof(DependencyResolver).GetMethod(nameof(RecursiveResolve), bindingFlags)
-            ?? throw new DependencyInjectionException(MsgResolverMethodInfoNotFound);
+            ?? throw new DependencyInjectionException(MsgResolveMethodInfoNotFound);
     }
 
     /// <summary>
@@ -139,11 +139,11 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <typeparamref name="T" />.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    private Dependency GetDependency<T>() where T : class
+    private IDependency GetDependency<T>() where T : class
     {
         Type dependencyType = typeof(T);
 
-        if (_dependencies.TryGetValue(dependencyType, out Dependency? dependency))
+        if (_dependencies.TryGetValue(dependencyType, out IDependency? dependency))
         {
             if (dependency is null)
             {
@@ -297,7 +297,7 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// </remarks>
     private T SaveResolvedDependency<T>(T resolvedDependency) where T : class
     {
-        Dependency dependency = GetDependency<T>();
+        IDependency dependency = GetDependency<T>();
 
         if (dependency.Lifetime is DependencyLifetime.Scoped && _scoped is not null)
         {
@@ -329,7 +329,7 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <exception cref="DependencyInjectionException" />
     private bool TryGetFactoryValue<T>(out T? factoryValue) where T : class
     {
-        Dependency dependency = GetDependency<T>();
+        IDependency dependency = GetDependency<T>();
 
         if (dependency.Factory is not null)
         {
@@ -375,18 +375,18 @@ internal sealed class DependencyResolver : IDependencyResolver
         {
             if (_scoped.TryGetResolvingObject(out resolvedDependency))
             {
-                if (resolvedDependency is not null)
-                {
-                    return true;
-                }
-            }
-        }
-        else if (_nonscoped.TryGetResolvingObject(out resolvedDependency))
-        {
-            if (resolvedDependency is not null)
-            {
                 return true;
             }
+
+            if (_dependencies[typeof(T)].Lifetime is DependencyLifetime.Scoped)
+            {
+                return false;
+            }
+        }
+            
+        if (_nonscoped.TryGetResolvingObject(out resolvedDependency))
+        {
+            return true;
         }
 
         return false;

@@ -9,21 +9,21 @@ public class ContainerTests
     private static readonly DependencyLifetime _class2Lifetime = DependencyLifetime.Singleton;
     private static readonly Type _class2ResolvingType = typeof(Class2);
 
-    private static readonly Dependency _myClass1Dependency = new()
+    private static readonly IDependency _myClass1Dependency = new Dependency()
     {
         DependencyType = _class1DependencyType,
         ResolvingType = _class1ResolvingType,
         Lifetime = _class1Lifetime
     };
 
-    private static readonly Dependency _myClass2Dependency = new()
+    private static readonly IDependency _myClass2Dependency = new Dependency()
     {
         DependencyType = _class2DependencyType,
         ResolvingType = _class2ResolvingType,
         Lifetime = _class2Lifetime
     };
 
-    private readonly List<Dependency> _dependencyList = [_myClass1Dependency, _myClass2Dependency];
+    private readonly List<IDependency> _dependencyList = [_myClass1Dependency, _myClass2Dependency];
 
     [Fact]
     public void ConstructContainerUsingNullDependenciesObject_ShouldThrowException()
@@ -32,7 +32,7 @@ public class ContainerTests
         Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
         Mock<IResolvingObjectsService> mockResolvingObjectsService = new(MockBehavior.Strict);
         Container container;
-        List<Dependency> dependencies = null!;
+        List<IDependency> dependencies = null!;
         string parameterName = "dependencies";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
 
@@ -55,7 +55,7 @@ public class ContainerTests
         // Arrange
         Mock<IDependencyResolver> mockDependencyResolver = new(MockBehavior.Strict);
         Container container;
-        List<Dependency> dependencies = [];
+        List<IDependency> dependencies = [];
         IResolvingObjectsService resolvingObjectsService = null!;
         string parameterName = "resolvingObjectsService";
         string expected = string.Format(MsgInvalidNullArgument, parameterName);
@@ -87,7 +87,7 @@ public class ContainerTests
             .Verifiable(Times.Once);
         Container container;
         Type containerType = typeof(IContainer);
-        Dependency containerDependency = new()
+        IDependency containerDependency = new Dependency()
         {
             DependencyType = containerType,
             ResolvingType = typeof(Container),

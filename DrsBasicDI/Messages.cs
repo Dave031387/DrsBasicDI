@@ -22,8 +22,8 @@ internal static class Messages
     internal const string MsgLifetimeAlreadySpecified = "Invalid attempt to assign lifetime more than once to dependency type {0}.";
     internal const string MsgNoSuitableConstructors = "No suitable constructor could be found for type {0}.";
     internal const string MsgNullDependencyObject = "Unexpected null dependency object returned for dependency type {0}.";
+    internal const string MsgResolveMethodInfoNotFound = "The attempt to retrieve the MethodInfo for the Resolve method failed.";
     internal const string MsgResolveMethodInvocationError = "An exception was thrown when invoking the generic RecursiveResolve method for dependency type {0}.";
-    internal const string MsgResolverMethodInfoNotFound = "The attempt to retrieve the MethodInfo for the Resolve method failed.";
     internal const string MsgResolvingGenericTypeIsOpen = "Resolving generic type {0} for dependency type {1} must be fully constructed.";
     internal const string MsgResolvingObjectNotCreated = "Unable to construct the resolving object for dependency type {0}.";
     internal const string MsgResolvingTypeAlreadySpecified = "Invalid attempt to assign resolving type more than once to dependency type {0}.";

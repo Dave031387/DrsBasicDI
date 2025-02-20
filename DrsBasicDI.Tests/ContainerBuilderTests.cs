@@ -35,14 +35,14 @@ public class ContainerBuilderTests
         container
             .Should()
             .NotBeNull();
-        Dictionary<Type, Dependency> dependencies = GetDependencies(container);
+        Dictionary<Type, IDependency> dependencies = GetDependencies(container);
         dependencies
             .Should()
             .HaveCount(3);
         dependencies
             .Should()
             .ContainKeys(dependencyType1, dependencyType2, _containerType);
-        Dependency containerDependency = dependencies[_containerType];
+        IDependency containerDependency = dependencies[_containerType];
         containerDependency.DependencyType
             .Should()
             .Be(_containerType);
@@ -65,7 +65,7 @@ public class ContainerBuilderTests
         resolvedDependencies[_containerType]
             .Should()
             .BeSameAs(container);
-        Dependency dependency1 = dependencies[dependencyType1];
+        IDependency dependency1 = dependencies[dependencyType1];
         dependency1.DependencyType
             .Should()
             .Be(dependencyType1);
@@ -78,7 +78,7 @@ public class ContainerBuilderTests
         dependency1.Factory
             .Should()
             .BeNull();
-        Dependency dependency2 = dependencies[dependencyType2];
+        IDependency dependency2 = dependencies[dependencyType2];
         dependency2.DependencyType
             .Should()
             .Be(dependencyType2);
@@ -308,7 +308,7 @@ public class ContainerBuilderTests
             .WithMessage(msg);
     }
 
-    private static Dictionary<Type, Dependency> GetDependencies(IContainer container)
+    private static Dictionary<Type, IDependency> GetDependencies(IContainer container)
                                                 => ((Container)container).Dependencies;
 
     private static Dictionary<Type, object> GetResolvingObjects(IContainer container)
@@ -324,14 +324,14 @@ public class ContainerBuilderTests
         container
             .Should()
             .NotBeNull();
-        Dictionary<Type, Dependency> dependencies = GetDependencies(container);
+        Dictionary<Type, IDependency> dependencies = GetDependencies(container);
         dependencies
             .Should()
             .HaveCount(2);
         dependencies
             .Should()
             .ContainKeys(typeof(IClass2), _containerType);
-        Dependency dependency = dependencies[typeof(IClass2)];
+        IDependency dependency = dependencies[typeof(IClass2)];
         dependency.DependencyType
             .Should()
             .Be<IClass2>();

@@ -2,28 +2,29 @@
 
 /// <summary>
 /// The <see cref="DependencyBuilder" /> class is used to construct a valid
-/// <see cref="Dependency" /> object.
+/// <see cref="IDependency" /> object.
 /// </summary>
 public sealed class DependencyBuilder
 {
     /// <summary>
-    /// The dependency type for this <see cref="Dependency" /> object.
+    /// The dependency type for the <see cref="IDependency" /> object that is being built.
     /// </summary>
     private Type? _dependencyType;
 
     /// <summary>
-    /// An optional factory method for creating instances of the resolving type for this
-    /// <see cref="Dependency" /> object.
+    /// An optional factory method for creating instances of the resolving type for the
+    /// <see cref="IDependency" /> object that is being built.
     /// </summary>
     private Func<object>? _factory;
 
     /// <summary>
-    /// The lifetime of this dependency.
+    /// The lifetime of the <see cref="IDependency" /> object that is being built.
     /// </summary>
     private DependencyLifetime _lifetime = DependencyLifetime.Undefined;
 
     /// <summary>
-    /// The type of the resolving object for this <see cref="Dependency" />.
+    /// The type of the resolving object for the <see cref="IDependency" /> object that is being
+    /// built.
     /// </summary>
     private Type? _resolvingType;
 
@@ -56,19 +57,19 @@ public sealed class DependencyBuilder
     private string ResolvingTypeName => _resolvingType is null ? "N/A" : _resolvingType.GetFriendlyName();
 
     /// <summary>
-    /// Build the <see cref="Dependency" /> object after verifying that the supplied information is
+    /// Build the <see cref="IDependency" /> object after verifying that the supplied information is
     /// valid.
     /// </summary>
     /// <returns>
-    /// A new <see cref="Dependency" /> object whose properties are set according to the information
-    /// that was passed into the <see cref="DependencyBuilder" /> object.
+    /// A new <see cref="IDependency" /> object whose properties are set according to the
+    /// information that was passed into the <see cref="DependencyBuilder" /> object.
     /// </returns>
     /// <exception cref="DependencyBuildException" />
-    public Dependency Build()
+    public IDependency Build()
     {
         Validate();
 
-        return new()
+        return new Dependency()
         {
             DependencyType = _dependencyType!,
             Factory = _factory,
@@ -78,7 +79,7 @@ public sealed class DependencyBuilder
     }
 
     /// <summary>
-    /// Specify the dependency type of the <see cref="Dependency" /> object that is to be built.
+    /// Specify the dependency type of the <see cref="IDependency" /> object that is to be built.
     /// </summary>
     /// <typeparam name="T">
     /// The dependency type.
@@ -92,7 +93,7 @@ public sealed class DependencyBuilder
         => WithDependencyType(typeof(T));
 
     /// <summary>
-    /// Specify the dependency type of the <see cref="Dependency" /> object that is to be built.
+    /// Specify the dependency type of the <see cref="IDependency" /> object that is to be built.
     /// </summary>
     /// <param name="dependencyType">
     /// The dependency type.
@@ -119,11 +120,11 @@ public sealed class DependencyBuilder
 
     /// <summary>
     /// Specify the factory delegate that will be used for constructing instances of the resolving
-    /// type for the <see cref="Dependency" /> object that is being built.
+    /// type for the <see cref="IDependency" /> object that is being built.
     /// </summary>
     /// <param name="factory">
     /// A factory delegate that returns an instance of the resolving type for the
-    /// <see cref="Dependency" /> object that is being built.
+    /// <see cref="IDependency" /> object that is being built.
     /// </param>
     /// <returns>
     /// This <see cref="DependencyBuilder" /> instance after it has been updated with the factory
@@ -147,11 +148,11 @@ public sealed class DependencyBuilder
     }
 
     /// <summary>
-    /// Specify the lifetime of the <see cref="Dependency" /> object that is being built.
+    /// Specify the lifetime of the <see cref="IDependency" /> object that is being built.
     /// </summary>
     /// <param name="lifetime">
     /// The <see cref="DependencyLifetime" /> enumeration value representing the lifetime of the
-    /// <see cref="Dependency" /> object.
+    /// <see cref="IDependency" /> object.
     /// </param>
     /// <returns>
     /// This <see cref="DependencyBuilder" /> instance after it has been updated with the dependency
@@ -172,7 +173,7 @@ public sealed class DependencyBuilder
     }
 
     /// <summary>
-    /// Specify the resolving type of the <see cref="Dependency" /> object that is to be built.
+    /// Specify the resolving type of the <see cref="IDependency" /> object that is to be built.
     /// </summary>
     /// <typeparam name="T">
     /// The resolving type.
@@ -186,7 +187,7 @@ public sealed class DependencyBuilder
         => WithResolvingType(typeof(T));
 
     /// <summary>
-    /// Specify the resolving type of the <see cref="Dependency" /> object that is to be built.
+    /// Specify the resolving type of the <see cref="IDependency" /> object that is to be built.
     /// </summary>
     /// <param name="resolvingType">
     /// The resolving type.
@@ -213,7 +214,7 @@ public sealed class DependencyBuilder
 
     /// <summary>
     /// Validate the state of the <see cref="DependencyBuilder" /> object to determine if the
-    /// supplied information constitutes a valid <see cref="Dependency" /> object.
+    /// supplied information constitutes a valid <see cref="IDependency" /> object.
     /// </summary>
     /// <remarks>
     /// An exception is thrown if the supplied information isn't valid.

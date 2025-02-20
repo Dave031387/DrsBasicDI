@@ -15,7 +15,7 @@ public sealed class Container : IContainer, IContainerInternal
     /// Create a new instance of the <see cref="Container" /> class.
     /// </summary>
     /// <param name="dependencies">
-    /// A list of <see cref="Dependency" /> objects to be added to the container.
+    /// A list of <see cref="IDependency" /> objects to be added to the container.
     /// </param>
     /// <param name="resolvingObjectsService">
     /// An empty <see cref="IResolvingObjectsService" /> instance that will be used for saving
@@ -29,7 +29,7 @@ public sealed class Container : IContainer, IContainerInternal
     /// <see cref="ContainerBuilder" /> object to construct new <see cref="Container" /> objects.
     /// </remarks>
     /// <exception cref="ArgumentNullException" />
-    internal Container(IEnumerable<Dependency> dependencies,
+    internal Container(IEnumerable<IDependency> dependencies,
                        IResolvingObjectsService resolvingObjectsService,
                        IDependencyResolver? resolver = null)
     {
@@ -44,10 +44,10 @@ public sealed class Container : IContainer, IContainerInternal
     }
 
     /// <summary>
-    /// Get the dictionary of <see cref="Dependency" /> objects whose keys are the corresponding
-    /// dependency type specified by the <see cref="Dependency.DependencyType" /> property.
+    /// Get the dictionary of <see cref="IDependency" /> objects whose keys are the corresponding
+    /// dependency type specified by the <see cref="IDependency.DependencyType" /> property.
     /// </summary>
-    public Dictionary<Type, Dependency> Dependencies
+    public Dictionary<Type, IDependency> Dependencies
     {
         get;
     } = [];
@@ -84,14 +84,14 @@ public sealed class Container : IContainer, IContainerInternal
     public T GetDependency<T>() where T : class => _resolver.Resolve<T>();
 
     /// <summary>
-    /// Initialize the container by adding a <see cref="Dependency" /> object that describes the
+    /// Initialize the container by adding a <see cref="IDependency" /> object that describes the
     /// <see cref="IContainer" /> dependency type and set the resolving object to this
     /// <see cref="Container" /> instance.
     /// </summary>
     private void Initialize()
     {
         Type containerDependencyType = typeof(IContainer);
-        Dependency containerDependency = new()
+        IDependency containerDependency = new Dependency()
         {
             DependencyType = containerDependencyType,
             ResolvingType = typeof(Container),
@@ -107,9 +107,9 @@ public sealed class Container : IContainer, IContainerInternal
     /// <param name="dependencies">
     /// A list of <see cref="Dependency" /> objects.
     /// </param>
-    private void LoadDependencies(IEnumerable<Dependency> dependencies)
+    private void LoadDependencies(IEnumerable<IDependency> dependencies)
     {
-        foreach (Dependency dependency in dependencies)
+        foreach (IDependency dependency in dependencies)
         {
             // It is impossible for the DependencyType to be null because the Dependency object is
             // validated before being added to the container.

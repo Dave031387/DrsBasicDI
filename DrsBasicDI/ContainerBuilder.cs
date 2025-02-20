@@ -12,14 +12,14 @@ public sealed class ContainerBuilder
     private static readonly Lazy<ContainerBuilder> _lazy = new(() => new ContainerBuilder());
 
     /// <summary>
-    /// A list of <see cref="Dependency" /> objects that have been added to this
+    /// A list of <see cref="IDependency" /> objects that have been added to this
     /// <see cref="Container" /> instance.
     /// </summary>
-    private readonly List<Dependency> _dependencies = [];
+    private readonly List<IDependency> _dependencies = [];
 
     /// <summary>
-    /// A list of dependency types taken from the <see cref="Dependency.DependencyType" /> property
-    /// of the <see cref="Dependency" /> objects stored in the <see cref="_dependencies" /> list.
+    /// A list of dependency types taken from the <see cref="IDependency.DependencyType" /> property
+    /// of the <see cref="IDependency" /> objects stored in the <see cref="_dependencies" /> list.
     /// </summary>
     private readonly List<Type> _dependencyTypes = [];
 
@@ -59,7 +59,7 @@ public sealed class ContainerBuilder
     internal static ContainerBuilder TestInstance => new();
 
     /// <summary>
-    /// Add the specified <see cref="Dependency" /> object to the container.
+    /// Construct a new <see cref="IDependency" /> object and add it to the container.
     /// </summary>
     /// <param name="builder">
     /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
@@ -72,14 +72,14 @@ public sealed class ContainerBuilder
     public ContainerBuilder AddDependency(Func<DependencyBuilder, DependencyBuilder> builder)
     {
         CheckForContainerAlreadyBuilt();
-        Dependency dependency = builder(DependencyBuilder.Empty)
+        IDependency dependency = builder(DependencyBuilder.Empty)
             .Build();
         Add(dependency);
         return this;
     }
 
     /// <summary>
-    /// Add the specified scoped <see cref="Dependency" /> object to the container.
+    /// Construct a new scoped <see cref="IDependency" /> object and add it to the container.
     /// </summary>
     /// <param name="builder">
     /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
@@ -92,7 +92,7 @@ public sealed class ContainerBuilder
     public ContainerBuilder AddScoped(Func<DependencyBuilder, DependencyBuilder> builder)
     {
         CheckForContainerAlreadyBuilt();
-        Dependency dependency = builder(DependencyBuilder.Empty)
+        IDependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Scoped)
             .Build();
         Add(dependency);
@@ -100,8 +100,8 @@ public sealed class ContainerBuilder
     }
 
     /// <summary>
-    /// Add the specified scoped <see cref="Dependency" /> object having the given dependency type
-    /// to the container.
+    /// Construct a new scoped <see cref="IDependency" /> object having the specified dependency
+    /// type <typeparamref name="T" /> and add it to the container.
     /// </summary>
     /// <typeparam name="T">
     /// The type of the dependency.
@@ -117,7 +117,7 @@ public sealed class ContainerBuilder
     public ContainerBuilder AddScoped<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
     {
         CheckForContainerAlreadyBuilt();
-        Dependency dependency = builder(DependencyBuilder.Empty)
+        IDependency dependency = builder(DependencyBuilder.Empty)
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Scoped)
             .Build();
@@ -126,7 +126,7 @@ public sealed class ContainerBuilder
     }
 
     /// <summary>
-    /// Add the specified singleton <see cref="Dependency" /> object to the container.
+    /// Construct a new singleton <see cref="IDependency" /> object and add it to the container.
     /// </summary>
     /// <param name="builder">
     /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
@@ -139,7 +139,7 @@ public sealed class ContainerBuilder
     public ContainerBuilder AddSingleton(Func<DependencyBuilder, DependencyBuilder> builder)
     {
         CheckForContainerAlreadyBuilt();
-        Dependency dependency = builder(DependencyBuilder.Empty)
+        IDependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Singleton)
             .Build();
         Add(dependency);
@@ -147,8 +147,8 @@ public sealed class ContainerBuilder
     }
 
     /// <summary>
-    /// Add the specified singleton <see cref="Dependency" /> object having the given dependency
-    /// type to the container.
+    /// Construct a new singleton <see cref="IDependency" /> object having the specified dependency
+    /// type <typeparamref name="T" /> and add it to the container.
     /// </summary>
     /// <typeparam name="T">
     /// The type of the dependency.
@@ -164,7 +164,7 @@ public sealed class ContainerBuilder
     public ContainerBuilder AddSingleton<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
     {
         CheckForContainerAlreadyBuilt();
-        Dependency dependency = builder(DependencyBuilder.Empty)
+        IDependency dependency = builder(DependencyBuilder.Empty)
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Singleton)
             .Build();
@@ -173,7 +173,7 @@ public sealed class ContainerBuilder
     }
 
     /// <summary>
-    /// Add the specified transient <see cref="Dependency" /> object to the container.
+    /// Construct a new transient <see cref="IDependency" /> object and add it to the container.
     /// </summary>
     /// <param name="builder">
     /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
@@ -186,7 +186,7 @@ public sealed class ContainerBuilder
     public ContainerBuilder AddTransient(Func<DependencyBuilder, DependencyBuilder> builder)
     {
         CheckForContainerAlreadyBuilt();
-        Dependency dependency = builder(DependencyBuilder.Empty)
+        IDependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Transient)
             .Build();
         Add(dependency);
@@ -194,8 +194,8 @@ public sealed class ContainerBuilder
     }
 
     /// <summary>
-    /// Add the specified transient <see cref="Dependency" /> object having the given dependency
-    /// type to the container.
+    /// Construct a new transient <see cref="IDependency" /> object having the specified dependency
+    /// type <typeparamref name="T" /> and add it to the container.
     /// </summary>
     /// <typeparam name="T">
     /// The type of the dependency.
@@ -211,7 +211,7 @@ public sealed class ContainerBuilder
     public ContainerBuilder AddTransient<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
     {
         CheckForContainerAlreadyBuilt();
-        Dependency dependency = builder(DependencyBuilder.Empty)
+        IDependency dependency = builder(DependencyBuilder.Empty)
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Transient)
             .Build();
@@ -220,10 +220,10 @@ public sealed class ContainerBuilder
     }
 
     /// <summary>
-    /// Build the <see cref="Container" /> object.
+    /// Build the <see cref="IContainer" /> object.
     /// </summary>
     /// <returns>
-    /// A new <see cref="IContainer" /> object containing all the <see cref="Dependency" /> objects
+    /// A new <see cref="IContainer" /> object containing all the <see cref="IDependency" /> objects
     /// that were added.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
@@ -244,18 +244,18 @@ public sealed class ContainerBuilder
     }
 
     /// <summary>
-    /// Add the given <see cref="Dependency" /> object to the container after verifying that the
-    /// dependency type wasn't already added to the container.
+    /// Add the given <see cref="IDependency" /> object to the container after verifying that the
+    /// specified dependency type wasn't already added to the container.
     /// </summary>
     /// <param name="dependency">
-    /// The <see cref="Dependency" /> object to be added to the container.
+    /// The <see cref="IDependency" /> object to be added to the container.
     /// </param>
     /// <exception cref="ContainerBuildException" />
-    private void Add(Dependency dependency)
+    private void Add(IDependency dependency)
     {
         if (dependency.DependencyType is null)
         {
-            // This exception should never occur since the Dependency object is validated before
+            // This exception should never occur since the IDependency object is validated before
             // this method is called.
             throw new ContainerBuildException(MsgDependencyHasNullDependencyType);
         }
