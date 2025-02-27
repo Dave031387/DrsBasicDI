@@ -65,6 +65,8 @@ internal sealed class DependencyResolver : IDependencyResolver
         _nonscoped = nonscoped;
         _scoped = scoped;
         BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;
+
+        // The exception on the following statement should never be thrown.
         _resolveMethodInfo = typeof(DependencyResolver).GetMethod(nameof(RecursiveResolve), bindingFlags)
             ?? throw new DependencyInjectionException(MsgResolveMethodInfoNotFound);
     }
@@ -378,7 +380,9 @@ internal sealed class DependencyResolver : IDependencyResolver
                 return true;
             }
 
-            if (_dependencies[typeof(T)].Lifetime is DependencyLifetime.Scoped)
+            IDependency dependency = GetDependency<T>();
+
+            if (dependency.Lifetime is DependencyLifetime.Scoped)
             {
                 return false;
             }
