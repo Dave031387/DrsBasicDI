@@ -38,9 +38,8 @@ public class ContainerBuilderTests
         Dictionary<Type, IDependency> dependencies = GetDependencies(container);
         dependencies
             .Should()
-            .HaveCount(3);
-        dependencies
-            .Should()
+            .HaveCount(3)
+            .And
             .ContainKeys(dependencyType1, dependencyType2, _containerType);
         IDependency containerDependency = dependencies[_containerType];
         containerDependency.DependencyType
@@ -58,9 +57,8 @@ public class ContainerBuilderTests
         Dictionary<Type, object> resolvedDependencies = GetResolvingObjects(container);
         resolvedDependencies
             .Should()
-            .ContainSingle();
-        resolvedDependencies
-            .Should()
+            .ContainSingle()
+            .And
             .ContainKey(_containerType);
         resolvedDependencies[_containerType]
             .Should()
@@ -216,9 +214,8 @@ public class ContainerBuilderTests
         // Assert
         builder1
             .Should()
-            .BeSameAs(builder2);
-        builder1
-            .Should()
+            .BeSameAs(builder2)
+            .And
             .BeSameAs(builder3);
     }
 
@@ -327,9 +324,8 @@ public class ContainerBuilderTests
         Dictionary<Type, IDependency> dependencies = GetDependencies(container);
         dependencies
             .Should()
-            .HaveCount(2);
-        dependencies
-            .Should()
+            .HaveCount(2)
+            .And
             .ContainKeys(typeof(IClass2), _containerType);
         IDependency dependency = dependencies[typeof(IClass2)];
         dependency.DependencyType

@@ -56,6 +56,8 @@ public class DependencyResolverTests
         // Assert
         actual
             .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockNonScopedService, mockScopedService, mockDependency);
     }
@@ -76,6 +78,8 @@ public class DependencyResolverTests
         // Assert
         actual
             .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockNonScopedService, mockScopedService);
     }
@@ -201,6 +205,8 @@ public class DependencyResolverTests
         // Assert
         actual
             .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockNonScopedService, null, mockDependency);
     }
@@ -223,6 +229,8 @@ public class DependencyResolverTests
         // Assert
         actual
             .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockNonScopedService, mockScopedService, mockDependency);
     }
@@ -244,6 +252,8 @@ public class DependencyResolverTests
         // Assert
         actual
             .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockNonScopedService, null, mockDependency);
     }
@@ -266,6 +276,8 @@ public class DependencyResolverTests
         // Assert
         actual
             .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockNonScopedService, mockScopedService, mockDependency);
     }
@@ -287,6 +299,8 @@ public class DependencyResolverTests
         // Assert
         actual
             .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockNonScopedService, null, mockDependency);
     }
@@ -309,8 +323,53 @@ public class DependencyResolverTests
         // Assert
         actual
             .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockNonScopedService, null, mockDependency);
+    }
+
+    [Fact]
+    public void ResolveTransientDependency_SimpleClassTypeWithParameterlessConstructor1_ShouldReturnResolvingObject()
+    {
+        // Arrange
+        Mock<IResolvingObjectsService> mockNonScopedService = GetMockResolvingObjectsService<IClass2>(null);
+        Mock<IDependency> mockDependency = GetMockDependency(DependencyLifetime.Transient, typeof(Class2), checkFactory: true);
+        Dictionary<Type, IDependency> dependencies = GetDependencies((typeof(IClass2), mockDependency.Object));
+        DependencyResolver resolver = new(dependencies, mockNonScopedService.Object);
+
+        // Act
+        IClass2 actual = resolver.Resolve<IClass2>();
+
+        // Assert
+        actual
+            .Should()
+            .NotBeNull()
+            .And
+            .BeOfType<Class2>();
+        VerifyMocks(mockNonScopedService, null, mockDependency);
+    }
+
+    [Fact]
+    public void ResolveTransientDependency_SimpleClassTypeWithParameterlessConstructor2_ShouldReturnResolvingObject()
+    {
+        // Arrange
+        Mock<IResolvingObjectsService> mockNonScopedService = GetMockResolvingObjectsService<IClass2>(null);
+        Mock<IResolvingObjectsService> mockScopedService = GetMockResolvingObjectsService<IClass2>(null);
+        Mock<IDependency> mockDependency = GetMockDependency(DependencyLifetime.Transient, typeof(Class2), checkFactory: true);
+        Dictionary<Type, IDependency> dependencies = GetDependencies((typeof(IClass2), mockDependency.Object));
+        DependencyResolver resolver = new(dependencies, mockNonScopedService.Object, mockScopedService.Object);
+
+        // Act
+        IClass2 actual = resolver.Resolve<IClass2>();
+
+        // Assert
+        actual
+            .Should()
+            .NotBeNull()
+            .And
+            .BeOfType<Class2>();
+        VerifyMocks(mockNonScopedService, mockScopedService, mockDependency);
     }
 
     private static Dictionary<Type, IDependency> GetDependencies(params (Type, IDependency)[] dependencies)
@@ -328,7 +387,8 @@ public class DependencyResolverTests
     private static Mock<IDependency> GetMockDependency(DependencyLifetime? lifetime = null,
                                                        Type? resolvingType = null,
                                                        Func<object>? factory = null,
-                                                       Type? dependencyType = null)
+                                                       Type? dependencyType = null,
+                                                       bool checkFactory = false)
     {
         Mock<IDependency> mock = new(MockBehavior.Strict);
 
@@ -344,6 +404,12 @@ public class DependencyResolverTests
             mock
                 .SetupGet(m => m.Factory)
                 .Returns(factory);
+        }
+        else if (checkFactory)
+        {
+            mock
+                .SetupGet(m => m.Factory)
+                .Returns(null!);
         }
 
         if (lifetime is not null)

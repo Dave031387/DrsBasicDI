@@ -18,9 +18,8 @@ public class ResolvingObjectsServiceTests
         // Assert
         resolvingObjectsService.ResolvingObjects
             .Should()
-            .ContainSingle();
-        resolvingObjectsService.ResolvingObjects
-            .Should()
+            .ContainSingle()
+            .And
             .ContainKey(dependencyType);
         resolvingObjectsService.ResolvingObjects[dependencyType]
             .Should()
@@ -45,9 +44,8 @@ public class ResolvingObjectsServiceTests
         // Assert
         resolvingObjectsService.ResolvingObjects
             .Should()
-            .ContainSingle();
-        resolvingObjectsService.ResolvingObjects
-            .Should()
+            .ContainSingle()
+            .And
             .ContainKey(dependencyType);
         resolvingObjectsService.ResolvingObjects[dependencyType]
             .Should()
@@ -71,9 +69,8 @@ public class ResolvingObjectsServiceTests
         // Assert
         resolvingObjectsService.ResolvingObjects
             .Should()
-            .ContainSingle();
-        resolvingObjectsService.ResolvingObjects
-            .Should()
+            .ContainSingle()
+            .And
             .ContainKey(dependencyType);
         resolvingObjectsService.ResolvingObjects[dependencyType]
             .Should()

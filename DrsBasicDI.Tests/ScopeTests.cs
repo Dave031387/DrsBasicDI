@@ -197,9 +197,8 @@ public class ScopeTests
         // Assert
         actual
             .Should()
-            .NotBeNull();
-        actual
-            .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockContainer, mockDependencyResolver, mockResolvingObjectsService);
     }

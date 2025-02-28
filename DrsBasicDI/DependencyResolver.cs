@@ -175,8 +175,9 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <exception cref="DependencyInjectionException" />
     private T GetResolvingInstance<T>() where T : class
     {
-        Type dependencyType = typeof(T);
-        ConstructorInfo constructorInfo = dependencyType.GetPrimaryConstructorInfo();
+        IDependency dependency = GetDependency<T>();
+        Type resolvingType = dependency.ResolvingType!;
+        ConstructorInfo constructorInfo = resolvingType.GetPrimaryConstructorInfo();
         object[] resolvedParameters = ResolveNestedDependencies(constructorInfo);
         return ConstructResolvingInstance<T>(constructorInfo, resolvedParameters);
     }

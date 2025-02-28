@@ -105,25 +105,20 @@ public class ContainerTests
             .NotBeNull();
         passedContainer
             .Should()
-            .NotBeNull();
-        passedContainer
-            .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(container);
         container.ResolvingObjectsService
             .Should()
             .BeSameAs(mockResolvingObjectsService.Object);
         container.Dependencies
             .Should()
-            .NotBeEmpty();
-        container.Dependencies
-            .Should()
-            .ContainKey(containerType);
+            .NotBeEmpty()
+            .And
+            .ContainKeys(containerType, _class1DependencyType, _class2DependencyType);
         container.Dependencies[containerType]
             .Should()
             .BeEquivalentTo(containerDependency);
-        container.Dependencies
-            .Should()
-            .ContainKeys(_class1DependencyType, _class2DependencyType);
         container.Dependencies[_class1DependencyType]
             .Should()
             .BeEquivalentTo(_myClass1Dependency);
@@ -154,13 +149,12 @@ public class ContainerTests
             .BeSameAs(container);
         scope2
             .Should()
-            .NotBeNull();
+            .NotBeNull()
+            .And
+            .NotBeSameAs(scope1);
         ((Scope)scope2)._container
             .Should()
             .BeSameAs(container);
-        scope1
-            .Should()
-            .NotBeSameAs(scope2);
         ((Scope)scope1)._resolvingObjectsService
             .Should()
             .NotBeSameAs(((Scope)scope2)._resolvingObjectsService);
@@ -216,9 +210,8 @@ public class ContainerTests
         // Assert
         actual
             .Should()
-            .NotBeNull();
-        actual
-            .Should()
+            .NotBeNull()
+            .And
             .BeSameAs(expected);
         VerifyMocks(mockDependencyResolver, mockResolvingObjectsService);
     }
