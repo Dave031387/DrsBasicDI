@@ -12,22 +12,22 @@ public sealed class ContainerBuilder
     private static readonly Lazy<ContainerBuilder> _lazy = new(() => new ContainerBuilder());
 
     /// <summary>
-    /// A list of <see cref="IDependency" /> objects that have been added to this
-    /// <see cref="Container" /> instance.
-    /// </summary>
-    private readonly List<IDependency> _dependencies = [];
-
-    /// <summary>
-    /// A list of dependency types taken from the <see cref="IDependency.DependencyType" /> property
-    /// of the <see cref="IDependency" /> objects stored in the <see cref="_dependencies" /> list.
-    /// </summary>
-    private readonly List<Type> _dependencyTypes = [];
-
-    /// <summary>
     /// A boolean flag that gets set to <see langword="true" /> once the <see cref="IContainer" />
     /// object has been built.
     /// </summary>
     private bool _containerHasBeenBuilt = false;
+
+    /// <summary>
+    /// Constructor for the <see cref="ContainerBuilder" /> class. Intended for unit testing only.
+    /// </summary>
+    /// <param name="serviceLocater">
+    /// A service locater object that should provide mock instances of the requested dependencies.
+    /// </param>
+    internal ContainerBuilder(IServiceLocater serviceLocater)
+    {
+        ServiceLocater = serviceLocater;
+        DependencyList = ServiceLocater.Get<IDependencyListBuilder>();
+    }
 
     /// <summary>
     /// Default constructor for the <see cref="ContainerBuilder" /> class.
@@ -37,7 +37,7 @@ public sealed class ContainerBuilder
     /// <see cref="Current" /> property to create a new, empty <see cref="ContainerBuilder" />
     /// object.
     /// </remarks>
-    private ContainerBuilder()
+    private ContainerBuilder() : this(DrsBasicDI.ServiceLocater.Instance)
     {
     }
 
@@ -50,13 +50,20 @@ public sealed class ContainerBuilder
     public static ContainerBuilder Current => _lazy.Value;
 
     /// <summary>
-    /// Get a new instance of the <see cref="ContainerBuilder" /> class.
+    /// Get a reference to the <see cref="IDependencyListBuilder" /> object.
     /// </summary>
-    /// <remarks>
-    /// This static property returns a new instance of the <see cref="ContainerBuilder" /> class
-    /// every time it is called.
-    /// </remarks>
-    internal static ContainerBuilder TestInstance => new();
+    private IDependencyListBuilder DependencyList
+    {
+        get;
+    }
+
+    /// <summary>
+    /// Get a reference to the <see cref="IServiceLocater" /> object.
+    /// </summary>
+    private IServiceLocater ServiceLocater
+    {
+        get;
+    }
 
     /// <summary>
     /// Construct a new <see cref="IDependency" /> object and add it to the container.
@@ -74,7 +81,7 @@ public sealed class ContainerBuilder
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.Empty)
             .Build();
-        Add(dependency);
+        DependencyList.Add(dependency);
         return this;
     }
 
@@ -95,7 +102,7 @@ public sealed class ContainerBuilder
         IDependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Scoped)
             .Build();
-        Add(dependency);
+        DependencyList.Add(dependency);
         return this;
     }
 
@@ -121,7 +128,7 @@ public sealed class ContainerBuilder
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Scoped)
             .Build();
-        Add(dependency);
+        DependencyList.Add(dependency);
         return this;
     }
 
@@ -142,7 +149,7 @@ public sealed class ContainerBuilder
         IDependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Singleton)
             .Build();
-        Add(dependency);
+        DependencyList.Add(dependency);
         return this;
     }
 
@@ -168,7 +175,7 @@ public sealed class ContainerBuilder
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Singleton)
             .Build();
-        Add(dependency);
+        DependencyList.Add(dependency);
         return this;
     }
 
@@ -189,7 +196,7 @@ public sealed class ContainerBuilder
         IDependency dependency = builder(DependencyBuilder.Empty)
             .WithLifetime(DependencyLifetime.Transient)
             .Build();
-        Add(dependency);
+        DependencyList.Add(dependency);
         return this;
     }
 
@@ -215,7 +222,7 @@ public sealed class ContainerBuilder
             .WithDependencyType<T>()
             .WithLifetime(DependencyLifetime.Transient)
             .Build();
-        Add(dependency);
+        DependencyList.Add(dependency);
         return this;
     }
 
@@ -231,45 +238,19 @@ public sealed class ContainerBuilder
     {
         CheckForContainerAlreadyBuilt(true);
 
-        if (_dependencies.Count is 0)
+        if (DependencyList.Count is 0)
         {
             string msg = MsgContainerIsEmpty;
             throw new ContainerBuildException(msg);
         }
 
-        IContainer container = new Container(_dependencies, new ResolvingObjectsService());
+        AddSingleton<IContainer>(builder => builder
+            .WithResolvingType<Container>());
+
+        IContainer container = ServiceLocater.Get<IContainer>();
 
         _containerHasBeenBuilt = true;
         return container;
-    }
-
-    /// <summary>
-    /// Add the given <see cref="IDependency" /> object to the container after verifying that the
-    /// specified dependency type wasn't already added to the container.
-    /// </summary>
-    /// <param name="dependency">
-    /// The <see cref="IDependency" /> object to be added to the container.
-    /// </param>
-    /// <exception cref="ContainerBuildException" />
-    private void Add(IDependency dependency)
-    {
-        if (dependency.DependencyType is null)
-        {
-            // This exception should never occur since the IDependency object is validated before
-            // this method is called.
-            throw new ContainerBuildException(MsgDependencyHasNullDependencyType);
-        }
-        else
-        {
-            if (_dependencyTypes.Contains(dependency.DependencyType))
-            {
-                string msg = string.Format(MsgDuplicateDependency, dependency.DependencyType.GetFriendlyName());
-                throw new ContainerBuildException(msg);
-            }
-        }
-
-        _dependencyTypes.Add(dependency.DependencyType);
-        _dependencies.Add(dependency);
     }
 
     /// <summary>

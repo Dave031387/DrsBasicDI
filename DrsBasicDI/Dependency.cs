@@ -18,23 +18,16 @@
 /// <param name="ResolvingType">
 /// Gets the resolving type that is mapped to the <see cref="DependencyType" /> property.
 /// </param>
+/// <param name="Key">
+/// An optional key that can be used to identify the dependency.
+/// </param>
 /// <remarks>
 /// This class is immutable.
 /// </remarks>
-public sealed record Dependency(Type? DependencyType,
-                                Func<object>? Factory,
-                                DependencyLifetime Lifetime,
-                                Type? ResolvingType) : IDependency
+internal sealed record Dependency(Type DependencyType,
+                                  Type ResolvingType,
+                                  DependencyLifetime Lifetime,
+                                  Func<object>? Factory,
+                                  string Key) : IDependency
 {
-    /// <summary>
-    /// Constructor for the <see cref="Dependency" /> record.
-    /// </summary>
-    /// <remarks>
-    /// This constructor is declared <see langword="internal" /> to force the user to use the
-    /// <see cref="DependencyBuilder" /> object for constructing new <see cref="Dependency" />
-    /// objects.
-    /// </remarks>
-    internal Dependency() : this(default, null, default, default)
-    {
-    }
 }

@@ -9,66 +9,69 @@ using System.Reflection;
 internal sealed class DependencyResolver : IDependencyResolver
 {
     /// <summary>
-    /// A dictionary of <see cref="Dependency" /> objects whose keys are the corresponding
-    /// dependency type specified by the <see cref="Dependency.DependencyType" /> property.
-    /// </summary>
-    private readonly Dictionary<Type, IDependency> _dependencies;
-
-    /// <summary>
     /// A lock object used to ensure thread safety when accessing or saving resolved dependencies.
     /// </summary>
     private readonly object _lock = new();
 
     /// <summary>
-    /// This <see cref="IResolvingObjectsService" /> instance contains all the non-scoped resolved
-    /// dependencies.
+    /// Save the <see cref="MethodInfo" /> details for the <see cref="Resolve{T}(string)" /> method
+    /// so that we can dynamically invoke the method for different generic types.
     /// </summary>
-    private readonly IResolvingObjectsService _nonscoped;
-
-    /// <summary>
-    /// Save the <see cref="MethodInfo" /> details for the <see cref="Resolve{T}()" /> method so
-    /// that we can dynamically invoke the method for different generic types.
-    /// </summary>
-    private readonly MethodInfo _resolveMethodInfo;
-
-    /// <summary>
-    /// This <see cref="IResolvingObjectsService" /> instance contains all the resolved dependencies for a
-    /// specific dependency scope.
-    /// </summary>
-    private readonly IResolvingObjectsService? _scoped;
-
-    /// <summary>
-    /// Create an instance of the <see cref="DependencyResolver" /> class.
-    /// </summary>
-    /// <param name="dependencies">
-    /// A dictionary of dependency type-to-resolving type mappings.
-    /// </param>
-    /// <param name="nonscoped">
-    /// A <see cref="ResolvingObjectsService" /> object containing all of the resolved non-scoped
-    /// dependency objects.
-    /// </param>
-    /// <param name="scoped">
-    /// A <see cref="ResolvingObjectsService" /> object containing all of the resolved scoped dependency
-    /// objects.
-    /// <para>
-    /// This parameter is optional when only non-scoped dependencies are being resolved.
-    /// </para>
-    /// </param>
-    /// <exception cref="ArgumentNullException" />
-    internal DependencyResolver(Dictionary<Type, IDependency> dependencies,
-                                IResolvingObjectsService nonscoped,
-                                IResolvingObjectsService? scoped = null)
-    {
-        ArgumentNullException.ThrowIfNull(dependencies, nameof(dependencies));
-        ArgumentNullException.ThrowIfNull(nonscoped, nameof(nonscoped));
-        _dependencies = dependencies;
-        _nonscoped = nonscoped;
-        _scoped = scoped;
-        BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;
-
-        // The exception on the following statement should never be thrown.
-        _resolveMethodInfo = typeof(DependencyResolver).GetMethod(nameof(RecursiveResolve), bindingFlags)
+    private readonly MethodInfo _resolveMethodInfo = typeof(DependencyResolver).GetMethod(nameof(RecursiveResolve), BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new DependencyInjectionException(MsgResolveMethodInfoNotFound);
+
+    /// <summary>
+    /// Create a new instance of the <see cref="DependencyResolver" /> class.
+    /// </summary>
+    public DependencyResolver() : this(ServiceLocater.Instance)
+    {
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="serviceLocater">
+    /// A service locater object that should provide mock instances of the requested dependencies.
+    /// </param>
+    internal DependencyResolver(IServiceLocater serviceLocater)
+    {
+        DependencyList = serviceLocater.Get<IDependencyListConsumer>();
+        ObjectConstructor = serviceLocater.Get<IObjectConstructor>();
+        NonscopedResolver = serviceLocater.Get<IResolvingObjectsService>(NonScoped);
+    }
+
+    /// <summary>
+    /// Get a reference to the <see cref="IDependencyListConsumer" /> object.
+    /// </summary>
+    private IDependencyListConsumer DependencyList
+    {
+        get;
+    }
+
+    /// <summary>
+    /// Get a reference to the <see cref="IResolvingObjectsService" /> instance used for managing
+    /// non-scoped dependency objects.
+    /// </summary>
+    private IResolvingObjectsService NonscopedResolver
+    {
+        get;
+    }
+
+    /// <summary>
+    /// Get a reference to the <see cref="IObjectConstructor" /> object.
+    /// </summary>
+    private IObjectConstructor ObjectConstructor
+    {
+        get;
+    }
+
+    /// <summary>
+    /// Get a reference to the <see cref="IResolvingObjectsService" /> instance used for managing
+    /// scoped dependency objects.
+    /// </summary>
+    private IResolvingObjectsService? ScopedResolver
+    {
+        get;
+        set;
     }
 
     /// <summary>
@@ -77,109 +80,55 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <typeparam name="T">
     /// The dependency type that is to be resolved.
     /// </typeparam>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be retrieved.
+    /// </param>
     /// <returns>
     /// An instance of the resolving class type.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    public T Resolve<T>() where T : class
+    public T Resolve<T>(string key) where T : class
     {
         lock (_lock)
         {
-            return RecursiveResolve<T>();
+            if (NonscopedResolver is null)
+            {
+                throw new DependencyInjectionException(MsgResolvingObjectServiceNotFound);
+            }
+
+            return RecursiveResolve<T>(key);
         }
     }
 
     /// <summary>
-    /// Construct the resolving instance for the given dependency type <typeparamref name="T" />.
+    /// Set the scoped <see cref="IResolvingObjectsService" /> to the specified
+    /// <paramref name="resolvingObjectsService" /> instance.
+    /// </summary>
+    /// <param name="resolvingObjectsService">
+    /// The scoped <see cref="IResolvingObjectsService" /> instance to be set.
+    /// </param>
+    public void SetScopedResolver(IResolvingObjectsService resolvingObjectsService) => ScopedResolver = resolvingObjectsService;
+
+    /// <summary>
+    /// Construct the resolving object for the given dependency type <typeparamref name="T" />.
     /// </summary>
     /// <typeparam name="T">
-    /// The dependency type being resolved.
+    /// The dependency type whose resolving object is being constructed.
     /// </typeparam>
-    /// <param name="constructorInfo">
-    /// The constructor info for the resolving instance.
-    /// </param>
-    /// <param name="parameterValues">
-    /// The constructor parameter values for the resolving instance.
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be constructed.
     /// </param>
     /// <returns>
     /// An instance of the resolving object for the given dependency type <typeparamref name="T" />.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    private T ConstructResolvingInstance<T>(ConstructorInfo constructorInfo, object[] parameterValues) where T : class
+    private T ConstructResolvingInstance<T>(string key) where T : class
     {
-        string typeName = typeof(T).GetFriendlyName();
-        T resolvingObject;
-
-        try
-        {
-            if (constructorInfo.Invoke(parameterValues) is not T resolvingInstance)
-            {
-                string msg = string.Format(MsgResolvingObjectNotCreated, typeName);
-                throw new DependencyInjectionException(msg);
-            }
-
-            resolvingObject = resolvingInstance;
-        }
-        catch (Exception ex)
-        {
-            string msg = string.Format(MsgErrorDuringConstruction, typeName);
-            throw new DependencyInjectionException(msg, ex);
-        }
-
-        resolvingObject = SaveResolvedDependency(resolvingObject);
-        return resolvingObject;
-    }
-
-    /// <summary>
-    /// Gets the <see cref="Dependency" /> object for the given dependency type.
-    /// </summary>
-    /// <typeparam name="T">
-    /// The dependency type that is being resolved.
-    /// </typeparam>
-    /// <returns>
-    /// The <see cref="Dependency" /> object corresponding to the given dependency type
-    /// <typeparamref name="T" />.
-    /// </returns>
-    /// <exception cref="DependencyInjectionException" />
-    private IDependency GetDependency<T>() where T : class
-    {
-        Type dependencyType = typeof(T);
-
-        if (_dependencies.TryGetValue(dependencyType, out IDependency? dependency))
-        {
-            if (dependency is null)
-            {
-                string msg = string.Format(MsgNullDependencyObject, dependencyType.GetFriendlyName());
-                throw new DependencyInjectionException(msg);
-            }
-
-            return dependency;
-        }
-        else
-        {
-            string msg = string.Format(MsgDependencyMappingNotFound, dependencyType.GetFriendlyName());
-            throw new DependencyInjectionException(msg);
-        }
-    }
-
-    /// <summary>
-    /// Gets an instance of the resolving object for the given dependency type
-    /// <typeparamref name="T" />.
-    /// </summary>
-    /// <typeparam name="T">
-    /// The dependency type being resolved.
-    /// </typeparam>
-    /// <returns>
-    /// An instance of the resolving object for the given dependency type <typeparamref name="T" />.
-    /// </returns>
-    /// <exception cref="DependencyInjectionException" />
-    private T GetResolvingInstance<T>() where T : class
-    {
-        IDependency dependency = GetDependency<T>();
-        Type resolvingType = dependency.ResolvingType!;
+        IDependency dependency = DependencyList.Get<T>(key);
+        Type resolvingType = dependency.ResolvingType;
         ConstructorInfo constructorInfo = resolvingType.GetPrimaryConstructorInfo();
         object[] resolvedParameters = ResolveNestedDependencies(constructorInfo);
-        return ConstructResolvingInstance<T>(constructorInfo, resolvedParameters);
+        return SaveResolvedDependency(ObjectConstructor.Construct<T>(constructorInfo, resolvedParameters), key);
     }
 
     /// <summary>
@@ -188,6 +137,9 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <typeparam name="T">
     /// The dependency type that is to be resolved.
     /// </typeparam>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be retrieved.
+    /// </param>
     /// <returns>
     /// An instance of the resolving class type.
     /// </returns>
@@ -195,23 +147,23 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// This method will be called recursively until all nested dependency types have been resolved.
     /// </remarks>
     /// <exception cref="DependencyInjectionException" />
-    private T RecursiveResolve<T>() where T : class
+    private T RecursiveResolve<T>(string key) where T : class
     {
-        if (TryGetResolvedDependency(out T? resolvedDependency))
+        if (TryGetResolvedDependency(out T? resolvedDependency, key))
         {
             // The only way we will get to this point is if the resolvedDependency value is not
             // null.
             return resolvedDependency!;
         }
 
-        if (TryGetFactoryValue(out T? factoryValue))
+        if (TryGetFactoryValue(out T? factoryValue, key))
         {
             // The only way we will get to this point is if the factoryValue is not null.
             return factoryValue!;
         }
 
         // If we get here the dependency hasn't been resolved yet, so go resolve it.
-        return GetResolvingInstance<T>();
+        return ConstructResolvingInstance<T>(key);
     }
 
     /// <summary>
@@ -237,6 +189,8 @@ internal sealed class DependencyResolver : IDependencyResolver
 
         foreach (ParameterInfo parameter in parameters)
         {
+            ResolvingKeyAttribute? attribute = parameter.GetCustomAttribute<ResolvingKeyAttribute>();
+            string resolvingKey = attribute?.Key ?? EmptyKey;
             Type parameterType = parameter.ParameterType;
             string parameterTypeName = parameterType.GetFriendlyName();
             MethodInfo resolveMethodInfo;
@@ -258,7 +212,7 @@ internal sealed class DependencyResolver : IDependencyResolver
             try
             {
                 // Invoke the generic RecursiveResolve<T>() method for the current parameter type.
-                resolvedParameter = resolveMethodInfo.Invoke(this, []);
+                resolvedParameter = resolveMethodInfo.Invoke(this, [resolvingKey]);
             }
             catch (Exception ex)
             {
@@ -290,6 +244,9 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// An instance of the resolving type that was mapped to the dependency type
     /// <typeparamref name="T" />.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be saved.
+    /// </param>
     /// <returns>
     /// The <paramref name="resolvedDependency" /> that was passed in, or the resolving instance
     /// that was previously saved by another application thread.
@@ -298,17 +255,17 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// Only scoped and singleton dependencies are saved. Transient dependencies by definition are
     /// created new every time they're requested.
     /// </remarks>
-    private T SaveResolvedDependency<T>(T resolvedDependency) where T : class
+    private T SaveResolvedDependency<T>(T resolvedDependency, string key) where T : class
     {
-        IDependency dependency = GetDependency<T>();
+        IDependency dependency = DependencyList.Get<T>(key);
 
-        if (dependency.Lifetime is DependencyLifetime.Scoped && _scoped is not null)
+        if (dependency.Lifetime is DependencyLifetime.Scoped && ScopedResolver is not null)
         {
-            return _scoped.Add(resolvedDependency);
+            return ScopedResolver.Add(resolvedDependency, key);
         }
         else if (dependency.Lifetime is DependencyLifetime.Scoped or DependencyLifetime.Singleton)
         {
-            return _nonscoped.Add(resolvedDependency);
+            return NonscopedResolver!.Add(resolvedDependency, key);
         }
 
         return resolvedDependency;
@@ -325,14 +282,17 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// The resolving object that is returned from the <see cref="Dependency.Factory" /> method for
     /// the dependency type <typeparamref name="T" /> that is being resolved.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be retrieved.
+    /// </param>
     /// <returns>
     /// <see langword="true" /> if a valid resolving object is returned from the
     /// <see cref="Dependency.Factory" /> method. Otherwise, returns <see langword="false" />.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    private bool TryGetFactoryValue<T>(out T? factoryValue) where T : class
+    private bool TryGetFactoryValue<T>(out T? factoryValue, string key) where T : class
     {
-        IDependency dependency = GetDependency<T>();
+        IDependency dependency = DependencyList.Get<T>(key);
 
         if (dependency.Factory is not null)
         {
@@ -348,7 +308,7 @@ internal sealed class DependencyResolver : IDependencyResolver
 
             if (factoryValue is not null)
             {
-                factoryValue = SaveResolvedDependency(factoryValue);
+                factoryValue = SaveResolvedDependency(factoryValue, key);
                 return true;
             }
         }
@@ -368,28 +328,31 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// The resolving object that is returned for the given dependency type
     /// <typeparamref name="T" /> if one was previously saved. Otherwise, <see langword="null" />.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be retrieved.
+    /// </param>
     /// <returns>
     /// <see langword="true" /> if a valid resolving object is successfully retrieved. Otherwise,
     /// <see langword="false" />.
     /// </returns>
-    private bool TryGetResolvedDependency<T>(out T? resolvedDependency) where T : class
+    private bool TryGetResolvedDependency<T>(out T? resolvedDependency, string key) where T : class
     {
-        if (_scoped is not null)
+        if (ScopedResolver is not null)
         {
-            if (_scoped.TryGetResolvingObject(out resolvedDependency))
+            if (ScopedResolver.TryGetResolvingObject(out resolvedDependency, key))
             {
                 return true;
             }
 
-            IDependency dependency = GetDependency<T>();
+            IDependency dependency = DependencyList.Get<T>(key);
 
             if (dependency.Lifetime is DependencyLifetime.Scoped)
             {
                 return false;
             }
         }
-            
-        if (_nonscoped.TryGetResolvingObject(out resolvedDependency))
+
+        if (NonscopedResolver!.TryGetResolvingObject(out resolvedDependency, key))
         {
             return true;
         }

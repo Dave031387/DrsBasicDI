@@ -7,13 +7,12 @@ using System.Collections.Generic;
 /// The <see cref="IResolvingObjectsService" /> interface defines the methods used for maintaining the list
 /// of resolved dependency objects.
 /// </summary>
-public interface IResolvingObjectsService
+internal interface IResolvingObjectsService
 {
     /// <summary>
-    /// Get the dictionary of resolving objects whose keys are the type of the dependencies being
-    /// resolved.
+    /// Get the dictionary of resolving objects.
     /// </summary>
-    Dictionary<Type, object> ResolvingObjects
+    public Dictionary<ServiceKey, object> ResolvingObjects
     {
         get;
     }
@@ -28,17 +27,20 @@ public interface IResolvingObjectsService
     /// <param name="resolvingObject">
     /// The resolving object to be added for the given dependency type <typeparamref name="T" />.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be added.
+    /// </param>
     /// <returns>
     /// The <paramref name="resolvingObject" /> or the object retrieved from the list of resolving
     /// objects if one already exists for the given dependency type <typeparamref name="T" />.
     /// </returns>
-    T Add<T>(T resolvingObject) where T : class;
+    public T Add<T>(T resolvingObject, string key) where T : class;
 
     /// <summary>
     /// Remove all objects from the list of resolved dependencies. Call Dispose on each object that
     /// implements the <see cref="IDisposable" /> interface.
     /// </summary>
-    void Clear();
+    public void Clear();
 
     /// <summary>
     /// Check to see if the specified dependency type has been resolved and, if it has, return the
@@ -51,9 +53,12 @@ public interface IResolvingObjectsService
     /// The resolved dependency object, or <see langword="null" /> if the dependency type hasn't yet
     /// been resolved.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be retrieved.
+    /// </param>
     /// <returns>
     /// <see langword="true" /> if the given dependency type has been resolved, otherwise
     /// <see langword="false" />.
     /// </returns>
-    bool TryGetResolvingObject<T>(out T? resolvingObject) where T : class;
+    public bool TryGetResolvingObject<T>(out T? resolvingObject, string key) where T : class;
 }

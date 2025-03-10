@@ -6,57 +6,44 @@
 internal sealed class Scope : IScope
 {
     /// <summary>
-    /// Hold a reference to the dependency injection container.
-    /// </summary>
-    internal readonly IContainerInternal _container;
-
-    /// <summary>
-    /// An instance of <see cref="IDependencyResolver" /> used for resolving dependencies and
-    /// returning the corresponding resolving object.
-    /// </summary>
-    internal readonly IDependencyResolver _resolver;
-
-    /// <summary>
-    /// This <see cref="IResolvingObjectsService" /> instance is used to manage all the scoped
-    /// resolved dependencies in this dependency injection container.
-    /// </summary>
-    internal readonly IResolvingObjectsService _resolvingObjectsService;
-
-    /// <summary>
     /// Flag to detect redundant calls to the <see cref="Dispose(bool)" /> method.
     /// </summary>
     internal bool _isDisposed;
 
     /// <summary>
-    /// Create a new <see cref="Scope" /> object.
+    /// Create a new instance of the <see cref="Scope" /> class.
     /// </summary>
-    /// <param name="container">
-    /// A reference to the <see cref="Container" /> object that is creating this
-    /// <see cref="Scope" /> object.
-    /// </param>
-    /// <param name="resolvingObjectsService">
-    /// An empty <see cref="IResolvingObjectsService" /> instance that will be used for saving
-    /// resolved scoped dependency objects.
-    /// </param>
-    /// <param name="resolver">
-    /// An optional <see cref="DependencyResolver" /> object used only in unit tests.
-    /// </param>
-    /// <remarks>
-    /// This constructor is marked <see langword="internal" />. Only the <see cref="Container" />
-    /// object can be used to create new <see cref="Scope" /> objects.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException" />
-    internal Scope(IContainerInternal container,
-                   IResolvingObjectsService resolvingObjectsService,
-                   IDependencyResolver? resolver = null)
+    public Scope() : this(ServiceLocater.Instance)
     {
-        ArgumentNullException.ThrowIfNull(container, nameof(container));
-        ArgumentNullException.ThrowIfNull(resolvingObjectsService, nameof(resolvingObjectsService));
-        _container = container;
-        _resolvingObjectsService = resolvingObjectsService;
-        _resolver = resolver is null
-            ? new DependencyResolver(container.Dependencies, container.ResolvingObjectsService, resolvingObjectsService)
-            : resolver;
+    }
+
+    /// <summary>
+    /// Constructor for the <see cref="Scope" /> class. Intended for unit testing only.
+    /// </summary>
+    /// <param name="serviceLocater">
+    /// A service locater object that should provide mock instances of the requested dependencies.
+    /// </param>
+    internal Scope(IServiceLocater serviceLocater)
+    {
+        ResolvingObjectsService = serviceLocater.Get<IResolvingObjectsService>(Scoped);
+        DependencyResolver = serviceLocater.Get<IDependencyResolver>(Scoped);
+        DependencyResolver.SetScopedResolver(ResolvingObjectsService);
+    }
+
+    /// <summary>
+    /// Get a reference to the <see cref="IDependencyResolver" /> object.
+    /// </summary>
+    private IDependencyResolver DependencyResolver
+    {
+        get;
+    }
+
+    /// <summary>
+    /// Get a reference to the <see cref="IResolvingObjectsService" /> object.
+    /// </summary>
+    private IResolvingObjectsService ResolvingObjectsService
+    {
+        get;
     }
 
     /// <summary>
@@ -84,7 +71,7 @@ internal sealed class Scope : IScope
 
         if (disposing)
         {
-            _resolvingObjectsService.Clear();
+            ResolvingObjectsService.Clear();
         }
 
         // Unmanaged resources would be freed here if there were any.
@@ -94,15 +81,20 @@ internal sealed class Scope : IScope
 
     /// <summary>
     /// Gets an instance of the resolving type that is mapped to the given dependency type
-    /// <typeparamref name="T" />.
+    /// <typeparamref name="T" /> and resolving <paramref name="key" />.
     /// </summary>
     /// <typeparam name="T">
     /// The dependency type that is to be retrieved.
     /// </typeparam>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be retrieved.
+    /// </param>
     /// <returns>
-    /// The resolving object for the given dependency type <typeparamref name="T" />, or
-    /// <see langword="null" /> if the resolving object can't be determined.
+    /// The resolving object for the given dependency type <typeparamref name="T" /> and resolving
+    /// <paramref name="key" />, or <see langword="null" /> if the resolving object can't be
+    /// determined.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    public T GetDependency<T>() where T : class => _resolver.Resolve<T>();
+    public T GetDependency<T>(string key = EmptyKey) where T : class
+        => DependencyResolver.Resolve<T>(key);
 }

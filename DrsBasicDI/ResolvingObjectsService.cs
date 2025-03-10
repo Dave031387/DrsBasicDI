@@ -15,19 +15,37 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
     /// <summary>
     /// Create an instance of the <see cref="ResolvingObjectsService" /> class.
     /// </summary>
-    internal ResolvingObjectsService()
+    public ResolvingObjectsService() : this(ServiceLocater.Instance)
     {
     }
 
     /// <summary>
-    /// Get the dictionary of resolving objects whose keys are the type of the dependencies being
-    /// resolved.
+    /// Constructor for the <see cref="ResolvingObjectsService" /> class. Intended for unit testing
+    /// only.
     /// </summary>
-    public Dictionary<Type, object> ResolvingObjects { get; } = [];
+    /// <param name="serviceLocater">
+    /// A service locater object that should provide mock instances of the requested dependencies.
+    /// </param>
+    internal ResolvingObjectsService(IServiceLocater serviceLocater)
+        => DependencyList = serviceLocater.Get<IDependencyListConsumer>();
+
+    /// <summary>
+    /// Get a reference to the <see cref="IDependencyListBuilder" /> object.
+    /// </summary>
+    private IDependencyListConsumer DependencyList
+    {
+        get;
+    }
+
+    /// <summary>
+    /// Get the dictionary of resolving objects.
+    /// </summary>
+    public Dictionary<ServiceKey, object> ResolvingObjects { get; } = [];
 
     /// <summary>
     /// Add the given <paramref name="resolvingObject" /> to the list of resolving objects if no
-    /// object currently exists for the given dependency type <typeparamref name="T" />.
+    /// object currently exists for the given dependency type <typeparamref name="T" /> having the
+    /// specified <paramref name="key" />.
     /// </summary>
     /// <typeparam name="T">
     /// The dependency type being resolved.
@@ -35,15 +53,23 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
     /// <param name="resolvingObject">
     /// The resolving object to be added for the given dependency type <typeparamref name="T" />.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific <paramref name="resolvingObject" /> to be
+    /// added.
+    /// </param>
     /// <returns>
     /// The <paramref name="resolvingObject" /> or the object retrieved from the list of resolving
-    /// objects if one already exists for the given dependency type <typeparamref name="T" />.
+    /// objects if one already exists for the given dependency type <typeparamref name="T" /> and
+    /// <paramref name="key" />.
     /// </returns>
-    public T Add<T>(T resolvingObject) where T : class
+    public T Add<T>(T resolvingObject, string key = EmptyKey) where T : class
     {
+        IDependency dependency = DependencyList.Get<T>(key);
+        ServiceKey serviceKey = ServiceKey.GetServiceResolvingKey(dependency);
+
         if (TryGetResolvingObject(out T? value))
         {
-            // If we get here then a resolving object for the given dependency type already been
+            // If we get here then a resolving object for the given dependency type has already been
             // added to the container and the resolving object that was added isn't null.
             return value!;
         }
@@ -52,7 +78,7 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
         {
             // If we get here then a resolving object hasn't yet been added to the container for the
             // given dependency type.
-            ResolvingObjects[typeof(T)] = resolvingObject;
+            ResolvingObjects[serviceKey] = resolvingObject;
             return resolvingObject;
         }
     }
@@ -65,14 +91,14 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
     {
         lock (_lock)
         {
-            foreach (Type type in ResolvingObjects.Keys)
+            foreach (ServiceKey serviceKey in ResolvingObjects.Keys)
             {
-                if (ResolvingObjects[type] is IDisposable disposable)
+                if (ResolvingObjects[serviceKey] is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
 
-                _ = ResolvingObjects.Remove(type);
+                _ = ResolvingObjects.Remove(serviceKey);
             }
         }
     }
@@ -88,15 +114,22 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
     /// The resolved dependency object, or <see langword="null" /> if the dependency type hasn't yet
     /// been resolved.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific <paramref name="resolvingObject" /> to be
+    /// retrieved.
+    /// </param>
     /// <returns>
     /// <see langword="true" /> if the given dependency type has been resolved, otherwise
     /// <see langword="false" />.
     /// </returns>
-    public bool TryGetResolvingObject<T>(out T? resolvingObject) where T : class
+    public bool TryGetResolvingObject<T>(out T? resolvingObject, string key = EmptyKey) where T : class
     {
+        IDependency dependency = DependencyList.Get<T>(key);
+        ServiceKey serviceKey = ServiceKey.GetServiceResolvingKey(dependency);
+
         lock (_lock)
         {
-            if (ResolvingObjects.TryGetValue(typeof(T), out object? value))
+            if (ResolvingObjects.TryGetValue(serviceKey, out object? value))
             {
                 if (value is not null)
                 {

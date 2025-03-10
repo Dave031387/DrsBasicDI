@@ -23,6 +23,11 @@ public sealed class DependencyBuilder
     private DependencyLifetime _lifetime = DependencyLifetime.Undefined;
 
     /// <summary>
+    /// An optional key used to identify the dependency.
+    /// </summary>
+    private string? _resolvingKey;
+
+    /// <summary>
     /// The type of the resolving object for the <see cref="IDependency" /> object that is being
     /// built.
     /// </summary>
@@ -65,17 +70,16 @@ public sealed class DependencyBuilder
     /// information that was passed into the <see cref="DependencyBuilder" /> object.
     /// </returns>
     /// <exception cref="DependencyBuildException" />
-    public IDependency Build()
+    internal IDependency Build()
     {
         Validate();
 
-        return new Dependency()
-        {
-            DependencyType = _dependencyType!,
-            Factory = _factory,
-            Lifetime = _lifetime,
-            ResolvingType = _resolvingType!
-        };
+        string resolvingKey = _resolvingKey is null ? EmptyKey : _resolvingKey;
+        return new Dependency(_dependencyType!,
+                              _resolvingType!,
+                              _lifetime,
+                              _factory,
+                              resolvingKey);
     }
 
     /// <summary>
@@ -89,7 +93,7 @@ public sealed class DependencyBuilder
     /// type information.
     /// </returns>
     /// <exception cref="DependencyBuildException" />
-    public DependencyBuilder WithDependencyType<T>() where T : class
+    internal DependencyBuilder WithDependencyType<T>() where T : class
         => WithDependencyType(typeof(T));
 
     /// <summary>
@@ -104,7 +108,7 @@ public sealed class DependencyBuilder
     /// </returns>
     /// <exception cref="ArgumentNullException" />
     /// <exception cref="DependencyBuildException" />
-    public DependencyBuilder WithDependencyType(Type dependencyType)
+    internal DependencyBuilder WithDependencyType(Type dependencyType)
     {
         ArgumentNullException.ThrowIfNull(dependencyType, nameof(dependencyType));
 
@@ -131,9 +135,8 @@ public sealed class DependencyBuilder
     /// delegate information.
     /// </returns>
     /// <exception cref="ArgumentNullException" />
-    /// <exception cref="DependencyBuildException">
-    /// </exception>
-    public DependencyBuilder WithFactory(Func<object> factory)
+    /// <exception cref="DependencyBuildException" />
+    internal DependencyBuilder WithFactory(Func<object> factory)
     {
         ArgumentNullException.ThrowIfNull(factory, nameof(factory));
 
@@ -158,10 +161,15 @@ public sealed class DependencyBuilder
     /// This <see cref="DependencyBuilder" /> instance after it has been updated with the dependency
     /// lifetime information.
     /// </returns>
-    /// <exception cref="DependencyBuildException">
-    /// </exception>
-    public DependencyBuilder WithLifetime(DependencyLifetime lifetime)
+    /// <exception cref="DependencyBuildException" />
+    internal DependencyBuilder WithLifetime(DependencyLifetime lifetime)
     {
+        if (lifetime is DependencyLifetime.Undefined)
+        {
+            string msg = string.Format(MsgUndefinedLifetime, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
+
         if (_lifetime is not DependencyLifetime.Undefined)
         {
             string msg = string.Format(MsgLifetimeAlreadySpecified, DependencyTypeName);
@@ -169,6 +177,32 @@ public sealed class DependencyBuilder
         }
 
         _lifetime = lifetime;
+        return this;
+    }
+
+    /// <summary>
+    /// Specify the optional key that can be used to identify this <see cref="IDependency" />
+    /// object.
+    /// </summary>
+    /// <param name="key">
+    /// A <see langword="string" /> value to be used as the key.
+    /// </param>
+    /// <returns>
+    /// This <see cref="DependencyBuilder" /> instance after it has been updated with the resolving
+    /// key information.
+    /// </returns>
+    /// <exception cref="DependencyBuildException" />
+    internal DependencyBuilder WithResolvingKey(string key)
+    {
+        ArgumentNullException.ThrowIfNull(key, nameof(key));
+
+        if (_resolvingKey is not null)
+        {
+            string msg = string.Format(MsgResolvingKeyAlreadySpecified, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
+
+        _resolvingKey = key;
         return this;
     }
 
@@ -183,7 +217,7 @@ public sealed class DependencyBuilder
     /// type information.
     /// </returns>
     /// <exception cref="DependencyBuildException" />
-    public DependencyBuilder WithResolvingType<T>() where T : class
+    internal DependencyBuilder WithResolvingType<T>() where T : class
         => WithResolvingType(typeof(T));
 
     /// <summary>
@@ -198,7 +232,7 @@ public sealed class DependencyBuilder
     /// </returns>
     /// <exception cref="ArgumentNullException" />
     /// <exception cref="DependencyBuildException" />
-    public DependencyBuilder WithResolvingType(Type resolvingType)
+    internal DependencyBuilder WithResolvingType(Type resolvingType)
     {
         ArgumentNullException.ThrowIfNull(resolvingType, nameof(resolvingType));
 

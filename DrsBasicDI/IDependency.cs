@@ -4,12 +4,12 @@
 /// The <see cref="IDependency" /> interface defines the properties and methods for a dependency
 /// object.
 /// </summary>
-public interface IDependency
+internal interface IDependency
 {
     /// <summary>
     /// Gets the dependency type of this <see cref="IDependency" /> object.
     /// </summary>
-    Type? DependencyType
+    public Type DependencyType
     {
         get;
         init;
@@ -19,7 +19,16 @@ public interface IDependency
     /// Gets the optional factory method used for creating instances of the resolving object for
     /// this <see cref="IDependency" /> object.
     /// </summary>
-    Func<object>? Factory
+    public Func<object>? Factory
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    /// Gets the optional key that can be used to identify the dependency.
+    /// </summary>
+    public string Key
     {
         get;
         init;
@@ -29,7 +38,7 @@ public interface IDependency
     /// Gets the <see cref="DependencyLifetime" /> enumeration value representing the dependency's
     /// lifetime.
     /// </summary>
-    DependencyLifetime Lifetime
+    public DependencyLifetime Lifetime
     {
         get;
         init;
@@ -38,7 +47,7 @@ public interface IDependency
     /// <summary>
     /// Gets the resolving type that is mapped to the <see cref="DependencyType" /> property.
     /// </summary>
-    Type? ResolvingType
+    public Type ResolvingType
     {
         get;
         init;

@@ -12,7 +12,7 @@ public interface IContainer
     /// <returns>
     /// A new <see cref="IScope" /> object.
     /// </returns>
-    IScope CreateScope();
+    public IScope CreateScope();
 
     /// <summary>
     /// Get an instance of the resolving class that is mapped to the given dependency type
@@ -21,10 +21,12 @@ public interface IContainer
     /// <typeparam name="T">
     /// The dependency type that is to be resolved.
     /// </typeparam>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving class object to be retrieved.
+    /// </param>
     /// <returns>
     /// An instance of the resolving object corresponding to the given dependency type
-    /// <typeparamref name="T" />.
+    /// <typeparamref name="T" /> and resolving <paramref name="key" />.
     /// </returns>
-    /// <exception cref="DependencyInjectionException" />
-    T? GetDependency<T>() where T : class;
+    public T GetDependency<T>(string key = EmptyKey) where T : class;
 }

@@ -8,20 +8,20 @@ public enum DependencyLifetime
     /// <summary>
     /// The dependency lifetime is undefined.
     /// </summary>
-    Undefined,
+    Undefined = 0,
 
     /// <summary>
     /// The dependency lifetime is singleton.
     /// </summary>
-    Singleton,
+    Singleton = 1,
 
     /// <summary>
     /// The dependency lifetime is scoped.
     /// </summary>
-    Scoped,
+    Scoped = 2,
 
     /// <summary>
     /// The dependency lifetime is transient.
     /// </summary>
-    Transient
+    Transient = 3
 }

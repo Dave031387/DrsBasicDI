@@ -25,7 +25,9 @@ internal static class Messages
     internal const string MsgResolveMethodInfoNotFound = "The attempt to retrieve the MethodInfo for the Resolve method failed.";
     internal const string MsgResolveMethodInvocationError = "An exception was thrown when invoking the generic RecursiveResolve method for dependency type {0}.";
     internal const string MsgResolvingGenericTypeIsOpen = "Resolving generic type {0} for dependency type {1} must be fully constructed.";
+    internal const string MsgResolvingKeyAlreadySpecified = "Invalid attempt to assign a resolving key more than once to dependency type {0}.";
     internal const string MsgResolvingObjectNotCreated = "Unable to construct the resolving object for dependency type {0}.";
+    internal const string MsgResolvingObjectServiceNotFound = "The resolving object service must be set before resolving any dependencies.";
     internal const string MsgResolvingTypeAlreadySpecified = "Invalid attempt to assign resolving type more than once to dependency type {0}.";
     internal const string MsgUnableToMakeGenericResolveMethod = "Unable to make a generic Resolve method for dependency type {0}";
     internal const string MsgUndefinedLifetime = "Dependency type {0} must not have an undefined lifetime.";
