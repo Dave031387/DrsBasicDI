@@ -4,30 +4,18 @@
 /// The <see cref="ContainerBuilder" /> class is used for constructing new <see cref="Container" />
 /// objects.
 /// </summary>
-public sealed class ContainerBuilder
+public sealed class ContainerBuilder : IContainerBuilder
 {
     /// <summary>
     /// A lazy initializer for the singleton instance of the <see cref="ContainerBuilder" /> object.
     /// </summary>
-    private static readonly Lazy<ContainerBuilder> _lazy = new(() => new ContainerBuilder());
+    private static readonly Lazy<ContainerBuilder> _lazy = new(static () => new ContainerBuilder());
 
     /// <summary>
     /// A boolean flag that gets set to <see langword="true" /> once the <see cref="IContainer" />
     /// object has been built.
     /// </summary>
     private bool _containerHasBeenBuilt = false;
-
-    /// <summary>
-    /// Constructor for the <see cref="ContainerBuilder" /> class. Intended for unit testing only.
-    /// </summary>
-    /// <param name="serviceLocater">
-    /// A service locater object that should provide mock instances of the requested dependencies.
-    /// </param>
-    internal ContainerBuilder(IServiceLocater serviceLocater)
-    {
-        ServiceLocater = serviceLocater;
-        DependencyList = ServiceLocater.Get<IDependencyListBuilder>();
-    }
 
     /// <summary>
     /// Default constructor for the <see cref="ContainerBuilder" /> class.
@@ -42,12 +30,31 @@ public sealed class ContainerBuilder
     }
 
     /// <summary>
-    /// Get the current <see cref="ContainerBuilder" /> instance.
+    /// Create a new instance of the <see cref="ContainerBuilder" /> class using the specified
+    /// <paramref name="serviceLocater" /> object.
+    /// <para> This constructor is intended for unit testing only. </para>
+    /// </summary>
+    /// <param name="serviceLocater">
+    /// A service locater object that should provide mock instances of the requested dependencies.
+    /// </param>
+    /// <remarks>
+    /// This constructor is declared <see langword="private" />. Use the static
+    /// <see cref="GetTestInstance(IServiceLocater)" /> method to create a new, empty
+    /// <see cref="IContainerBuilder" /> object for testing purposes.
+    /// </remarks>
+    private ContainerBuilder(IServiceLocater serviceLocater)
+    {
+        ServiceLocater = serviceLocater;
+        DependencyList = ServiceLocater.Get<IDependencyListBuilder>();
+    }
+
+    /// <summary>
+    /// Get the current <see cref="IContainerBuilder" /> instance.
     /// </summary>
     /// <remarks>
     /// This returns a thread safe singleton instance of the <see cref="ContainerBuilder" /> class.
     /// </remarks>
-    public static ContainerBuilder Current => _lazy.Value;
+    public static IContainerBuilder Current => _lazy.Value;
 
     /// <summary>
     /// Get a reference to the <see cref="IDependencyListBuilder" /> object.
@@ -73,13 +80,71 @@ public sealed class ContainerBuilder
     /// the updated <see cref="DependencyBuilder" /> object.
     /// </param>
     /// <returns>
-    /// The updated <see cref="ContainerBuilder" /> object.
+    /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
-    public ContainerBuilder AddDependency(Func<DependencyBuilder, DependencyBuilder> builder)
+    public IContainerBuilder AddDependency(Func<DependencyBuilder, DependencyBuilder> builder)
     {
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.Empty)
+            .Build();
+        DependencyList.Add(dependency);
+        return this;
+    }
+
+    /// <summary>
+    /// Construct a new <see cref="IDependency" /> object having the specified dependency type
+    /// <typeparamref name="T" /> and add it to the container.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The type of the dependency.
+    /// </typeparam>
+    /// <param name="builder">
+    /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
+    /// the updated <see cref="DependencyBuilder" /> object.
+    /// </param>
+    /// <returns>
+    /// The updated <see cref="IContainerBuilder" /> object.
+    /// </returns>
+    /// <exception cref="ContainerBuildException" />
+    public IContainerBuilder AddDependency<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
+    {
+        CheckForContainerAlreadyBuilt();
+        IDependency dependency = builder(DependencyBuilder.Empty)
+            .WithDependencyType<T>()
+            .Build();
+        DependencyList.Add(dependency);
+        return this;
+    }
+
+    /// <summary>
+    /// Construct a new <see cref="IDependency" /> object having the specified dependency type
+    /// <typeparamref name="TDependency" /> and resolving type <typeparamref name="TResolving" />
+    /// and add it to the container.
+    /// </summary>
+    /// <typeparam name="TDependency">
+    /// The type of the dependency.
+    /// </typeparam>
+    /// <typeparam name="TResolving">
+    /// The resolving type that is mapped to the dependency type
+    /// <typeparamref name="TDependency" />.
+    /// </typeparam>
+    /// <param name="builder">
+    /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
+    /// the updated <see cref="DependencyBuilder" /> object.
+    /// </param>
+    /// <returns>
+    /// The updated <see cref="IContainerBuilder" /> object.
+    /// </returns>
+    /// <exception cref="ContainerBuildException" />
+    public IContainerBuilder AddDependency<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
+        where TDependency : class
+        where TResolving : class, TDependency
+    {
+        CheckForContainerAlreadyBuilt();
+        IDependency dependency = builder(DependencyBuilder.Empty)
+            .WithDependencyType<TDependency>()
+            .WithResolvingType<TResolving>()
             .Build();
         DependencyList.Add(dependency);
         return this;
@@ -93,10 +158,10 @@ public sealed class ContainerBuilder
     /// the updated <see cref="DependencyBuilder" /> object.
     /// </param>
     /// <returns>
-    /// The updated <see cref="ContainerBuilder" /> object.
+    /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
-    public ContainerBuilder AddScoped(Func<DependencyBuilder, DependencyBuilder> builder)
+    public IContainerBuilder AddScoped(Func<DependencyBuilder, DependencyBuilder> builder)
     {
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.Empty)
@@ -108,9 +173,9 @@ public sealed class ContainerBuilder
 
     /// <summary>
     /// Construct a new scoped <see cref="IDependency" /> object having the specified dependency
-    /// type <typeparamref name="T" /> and add it to the container.
+    /// type <typeparamref name="TDependency" /> and add it to the container.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency.
     /// </typeparam>
     /// <param name="builder">
@@ -118,14 +183,48 @@ public sealed class ContainerBuilder
     /// the updated <see cref="DependencyBuilder" /> object.
     /// </param>
     /// <returns>
-    /// The updated <see cref="ContainerBuilder" /> object.
+    /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
-    public ContainerBuilder AddScoped<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
+    public IContainerBuilder AddScoped<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class
     {
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.Empty)
-            .WithDependencyType<T>()
+            .WithDependencyType<TDependency>()
+            .WithLifetime(DependencyLifetime.Scoped)
+            .Build();
+        DependencyList.Add(dependency);
+        return this;
+    }
+
+    /// <summary>
+    /// Construct a new scoped <see cref="IDependency" /> object having the specified dependency
+    /// type <typeparamref name="TDependency" /> and resolving type
+    /// <typeparamref name="TResolving" /> and add it to the container.
+    /// </summary>
+    /// <typeparam name="TDependency">
+    /// The type of the dependency.
+    /// </typeparam>
+    /// <typeparam name="TResolving">
+    /// The resolving type that is mapped to the given dependency type
+    /// <typeparamref name="TDependency" />
+    /// </typeparam>
+    /// <param name="builder">
+    /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
+    /// the updated <see cref="DependencyBuilder" /> object.
+    /// </param>
+    /// <returns>
+    /// The updated <see cref="IContainerBuilder" /> object.
+    /// </returns>
+    /// <exception cref="ContainerBuildException" />
+    public IContainerBuilder AddScoped<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
+        where TDependency : class
+        where TResolving : class, TDependency
+    {
+        CheckForContainerAlreadyBuilt();
+        IDependency dependency = builder(DependencyBuilder.Empty)
+            .WithDependencyType<TDependency>()
+            .WithResolvingType<TResolving>()
             .WithLifetime(DependencyLifetime.Scoped)
             .Build();
         DependencyList.Add(dependency);
@@ -140,10 +239,10 @@ public sealed class ContainerBuilder
     /// the updated <see cref="DependencyBuilder" /> object.
     /// </param>
     /// <returns>
-    /// The updated <see cref="ContainerBuilder" /> object.
+    /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
-    public ContainerBuilder AddSingleton(Func<DependencyBuilder, DependencyBuilder> builder)
+    public IContainerBuilder AddSingleton(Func<DependencyBuilder, DependencyBuilder> builder)
     {
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.Empty)
@@ -155,9 +254,9 @@ public sealed class ContainerBuilder
 
     /// <summary>
     /// Construct a new singleton <see cref="IDependency" /> object having the specified dependency
-    /// type <typeparamref name="T" /> and add it to the container.
+    /// type <typeparamref name="TDependency" /> and add it to the container.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency.
     /// </typeparam>
     /// <param name="builder">
@@ -165,14 +264,48 @@ public sealed class ContainerBuilder
     /// the updated <see cref="DependencyBuilder" /> object.
     /// </param>
     /// <returns>
-    /// The updated <see cref="ContainerBuilder" /> object.
+    /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
-    public ContainerBuilder AddSingleton<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
+    public IContainerBuilder AddSingleton<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class
     {
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.Empty)
-            .WithDependencyType<T>()
+            .WithDependencyType<TDependency>()
+            .WithLifetime(DependencyLifetime.Singleton)
+            .Build();
+        DependencyList.Add(dependency);
+        return this;
+    }
+
+    /// <summary>
+    /// Construct a new singleton <see cref="IDependency" /> object having the specified dependency
+    /// type <typeparamref name="TDependency" /> and resolving type
+    /// <typeparamref name="TResolving" /> and add it to the container.
+    /// </summary>
+    /// <typeparam name="TDependency">
+    /// The type of the dependency.
+    /// </typeparam>
+    /// <typeparam name="TResolving">
+    /// The resolving type that is mapped to the given dependency type
+    /// <typeparamref name="TDependency" />.
+    /// </typeparam>
+    /// <param name="builder">
+    /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
+    /// the updated <see cref="DependencyBuilder" /> object.
+    /// </param>
+    /// <returns>
+    /// The updated <see cref="IContainerBuilder" /> object.
+    /// </returns>
+    /// <exception cref="ContainerBuildException" />
+    public IContainerBuilder AddSingleton<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
+        where TDependency : class
+        where TResolving : class, TDependency
+    {
+        CheckForContainerAlreadyBuilt();
+        IDependency dependency = builder(DependencyBuilder.Empty)
+            .WithDependencyType<TDependency>()
+            .WithResolvingType<TResolving>()
             .WithLifetime(DependencyLifetime.Singleton)
             .Build();
         DependencyList.Add(dependency);
@@ -187,10 +320,10 @@ public sealed class ContainerBuilder
     /// the updated <see cref="DependencyBuilder" /> object.
     /// </param>
     /// <returns>
-    /// The updated <see cref="ContainerBuilder" /> object.
+    /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
-    public ContainerBuilder AddTransient(Func<DependencyBuilder, DependencyBuilder> builder)
+    public IContainerBuilder AddTransient(Func<DependencyBuilder, DependencyBuilder> builder)
     {
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.Empty)
@@ -202,9 +335,9 @@ public sealed class ContainerBuilder
 
     /// <summary>
     /// Construct a new transient <see cref="IDependency" /> object having the specified dependency
-    /// type <typeparamref name="T" /> and add it to the container.
+    /// type <typeparamref name="TDependency" /> and add it to the container.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency.
     /// </typeparam>
     /// <param name="builder">
@@ -212,14 +345,48 @@ public sealed class ContainerBuilder
     /// the updated <see cref="DependencyBuilder" /> object.
     /// </param>
     /// <returns>
-    /// The updated <see cref="ContainerBuilder" /> object.
+    /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
     /// <exception cref="ContainerBuildException" />
-    public ContainerBuilder AddTransient<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class
+    public IContainerBuilder AddTransient<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class
     {
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.Empty)
-            .WithDependencyType<T>()
+            .WithDependencyType<TDependency>()
+            .WithLifetime(DependencyLifetime.Transient)
+            .Build();
+        DependencyList.Add(dependency);
+        return this;
+    }
+
+    /// <summary>
+    /// Construct a new transient <see cref="IDependency" /> object having the specified dependency
+    /// type <typeparamref name="TDependency" /> and resolving type
+    /// <typeparamref name="TResolving" /> and add it to the container.
+    /// </summary>
+    /// <typeparam name="TDependency">
+    /// The type of the dependency.
+    /// </typeparam>
+    /// <typeparam name="TResolving">
+    /// The resolving type that is mapped to the given dependency type
+    /// <typeparamref name="TDependency" />.
+    /// </typeparam>
+    /// <param name="builder">
+    /// A builder function that takes a <see cref="DependencyBuilder" /> object as input and returns
+    /// the updated <see cref="DependencyBuilder" /> object.
+    /// </param>
+    /// <returns>
+    /// The updated <see cref="IContainerBuilder" /> object.
+    /// </returns>
+    /// <exception cref="ContainerBuildException" />
+    public IContainerBuilder AddTransient<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
+        where TDependency : class
+        where TResolving : class, TDependency
+    {
+        CheckForContainerAlreadyBuilt();
+        IDependency dependency = builder(DependencyBuilder.Empty)
+            .WithDependencyType<TDependency>()
+            .WithResolvingType<TResolving>()
             .WithLifetime(DependencyLifetime.Transient)
             .Build();
         DependencyList.Add(dependency);
@@ -252,6 +419,17 @@ public sealed class ContainerBuilder
         _containerHasBeenBuilt = true;
         return container;
     }
+
+    /// <summary>
+    /// Get a new test instance of the <see cref="IContainerBuilder" /> object.
+    /// </summary>
+    /// <param name="serviceLocater">
+    /// A service locater object that should provide mock instances of the requested dependencies.
+    /// </param>
+    /// <returns>
+    /// </returns>
+    internal static IContainerBuilder GetTestInstance(IServiceLocater serviceLocater)
+        => new ContainerBuilder(serviceLocater);
 
     /// <summary>
     /// Check to see if the <see cref="IContainer" /> object has already been built. Throw an

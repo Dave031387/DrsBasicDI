@@ -2,9 +2,9 @@
 
 internal class MockServiceLocater : IServiceLocater, IMockServiceLocater
 {
-    private readonly Dictionary<ServiceKey, object> _mockObjects = [];
+    private readonly Dictionary<ServiceKey, Mock> _mockObjects = [];
 
-    public T Get<T>(string key = "") where T : class
+    public T Get<T>(string key = EmptyKey) where T : class
     {
         ServiceKey serviceKey = new(typeof(T), key);
 
@@ -15,11 +15,11 @@ internal class MockServiceLocater : IServiceLocater, IMockServiceLocater
         return ((Mock<T>)_mockObjects[serviceKey]).Object;
     }
 
-    public Mock<T> GetMock<T>(string key = "") where T : class
+    public Mock<T> GetMock<T>(string key = EmptyKey) where T : class
     {
         ServiceKey serviceKey = new(typeof(T), key);
 
-        if (_mockObjects.TryGetValue(serviceKey, out object? value))
+        if (_mockObjects.TryGetValue(serviceKey, out Mock? value))
         {
             return (Mock<T>)value;
         }
@@ -29,4 +29,6 @@ internal class MockServiceLocater : IServiceLocater, IMockServiceLocater
 
         return mock;
     }
+
+    public void VerifyMocks() => Mock.VerifyAll([.. _mockObjects.Values]);
 }

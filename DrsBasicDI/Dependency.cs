@@ -21,13 +21,18 @@
 /// <param name="Key">
 /// An optional key that can be used to identify the dependency.
 /// </param>
-/// <remarks>
-/// This class is immutable.
-/// </remarks>
-internal sealed record Dependency(Type DependencyType,
+internal record Dependency(Type DependencyType,
                                   Type ResolvingType,
                                   DependencyLifetime Lifetime,
                                   Func<object>? Factory,
                                   string Key) : IDependency
 {
+    public virtual bool Equals(Dependency? other) => other is not null
+                                                     && other.DependencyType == DependencyType
+                                                     && other.ResolvingType == ResolvingType
+                                                     && other.Lifetime == Lifetime
+                                                     && (other.Factory == Factory || (other.Factory is null && Factory is null))
+                                                     && other.Key == Key;
+
+    public override int GetHashCode() => HashCode.Combine(DependencyType, ResolvingType, Lifetime, Factory, Key);
 }

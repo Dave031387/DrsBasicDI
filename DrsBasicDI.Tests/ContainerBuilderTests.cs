@@ -2,97 +2,68 @@
 
 public class ContainerBuilderTests
 {
-    private readonly Type _containerType = typeof(IContainer);
+    private readonly IDependency _containerDependency = new Dependency(typeof(IContainer),
+                                                                       typeof(Container),
+                                                                       DependencyLifetime.Singleton,
+                                                                       null,
+                                                                       EmptyKey);
 
     [Fact]
     public void AddValidDependenciesToContainer_ShouldBuildContainer()
     {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //Type dependencyType1 = typeof(IClass1);
-        //Type resolvingType1 = typeof(Class1);
-        //DependencyLifetime lifetime1 = DependencyLifetime.Transient;
-        //Type dependencyType2 = typeof(IGenericClass1<int, string>);
-        //Type resolvingType2 = typeof(GenericClass1<int, string>);
-        //DependencyLifetime lifetime2 = DependencyLifetime.Scoped;
-        //static GenericClass1<int, string> factory() => new();
-        //string expected = "GenericClass1<int, string>.DoWork\n  arg1=5\n  arg2=test";
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Mock<IDependencyListBuilder> mockDependencyList = mockServiceLocater.GetMock<IDependencyListBuilder>();
+        Mock<IContainer> mockContainer = mockServiceLocater.GetMock<IContainer>();
+        static GenericClass1<int, string> factory() => new();
+        string key = "test";
+        IDependency dependency1 = new Dependency(typeof(IClass1),
+                                                 typeof(Class1),
+                                                 DependencyLifetime.Transient,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency2 = new Dependency(typeof(IGenericClass1<int, string>),
+                                                 typeof(GenericClass1<int, string>),
+                                                 DependencyLifetime.Scoped,
+                                                 factory,
+                                                 key);
+        mockDependencyList
+            .Setup(m => m.Add(dependency1))
+            .Verifiable(Times.Once);
+        mockDependencyList
+            .Setup(m => m.Add(dependency2))
+            .Verifiable(Times.Once);
+        mockDependencyList
+            .Setup(m => m.Add(_containerDependency))
+            .Verifiable(Times.Once);
+        mockDependencyList
+            .SetupGet(m => m.Count)
+            .Returns(2)
+            .Verifiable(Times.Once);
+        IContainerBuilder builder = ContainerBuilder.GetTestInstance(mockServiceLocater);
 
-        //// Act
-        //IContainer container = builder
-        //    .AddDependency(b => b
-        //        .WithDependencyType(dependencyType1)
-        //        .WithResolvingType(resolvingType1)
-        //        .WithLifetime(lifetime1))
-        //    .AddDependency(b => b
-        //        .WithDependencyType(dependencyType2)
-        //        .WithResolvingType(resolvingType2)
-        //        .WithLifetime(lifetime2)
-        //        .WithFactory(factory))
-        //    .Build();
+        // Act
+        IContainer container = builder
+            .AddDependency(b => b
+                .WithDependencyType<IClass1>()
+                .WithResolvingType<Class1>()
+                .WithLifetime(DependencyLifetime.Transient))
+            .AddDependency(b => b
+                .WithDependencyType<IGenericClass1<int, string>>()
+                .WithResolvingType<GenericClass1<int, string>>()
+                .WithLifetime(DependencyLifetime.Scoped)
+                .WithFactory(factory)
+                .WithResolvingKey(key))
+            .Build();
 
-        //// Assert
-        //container
-        //    .Should()
-        //    .NotBeNull();
-        //Dictionary<Type, IDependency> dependencies = GetDependencies(container);
-        //dependencies
-        //    .Should()
-        //    .HaveCount(3)
-        //    .And
-        //    .ContainKeys(dependencyType1, dependencyType2, _containerType);
-        //IDependency containerDependency = dependencies[_containerType];
-        //containerDependency.DependencyType
-        //    .Should()
-        //    .Be(_containerType);
-        //containerDependency.ResolvingType
-        //    .Should()
-        //    .Be<Container>();
-        //containerDependency.Lifetime
-        //    .Should()
-        //    .Be(DependencyLifetime.Singleton);
-        //containerDependency.Factory
-        //    .Should()
-        //    .BeNull();
-        //Dictionary<Type, object> resolvedDependencies = GetResolvingObjects(container);
-        //resolvedDependencies
-        //    .Should()
-        //    .ContainSingle()
-        //    .And
-        //    .ContainKey(_containerType);
-        //resolvedDependencies[_containerType]
-        //    .Should()
-        //    .BeSameAs(container);
-        //IDependency dependency1 = dependencies[dependencyType1];
-        //dependency1.DependencyType
-        //    .Should()
-        //    .Be(dependencyType1);
-        //dependency1.ResolvingType
-        //    .Should()
-        //    .Be(resolvingType1);
-        //dependency1.Lifetime
-        //    .Should()
-        //    .Be(lifetime1);
-        //dependency1.Factory
-        //    .Should()
-        //    .BeNull();
-        //IDependency dependency2 = dependencies[dependencyType2];
-        //dependency2.DependencyType
-        //    .Should()
-        //    .Be(dependencyType2);
-        //dependency2.ResolvingType
-        //    .Should()
-        //    .Be(resolvingType2);
-        //dependency2.Lifetime
-        //    .Should()
-        //    .Be(lifetime2);
-        //dependency2.Factory
-        //    .Should()
-        //    .NotBeNull();
-        //string actual = ((IGenericClass1<int, string>)dependency2.Factory!()).DoWork(5, "test");
-        //actual
-        //    .Should()
-        //    .Be(expected);
+        // Assert
+        container
+            .Should()
+            .NotBeNull();
+        container
+            .Should()
+            .BeSameAs(mockContainer.Object);
+        mockServiceLocater.VerifyMocks();
     }
 
     [Fact]
