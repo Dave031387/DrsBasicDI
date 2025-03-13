@@ -69,7 +69,7 @@ internal sealed class ServiceLocater : IServiceLocater
     /// An instance of the implementation type that has been mapped to the given interface type
     /// <typeparamref name="T" />.
     /// </returns>
-    /// <exception cref="Exception" />
+    /// <exception cref="InvalidOperationException" />
     public T Get<T>(string key = EmptyKey) where T : class
     {
         ServiceKey serviceKey = ServiceKey.GetServiceKey<T>(key);

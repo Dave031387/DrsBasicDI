@@ -6,7 +6,7 @@ public class DependencyBuilderTests
     public void DependencyLifetimeIsUndefined_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         Type resolvingType = typeof(Class1);
         string msg = string.Format(MsgUndefinedLifetime, nameof(IClass1));
@@ -25,7 +25,7 @@ public class DependencyBuilderTests
     public void DependencyTypeAndResolvingTypeAreSame_ShouldBuildValidDependency()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type type = typeof(Class2);
         DependencyLifetime lifetime = DependencyLifetime.Scoped;
 
@@ -55,7 +55,7 @@ public class DependencyBuilderTests
     public void DependencyTypeIsNull_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type resolvingType = typeof(Class1);
         string msg = MsgUnspecifiedDependencyType;
 
@@ -73,7 +73,7 @@ public class DependencyBuilderTests
     public void DependencyTypeIsSubclassOfResolvingType_ShouldBuildValidDependency()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         DependencyLifetime lifetime = DependencyLifetime.Transient;
 
         // Act
@@ -102,7 +102,7 @@ public class DependencyBuilderTests
     public void DependencyTypeIsUnboundGenericType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IGenericClass1<,>);
         string dependencyTypeName = "IGenericClass1<S, T>";
         Type resolvingType = typeof(GenericClass1<int, string>);
@@ -123,7 +123,7 @@ public class DependencyBuilderTests
     public void DependencyTypeIsValueType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type type = typeof(Struct1);
         string typeName = type.Name;
         string msg = string.Format(MsgInvalidDependencyType, typeName);
@@ -143,7 +143,7 @@ public class DependencyBuilderTests
     public void DependencyTypeSpecifiedMoreThanOnce_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Class1);
@@ -166,7 +166,7 @@ public class DependencyBuilderTests
     public void DependencyWithValidFactory_ShouldBuildValidDependency()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         DependencyLifetime lifetime = DependencyLifetime.Singleton;
         string builtBy = "Factory";
         Class1A factory() => new()
@@ -204,7 +204,7 @@ public class DependencyBuilderTests
     public void FactorySpecifiedMoreThanOnce_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = "N/A";
         Type resolvingType = typeof(Class1);
@@ -229,7 +229,7 @@ public class DependencyBuilderTests
     public void LifetimeSpecifiedMoreThanOnce_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Class1);
@@ -252,7 +252,7 @@ public class DependencyBuilderTests
     public void ResolvingGenericClassTypeNotAssignableToDependencyType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IGenericClass1<int, string>);
         string dependencyTypeName = "IGenericClass1<int, string>";
         Type resolvingType = typeof(GenericClass1<string, int>);
@@ -274,7 +274,7 @@ public class DependencyBuilderTests
     public void ResolvingNonGenericClassTypeNotAssignableToDependencyType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Class2);
@@ -296,7 +296,7 @@ public class DependencyBuilderTests
     public void ResolvingTypeIsAbstractType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(AbstractClass1);
@@ -318,7 +318,7 @@ public class DependencyBuilderTests
     public void ResolvingTypeIsInterfaceType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type type = typeof(IClass1);
         string typeName = type.Name;
         string msg = string.Format(MsgInvalidResolvingType, typeName, typeName);
@@ -338,7 +338,7 @@ public class DependencyBuilderTests
     public void ResolvingTypeIsNull_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = dependencyType.Name;
         string msg = string.Format(MsgUnspecifiedResolvingType, dependencyTypeName);
@@ -357,7 +357,7 @@ public class DependencyBuilderTests
     public void ResolvingTypeIsUnboundGenericType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IGenericClass1<int, string>);
         string dependencyTypeName = "IGenericClass1<int, string>";
         Type resolvingType = typeof(GenericClass1<,>);
@@ -379,7 +379,7 @@ public class DependencyBuilderTests
     public void ResolvingTypeIsValueType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IStruct1);
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Struct1);
@@ -401,7 +401,7 @@ public class DependencyBuilderTests
     public void ResolvingTypeSpecifiedMoreThanOnce_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Class1);
@@ -424,7 +424,7 @@ public class DependencyBuilderTests
     public void TypeReturnedFromFactoryNotAssignableToDependencyType_ShouldThrowException()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IClass1);
         string dependencyTypeName = dependencyType.Name;
         Type resolvingType = typeof(Class1);
@@ -450,7 +450,7 @@ public class DependencyBuilderTests
     public void ValidDependencyAndResolvingTypes_ShouldAllowAnyValidLifetime(DependencyLifetime lifetime)
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
 
         // Act
         IDependency dependency = builder
@@ -478,7 +478,7 @@ public class DependencyBuilderTests
     public void ValidGenericDependencyAndResolvingTypes_ShouldBuildValidDependency()
     {
         // Arrange
-        DependencyBuilder builder = DependencyBuilder.Empty;
+        DependencyBuilder builder = DependencyBuilder.CreateNew;
         Type dependencyType = typeof(IGenericClass1<int, string>);
         Type resolvingType = typeof(GenericClass1<int, string>);
         DependencyLifetime lifetime = DependencyLifetime.Singleton;

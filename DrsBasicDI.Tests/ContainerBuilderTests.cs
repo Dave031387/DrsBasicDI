@@ -14,8 +14,7 @@ public class ContainerBuilderTests
         // Arrange
         MockServiceLocater mockServiceLocater = new();
         Mock<IDependencyListBuilder> mockDependencyList = mockServiceLocater.GetMock<IDependencyListBuilder>();
-        Mock<IContainer> mockContainer = mockServiceLocater.GetMock<IContainer>();
-        static GenericClass1<int, string> factory() => new();
+        mockServiceLocater.CreateMock<IContainer>();
         string key = "test";
         IDependency dependency1 = new Dependency(typeof(IClass1),
                                                  typeof(Class1),
@@ -25,21 +24,14 @@ public class ContainerBuilderTests
         IDependency dependency2 = new Dependency(typeof(IGenericClass1<int, string>),
                                                  typeof(GenericClass1<int, string>),
                                                  DependencyLifetime.Scoped,
-                                                 factory,
+                                                 null,
                                                  key);
-        mockDependencyList
-            .Setup(m => m.Add(dependency1))
-            .Verifiable(Times.Once);
-        mockDependencyList
-            .Setup(m => m.Add(dependency2))
-            .Verifiable(Times.Once);
-        mockDependencyList
-            .Setup(m => m.Add(_containerDependency))
-            .Verifiable(Times.Once);
-        mockDependencyList
-            .SetupGet(m => m.Count)
-            .Returns(2)
-            .Verifiable(Times.Once);
+        IDependency dependency3 = new Dependency(typeof(IClass2),
+                                                 typeof(Class2),
+                                                 DependencyLifetime.Singleton,
+                                                 null,
+                                                 EmptyKey);
+        SetupMockDependencyList(mockDependencyList, [dependency1, dependency2, dependency3]);
         IContainerBuilder builder = ContainerBuilder.GetTestInstance(mockServiceLocater);
 
         // Act
@@ -48,268 +40,288 @@ public class ContainerBuilderTests
                 .WithDependencyType<IClass1>()
                 .WithResolvingType<Class1>()
                 .WithLifetime(DependencyLifetime.Transient))
-            .AddDependency(b => b
-                .WithDependencyType<IGenericClass1<int, string>>()
+            .AddDependency<IGenericClass1<int, string>>(b => b
                 .WithResolvingType<GenericClass1<int, string>>()
                 .WithLifetime(DependencyLifetime.Scoped)
-                .WithFactory(factory)
+                .WithResolvingKey(key))
+            .AddDependency<IClass2, Class2>(b => b
+                .WithLifetime(DependencyLifetime.Singleton))
+            .Build();
+
+        // Assert
+        AssertValidDependencies(container, mockServiceLocater);
+    }
+
+    [Fact]
+    public void AddValidScopedDependenciesToContainer_ShouldBuildContainer()
+    {
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Mock<IDependencyListBuilder> mockDependencyList = mockServiceLocater.GetMock<IDependencyListBuilder>();
+        mockServiceLocater.CreateMock<IContainer>();
+        string key = "test";
+        IDependency dependency1 = new Dependency(typeof(IClass1),
+                                                 typeof(Class1),
+                                                 DependencyLifetime.Scoped,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency2 = new Dependency(typeof(IClass2),
+                                                 typeof(Class2),
+                                                 DependencyLifetime.Scoped,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency3 = new Dependency(typeof(IGenericClass1<int, string>),
+                                                 typeof(GenericClass1<int, string>),
+                                                 DependencyLifetime.Scoped,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency4 = new Dependency(typeof(IClass1),
+                                                 typeof(Class1A),
+                                                 DependencyLifetime.Scoped,
+                                                 null,
+                                                 key);
+        SetupMockDependencyList(mockDependencyList, [dependency1, dependency2, dependency3, dependency4]);
+        IContainerBuilder builder = ContainerBuilder.GetTestInstance(mockServiceLocater);
+
+        // Act
+        IContainer container = builder
+            .AddScoped(b => b
+                .WithDependencyType<IClass1>()
+                .WithResolvingType<Class1>())
+            .AddScoped<IClass2>(b => b
+                .WithResolvingType<Class2>())
+            .AddScoped<IGenericClass1<int, string>, GenericClass1<int, string>>()
+            .AddScoped<IClass1, Class1A>(b => b
                 .WithResolvingKey(key))
             .Build();
 
         // Assert
-        container
-            .Should()
-            .NotBeNull();
-        container
-            .Should()
-            .BeSameAs(mockContainer.Object);
-        mockServiceLocater.VerifyMocks();
+        AssertValidDependencies(container, mockServiceLocater);
     }
 
     [Fact]
-    public void AddValidScopedDependencyToContainer_ShouldBuildContainer()
+    public void AddValidSingletonDependenciesToContainer_ShouldBuildContainer()
     {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //Type dependencyType = typeof(IClass2);
-        //Type resolvingType = typeof(Class2);
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Mock<IDependencyListBuilder> mockDependencyList = mockServiceLocater.GetMock<IDependencyListBuilder>();
+        mockServiceLocater.CreateMock<IContainer>();
+        string key = "test";
+        IDependency dependency1 = new Dependency(typeof(IClass1),
+                                                 typeof(Class1),
+                                                 DependencyLifetime.Singleton,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency2 = new Dependency(typeof(IClass2),
+                                                 typeof(Class2),
+                                                 DependencyLifetime.Singleton,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency3 = new Dependency(typeof(IGenericClass1<int, string>),
+                                                 typeof(GenericClass1<int, string>),
+                                                 DependencyLifetime.Singleton,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency4 = new Dependency(typeof(IClass1),
+                                                 typeof(Class1A),
+                                                 DependencyLifetime.Singleton,
+                                                 null,
+                                                 key);
+        SetupMockDependencyList(mockDependencyList, [dependency1, dependency2, dependency3, dependency4]);
+        IContainerBuilder builder = ContainerBuilder.GetTestInstance(mockServiceLocater);
 
-        //// Act
-        //IContainer container = builder
-        //    .AddScoped(b => b
-        //        .WithDependencyType(dependencyType)
-        //        .WithResolvingType(resolvingType))
-        //    .Build();
+        // Act
+        IContainer container = builder
+            .AddSingleton(b => b
+                .WithDependencyType<IClass1>()
+                .WithResolvingType<Class1>())
+            .AddSingleton<IClass2>(b => b
+                .WithResolvingType<Class2>())
+            .AddSingleton<IGenericClass1<int, string>, GenericClass1<int, string>>()
+            .AddSingleton<IClass1, Class1A>(b => b
+                .WithResolvingKey(key))
+            .Build();
 
-        //// Assert
-        //AssertValidContainer(container, DependencyLifetime.Scoped);
+        // Assert
+        AssertValidDependencies(container, mockServiceLocater);
     }
 
     [Fact]
-    public void AddValidSingletonDependencyToContainer_ShouldBuildContainer()
+    public void AddValidTransientDependenciesToContainer_ShouldBuildContainer()
     {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //Type dependencyType = typeof(IClass2);
-        //Type resolvingType = typeof(Class2);
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Mock<IDependencyListBuilder> mockDependencyList = mockServiceLocater.GetMock<IDependencyListBuilder>();
+        mockServiceLocater.CreateMock<IContainer>();
+        string key = "test";
+        IDependency dependency1 = new Dependency(typeof(IClass1),
+                                                 typeof(Class1),
+                                                 DependencyLifetime.Transient,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency2 = new Dependency(typeof(IClass2),
+                                                 typeof(Class2),
+                                                 DependencyLifetime.Transient,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency3 = new Dependency(typeof(IGenericClass1<int, string>),
+                                                 typeof(GenericClass1<int, string>),
+                                                 DependencyLifetime.Transient,
+                                                 null,
+                                                 EmptyKey);
+        IDependency dependency4 = new Dependency(typeof(IClass1),
+                                                 typeof(Class1A),
+                                                 DependencyLifetime.Transient,
+                                                 null,
+                                                 key);
+        SetupMockDependencyList(mockDependencyList, [dependency1, dependency2, dependency3, dependency4]);
+        IContainerBuilder builder = ContainerBuilder.GetTestInstance(mockServiceLocater);
 
-        //// Act
-        //IContainer container = builder
-        //    .AddSingleton(b => b
-        //        .WithDependencyType(dependencyType)
-        //        .WithResolvingType(resolvingType))
-        //    .Build();
+        // Act
+        IContainer container = builder
+            .AddTransient(b => b
+                .WithDependencyType<IClass1>()
+                .WithResolvingType<Class1>())
+            .AddTransient<IClass2>(b => b
+                .WithResolvingType<Class2>())
+            .AddTransient<IGenericClass1<int, string>, GenericClass1<int, string>>()
+            .AddTransient<IClass1, Class1A>(b => b
+                .WithResolvingKey(key))
+            .Build();
 
-        //// Assert
-        //AssertValidContainer(container, DependencyLifetime.Singleton);
-    }
-
-    [Fact]
-    public void AddValidTransientDependencyToContainer_ShouldBuildContainer()
-    {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //Type dependencyType = typeof(IClass2);
-        //Type resolvingType = typeof(Class2);
-
-        //// Act
-        //IContainer container = builder
-        //    .AddTransient(b => b
-        //        .WithDependencyType(dependencyType)
-        //        .WithResolvingType(resolvingType))
-        //    .Build();
-
-        //// Assert
-        //AssertValidContainer(container, DependencyLifetime.Transient);
-    }
-
-    [Fact]
-    public void GenericAddValidScopedDependencyToContainer_ShouldBuildContainer()
-    {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //Type resolvingType = typeof(Class2);
-
-        //// Act
-        //IContainer container = builder
-        //    .AddScoped<IClass2>(b => b
-        //        .WithResolvingType(resolvingType))
-        //    .Build();
-
-        //// Assert
-        //AssertValidContainer(container, DependencyLifetime.Scoped);
-    }
-
-    [Fact]
-    public void GenericAddValidSingletonDependencyToContainer_ShouldBuildContainer()
-    {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //Type resolvingType = typeof(Class2);
-
-        //// Act
-        //IContainer container = builder
-        //    .AddSingleton<IClass2>(b => b
-        //        .WithResolvingType(resolvingType))
-        //    .Build();
-
-        //// Assert
-        //AssertValidContainer(container, DependencyLifetime.Singleton);
-    }
-
-    [Fact]
-    public void GenericAddValidTransientDependencyToContainer_ShouldBuildContainer()
-    {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //Type resolvingType = typeof(Class2);
-
-        //// Act
-        //IContainer container = builder
-        //    .AddTransient<IClass2>(b => b
-        //        .WithResolvingType(resolvingType))
-        //    .Build();
-
-        //// Assert
-        //AssertValidContainer(container, DependencyLifetime.Transient);
+        // Assert
+        AssertValidDependencies(container, mockServiceLocater);
     }
 
     [Fact]
     public void GetContainerBuilderMoreThanOnce_ReturnsSameInstanceEachTime()
     {
-        //// Arrange/Act
-        //ContainerBuilder builder1 = ContainerBuilder.Current;
-        //ContainerBuilder builder2 = ContainerBuilder.Current;
-        //ContainerBuilder builder3 = ContainerBuilder.Current;
+        // Arrange/Act
+        IContainerBuilder builder1 = ContainerBuilder.Current;
+        IContainerBuilder builder2 = ContainerBuilder.Current;
+        IContainerBuilder builder3 = ContainerBuilder.Current;
 
-        //// Assert
-        //builder1
-        //    .Should()
-        //    .BeSameAs(builder2)
-        //    .And
-        //    .BeSameAs(builder3);
+        // Assert
+        builder1
+            .Should()
+            .BeSameAs(builder2)
+            .And
+            .BeSameAs(builder3);
     }
 
     [Fact]
     public void TryToAddDependencyAfterContainerBuilt_ShouldThrowException()
     {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //_ = builder
-        //    .AddTransient<IClass1>(b => b
-        //        .WithResolvingType<Class1>())
-        //    .Build();
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Mock<IDependencyListBuilder> mockDependencyList = mockServiceLocater.GetMock<IDependencyListBuilder>();
+        mockServiceLocater.CreateMock<IContainer>();
+        IDependency dependency = new Dependency(typeof(IClass1),
+                                                typeof(Class1),
+                                                DependencyLifetime.Transient,
+                                                null,
+                                                EmptyKey);
+        SetupMockDependencyList(mockDependencyList, [dependency]);
+        IContainerBuilder builder = ContainerBuilder.GetTestInstance(mockServiceLocater);
+        _ = builder
+            .AddTransient<IClass1>(b => b
+                .WithResolvingType<Class1>())
+            .Build();
+        string msg = MsgCantAddToContainerAfterBuild;
 
-        //// Act
-        //void action() => builder
-        //    .AddTransient<IClass2>(b => b
-        //        .WithResolvingType<Class2>());
+        // Act
+        void action() => builder
+            .AddTransient<IClass2>(b => b
+                .WithResolvingType<Class2>());
 
-        //// Assert
-        //AssertException(action, MsgCantAddToContainerAfterBuild);
-    }
-
-    [Fact]
-    public void TryToAddDuplicateDependencyTypeToContainer_ShouldThrowException()
-    {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //Type dependencyType = typeof(IClass1);
-        //Type resolvingType1 = typeof(Class1);
-        //string typeName = nameof(IClass1);
-        //string msg = string.Format(MsgDuplicateDependency, typeName);
-
-        //// Act
-        //void action() => builder
-        //    .AddDependency(b => b
-        //        .WithDependencyType(dependencyType)
-        //        .WithResolvingType(resolvingType1)
-        //        .WithLifetime(DependencyLifetime.Singleton))
-        //    .AddDependency(b => b
-        //        .WithDependencyType(dependencyType)
-        //        .WithResolvingType<Class1A>()
-        //        .WithLifetime(DependencyLifetime.Transient))
-        //    .Build();
-
-        //// Assert
-        //AssertException(action, msg);
+        // Assert
+        AssertException(action, msg, mockServiceLocater);
     }
 
     [Fact]
     public void TryToBuildContainerAfterContainerAlreadyBuilt_ShouldThrowException()
     {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //_ = builder
-        //    .AddTransient<IClass1>(b => b
-        //        .WithResolvingType<Class1>())
-        //    .Build();
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Mock<IDependencyListBuilder> mockDependencyList = mockServiceLocater.GetMock<IDependencyListBuilder>();
+        mockServiceLocater.CreateMock<IContainer>();
+        IDependency dependency = new Dependency(typeof(IClass1),
+                                                typeof(Class1),
+                                                DependencyLifetime.Transient,
+                                                null,
+                                                EmptyKey);
+        SetupMockDependencyList(mockDependencyList, [dependency]);
+        IContainerBuilder builder = ContainerBuilder.GetTestInstance(mockServiceLocater);
+        _ = builder
+            .AddTransient<IClass1>(b => b
+                .WithResolvingType<Class1>())
+            .Build();
+        string msg = MsgContainerCantBeBuiltMoreThanOnce;
 
-        //// Act
-        //void action() => builder
-        //    .Build();
+        // Act
+        void action() => builder
+            .Build();
 
-        //// Assert
-        //AssertException(action, MsgContainerCantBeBuiltMoreThanOnce);
+        // Assert
+        AssertException(action, msg, mockServiceLocater);
     }
 
     [Fact]
     public void TryToBuildEmptyContainer_ShouldThrowException()
     {
-        //// Arrange
-        //ContainerBuilder builder = ContainerBuilder.TestInstance;
-        //string msg = MsgContainerIsEmpty;
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Mock<IDependencyListBuilder> mockDependencyList = mockServiceLocater.GetMock<IDependencyListBuilder>();
+        mockServiceLocater.CreateMock<IContainer>();
+        mockDependencyList
+            .SetupGet(m => m.Count)
+            .Returns(0);
+        IContainerBuilder builder = ContainerBuilder.GetTestInstance(mockServiceLocater);
+        string msg = MsgContainerIsEmpty;
 
-        //// Act
-        //void action() => builder.Build();
+        // Act
+        void action() => builder.Build();
 
-        //// Assert
-        //AssertException(action, msg);
+        // Assert
+        AssertException(action, msg, mockServiceLocater);
     }
 
-    //private static void AssertException(Action action, string msg)
-    //{
-    //    // Assert
-    //    action
-    //        .Should()
-    //        .ThrowExactly<ContainerBuildException>()
-    //        .WithMessage(msg);
-    //}
+    private static void AssertException(Action action, string msg, MockServiceLocater mockServiceLocater)
+    {
+        // Assert
+        action
+            .Should()
+            .ThrowExactly<ContainerBuildException>()
+            .WithMessage(msg);
+        mockServiceLocater.VerifyMocks();
+    }
 
-    //private static Dictionary<Type, IDependency> GetDependencies(IContainer container)
-    //                                            => ((Container)container).Dependencies;
+    private static void AssertValidDependencies(IContainer container, MockServiceLocater mockServiceLocater)
+    {
+        container
+            .Should()
+            .NotBeNull();
+        container
+            .Should()
+            .BeSameAs(mockServiceLocater.Get<IContainer>());
+        mockServiceLocater.VerifyMocks();
+    }
 
-    //private static Dictionary<Type, object> GetResolvingObjects(IContainer container)
-    //{
-    //    Container theContainer = (Container)container;
-    //    ResolvingObjectsService resolvingObjects = (ResolvingObjectsService)theContainer.ResolvingObjectsService;
-    //    return resolvingObjects.ResolvingObjects;
-    //}
+    private void SetupMockDependencyList(Mock<IDependencyListBuilder> mockDependencyList, IDependency[] dependencies)
+    {
+        foreach (IDependency dependency in dependencies)
+        {
+            mockDependencyList
+                .Setup(m => m.Add(dependency))
+                .Verifiable(Times.Once);
+        }
 
-    //private void AssertValidContainer(IContainer container, DependencyLifetime lifetime)
-    //{
-    //    // Assert
-    //    container
-    //        .Should()
-    //        .NotBeNull();
-    //    Dictionary<Type, IDependency> dependencies = GetDependencies(container);
-    //    dependencies
-    //        .Should()
-    //        .HaveCount(2)
-    //        .And
-    //        .ContainKeys(typeof(IClass2), _containerType);
-    //    IDependency dependency = dependencies[typeof(IClass2)];
-    //    dependency.DependencyType
-    //        .Should()
-    //        .Be<IClass2>();
-    //    dependency.ResolvingType
-    //        .Should()
-    //        .Be<Class2>();
-    //    dependency.Lifetime
-    //        .Should()
-    //        .Be(lifetime);
-    //    dependency.Factory
-    //        .Should()
-    //        .BeNull();
-    //}
+        mockDependencyList
+            .Setup(m => m.Add(_containerDependency))
+            .Verifiable(Times.Once);
+        mockDependencyList
+            .SetupGet(m => m.Count)
+            .Returns(dependencies.Length)
+            .Verifiable(Times.Once);
+    }
 }

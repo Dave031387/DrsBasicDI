@@ -1,8 +1,19 @@
 ﻿namespace DrsBasicDI;
 
-internal class MockServiceLocater : IServiceLocater, IMockServiceLocater
+internal class MockServiceLocater : IMockServiceLocater
 {
     private readonly Dictionary<ServiceKey, Mock> _mockObjects = [];
+
+    public void CreateMock<T>(string key = EmptyKey) where T : class
+    {
+        ServiceKey serviceKey = new(typeof(T), key);
+
+        _mockObjects
+            .Should()
+            .NotContainKey(serviceKey, "the mock object can only be created once");
+
+        _mockObjects[serviceKey] = new Mock<T>(MockBehavior.Strict);
+    }
 
     public T Get<T>(string key = EmptyKey) where T : class
     {
@@ -10,7 +21,7 @@ internal class MockServiceLocater : IServiceLocater, IMockServiceLocater
 
         _mockObjects
             .Should()
-            .ContainKey(serviceKey);
+            .ContainKey(serviceKey, "the mock object should have already been created");
 
         return ((Mock<T>)_mockObjects[serviceKey]).Object;
     }
@@ -24,10 +35,8 @@ internal class MockServiceLocater : IServiceLocater, IMockServiceLocater
             return (Mock<T>)value;
         }
 
-        Mock<T> mock = new(MockBehavior.Strict);
-        _mockObjects[serviceKey] = mock;
-
-        return mock;
+        CreateMock<T>(key);
+        return (Mock<T>)_mockObjects[serviceKey];
     }
 
     public void VerifyMocks() => Mock.VerifyAll([.. _mockObjects.Values]);

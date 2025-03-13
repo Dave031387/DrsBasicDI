@@ -37,8 +37,9 @@ public sealed class DependencyBuilder
     /// Default constructor for the <see cref="DependencyBuilder" /> class.
     /// </summary>
     /// <remarks>
-    /// This constructor is declared <see langword="private" />. Use the static <see cref="Empty" />
-    /// property to create a new, empty <see cref="DependencyBuilder" /> object.
+    /// This constructor is declared <see langword="private" />. Use the static
+    /// <see cref="CreateNew" /> property to create a new, empty <see cref="DependencyBuilder" />
+    /// object.
     /// </remarks>
     private DependencyBuilder()
     {
@@ -47,7 +48,7 @@ public sealed class DependencyBuilder
     /// <summary>
     /// Gets a new instance of an empty <see cref="DependencyBuilder" /> object.
     /// </summary>
-    public static DependencyBuilder Empty => new();
+    public static DependencyBuilder CreateNew => new();
 
     /// <summary>
     /// Gets the friendly name of the dependency type, or "N/A" if the dependency type hasn't yet
