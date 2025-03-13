@@ -3,7 +3,7 @@
 /// <summary>
 /// The <see cref="Container" /> class implements a basic dependency injection container.
 /// </summary>
-public sealed class Container : IContainer
+internal sealed class Container : IContainer
 {
     /// <summary>
     /// Create a new instance of the <see cref="Container" /> class.
@@ -21,8 +21,8 @@ public sealed class Container : IContainer
     internal Container(IServiceLocater serviceLocater)
     {
         ServiceLocater = serviceLocater;
-        ResolvingObjectsService = ServiceLocater.Get<IResolvingObjectsService>(NonScoped);
-        _ = ResolvingObjectsService.Add<IContainer>(this, EmptyKey);
+        IResolvingObjectsService resolvingObjectsService = ServiceLocater.Get<IResolvingObjectsService>(NonScoped);
+        _ = resolvingObjectsService.Add<IContainer>(this, EmptyKey);
         DependencyResolver = ServiceLocater.Get<IDependencyResolver>(NonScoped);
     }
 
@@ -30,15 +30,6 @@ public sealed class Container : IContainer
     /// Get the <see cref="IDependencyResolver" /> instance used to resolve dependencies.
     /// </summary>
     private IDependencyResolver DependencyResolver
-    {
-        get;
-    }
-
-    /// <summary>
-    /// Get the <see cref="IResolvingObjectsService" /> instance used to manage all the non-scoped
-    /// resolved dependencies in this dependency injection container.
-    /// </summary>
-    private IResolvingObjectsService ResolvingObjectsService
     {
         get;
     }
