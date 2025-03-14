@@ -107,11 +107,13 @@ public sealed class DependencyBuilder
     /// This <see cref="DependencyBuilder" /> instance after it has been updated with the dependency
     /// type information.
     /// </returns>
-    /// <exception cref="ArgumentNullException" />
     /// <exception cref="DependencyBuildException" />
     internal DependencyBuilder WithDependencyType(Type dependencyType)
     {
-        ArgumentNullException.ThrowIfNull(dependencyType, nameof(dependencyType));
+        if (dependencyType is null)
+        {
+            throw new DependencyBuildException(MsgNullDependencyType);
+        }
 
         if (_dependencyType is not null)
         {
@@ -135,11 +137,14 @@ public sealed class DependencyBuilder
     /// This <see cref="DependencyBuilder" /> instance after it has been updated with the factory
     /// delegate information.
     /// </returns>
-    /// <exception cref="ArgumentNullException" />
     /// <exception cref="DependencyBuildException" />
     internal DependencyBuilder WithFactory(Func<object> factory)
     {
-        ArgumentNullException.ThrowIfNull(factory, nameof(factory));
+        if (factory is null)
+        {
+            string msg = string.Format(MsgNullFactory, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
 
         if (_factory is not null)
         {
@@ -185,7 +190,7 @@ public sealed class DependencyBuilder
     /// Specify the optional key that can be used to identify this <see cref="IDependency" />
     /// object.
     /// </summary>
-    /// <param name="key">
+    /// <param name="resolvingKey">
     /// A <see langword="string" /> value to be used as the key.
     /// </param>
     /// <returns>
@@ -193,9 +198,13 @@ public sealed class DependencyBuilder
     /// key information.
     /// </returns>
     /// <exception cref="DependencyBuildException" />
-    internal DependencyBuilder WithResolvingKey(string key)
+    internal DependencyBuilder WithResolvingKey(string resolvingKey)
     {
-        ArgumentNullException.ThrowIfNull(key, nameof(key));
+        if (resolvingKey is null)
+        {
+            string msg = string.Format(MsgNullResolvingKey, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
 
         if (_resolvingKey is not null)
         {
@@ -203,7 +212,7 @@ public sealed class DependencyBuilder
             throw new DependencyBuildException(msg);
         }
 
-        _resolvingKey = key;
+        _resolvingKey = resolvingKey;
         return this;
     }
 
@@ -231,11 +240,14 @@ public sealed class DependencyBuilder
     /// This <see cref="DependencyBuilder" /> instance after it has been updated with the resolving
     /// type information.
     /// </returns>
-    /// <exception cref="ArgumentNullException" />
     /// <exception cref="DependencyBuildException" />
     internal DependencyBuilder WithResolvingType(Type resolvingType)
     {
-        ArgumentNullException.ThrowIfNull(resolvingType, nameof(resolvingType));
+        if (resolvingType is null)
+        {
+            string msg = string.Format(MsgNullResolvingType, DependencyTypeName);
+            throw new DependencyBuildException(msg);
+        }
 
         if (_resolvingType is not null)
         {

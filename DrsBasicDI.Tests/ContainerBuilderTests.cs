@@ -235,7 +235,8 @@ public class ContainerBuilderTests
                 .WithResolvingType<Class2>());
 
         // Assert
-        AssertException(action, msg, mockServiceLocater);
+        TestHelper.AssertException<ContainerBuildException>(action, msg);
+        mockServiceLocater.VerifyMocks();
     }
 
     [Fact]
@@ -263,7 +264,8 @@ public class ContainerBuilderTests
             .Build();
 
         // Assert
-        AssertException(action, msg, mockServiceLocater);
+        TestHelper.AssertException<ContainerBuildException>(action, msg);
+        mockServiceLocater.VerifyMocks();
     }
 
     [Fact]
@@ -283,16 +285,7 @@ public class ContainerBuilderTests
         void action() => builder.Build();
 
         // Assert
-        AssertException(action, msg, mockServiceLocater);
-    }
-
-    private static void AssertException(Action action, string msg, MockServiceLocater mockServiceLocater)
-    {
-        // Assert
-        action
-            .Should()
-            .ThrowExactly<ContainerBuildException>()
-            .WithMessage(msg);
+        TestHelper.AssertException<ContainerBuildException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 
