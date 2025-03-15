@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// The <see cref="IResolvingObjectsService" /> interface defines the methods used for maintaining the list
 /// of resolved dependency objects.
 /// </summary>
-internal interface IResolvingObjectsService
+internal interface IResolvingObjectsService : IDisposable
 {
     /// <summary>
     /// Get the dictionary of resolving objects.
@@ -35,12 +35,6 @@ internal interface IResolvingObjectsService
     /// objects if one already exists for the given dependency type <typeparamref name="T" />.
     /// </returns>
     public T Add<T>(T resolvingObject, string key) where T : class;
-
-    /// <summary>
-    /// Remove all objects from the list of resolved dependencies. Call Dispose on each object that
-    /// implements the <see cref="IDisposable" /> interface.
-    /// </summary>
-    public void Clear();
 
     /// <summary>
     /// Check to see if the specified dependency type has been resolved and, if it has, return the

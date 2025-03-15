@@ -51,6 +51,12 @@ internal sealed class Container : IContainer
     public IScope CreateScope() => ServiceLocater.Get<IScope>();
 
     /// <summary>
+    /// Dispose of any resources held by any singleton or globally-scoped dependency objects that
+    /// have been created by this dependency injection container.
+    /// </summary>
+    public void Dispose() => DependencyResolver.Dispose();
+
+    /// <summary>
     /// Get an instance of the resolving class that is mapped to the given dependency type
     /// <typeparamref name="T" />.
     /// </summary>

@@ -4,7 +4,7 @@
 /// The <see cref="IContainer" /> interface defines the methods and properties for a simple
 /// dependency injection container.
 /// </summary>
-public interface IContainer
+public interface IContainer : IDisposable
 {
     /// <summary>
     /// Create a new <see cref="IScope" /> object to be used in managing a dependency scope.

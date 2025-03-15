@@ -62,12 +62,12 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
     /// objects if one already exists for the given dependency type <typeparamref name="T" /> and
     /// <paramref name="key" />.
     /// </returns>
-    public T Add<T>(T resolvingObject, string key = EmptyKey) where T : class
+    public T Add<T>(T resolvingObject, string key) where T : class
     {
         IDependency dependency = DependencyList.Get<T>(key);
         ServiceKey serviceKey = ServiceKey.GetServiceResolvingKey(dependency);
 
-        if (TryGetResolvingObject(out T? value))
+        if (TryGetResolvingObject(out T? value, key))
         {
             // If we get here then a resolving object for the given dependency type has already been
             // added to the container and the resolving object that was added isn't null.
@@ -87,7 +87,7 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
     /// Remove all objects from the list of resolved dependencies. Call Dispose on each object that
     /// implements the <see cref="IDisposable" /> interface.
     /// </summary>
-    public void Clear()
+    public void Dispose()
     {
         lock (_lock)
         {
@@ -122,7 +122,7 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
     /// <see langword="true" /> if the given dependency type has been resolved, otherwise
     /// <see langword="false" />.
     /// </returns>
-    public bool TryGetResolvingObject<T>(out T? resolvingObject, string key = EmptyKey) where T : class
+    public bool TryGetResolvingObject<T>(out T? resolvingObject, string key) where T : class
     {
         IDependency dependency = DependencyList.Get<T>(key);
         ServiceKey serviceKey = ServiceKey.GetServiceResolvingKey(dependency);

@@ -4,7 +4,7 @@
 /// The <see cref="IDependencyResolver" /> interface defines the methods implemented by the
 /// dependency resolver object.
 /// </summary>
-internal interface IDependencyResolver
+internal interface IDependencyResolver : IDisposable
 {
     /// <summary>
     /// Retrieve the resolving object for the given dependency type <typeparamref name="T" />.

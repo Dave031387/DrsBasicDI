@@ -2,7 +2,7 @@
 
 using System.Reflection;
 
-public class ExtensionsTests
+public class TypeExtensionsTests
 {
     [Theory]
     [MemberData(nameof(TestDataGenerator.GetArrayTypes), MemberType = typeof(TestDataGenerator))]
@@ -97,12 +97,9 @@ public class ExtensionsTests
         string expected = string.Format(MsgNoSuitableConstructors, typeName);
 
         // Act
-        Action action = () => type.GetPrimaryConstructorInfo();
+        void action() => type.GetPrimaryConstructorInfo();
 
         // Assert
-        action
-            .Should()
-            .ThrowExactly<DependencyInjectionException>()
-            .WithMessage(expected);
+        TestHelper.AssertException<DependencyInjectionException>(action, expected);
     }
 }

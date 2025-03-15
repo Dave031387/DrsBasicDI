@@ -75,6 +75,14 @@ internal sealed class DependencyResolver : IDependencyResolver
     }
 
     /// <summary>
+    /// Call the <see cref="ResolvingObjectsService.Dispose()" /> method on the
+    /// <see cref="NonscopedResolver" /> instance to dispose of any resources that may be owned by
+    /// singleton or globally-scoped dependency objects that were created by the dependency
+    /// injection container.
+    /// </summary>
+    public void Dispose() => NonscopedResolver.Dispose();
+
+    /// <summary>
     /// Retrieve the resolving object for the given dependency type <typeparamref name="T" />.
     /// </summary>
     /// <typeparam name="T">

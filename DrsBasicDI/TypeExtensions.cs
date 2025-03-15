@@ -3,10 +3,10 @@
 using System.Reflection;
 
 /// <summary>
-/// The <see cref="Extensions" /> class extends the <see cref="Type" /> class by adding a couple
+/// The <see cref="TypeExtensions" /> class extends the <see cref="Type" /> class by adding a couple
 /// methods that are used by the <see cref="DrsBasicDI" /> class library.
 /// </summary>
-internal static class Extensions
+internal static class TypeExtensions
 {
     /// <summary>
     /// A dictionary of predefined types whose key is the predefined type and whose value is the

@@ -6,11 +6,6 @@
 internal sealed class Scope : IScope
 {
     /// <summary>
-    /// Flag to detect redundant calls to the <see cref="Dispose(bool)" /> method.
-    /// </summary>
-    internal bool _isDisposed;
-
-    /// <summary>
     /// Create a new instance of the <see cref="Scope" /> class.
     /// </summary>
     public Scope() : this(ServiceLocater.Instance)
@@ -47,37 +42,10 @@ internal sealed class Scope : IScope
     }
 
     /// <summary>
-    /// Dispose of the managed resources that are owned by this scope.
+    /// Dispose of any resources owned by any scoped dependency objects that have been built in this
+    /// scope.
     /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Dispose of the managed resources that are owned by this scope and then set a flag to prevent
-    /// redundant calls to this method.
-    /// </summary>
-    /// <param name="disposing">
-    /// A boolean flag indicating whether or not managed resources should be disposed of.
-    /// </param>
-    public void Dispose(bool disposing)
-    {
-        if (_isDisposed)
-        {
-            return;
-        }
-
-        if (disposing)
-        {
-            ResolvingObjectsService.Clear();
-        }
-
-        // Unmanaged resources would be freed here if there were any.
-
-        _isDisposed = true;
-    }
+    public void Dispose() => ResolvingObjectsService.Dispose();
 
     /// <summary>
     /// Gets an instance of the resolving type that is mapped to the given dependency type

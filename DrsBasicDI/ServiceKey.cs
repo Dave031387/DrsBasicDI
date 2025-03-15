@@ -58,7 +58,7 @@ internal sealed class ServiceKey(Type type, string key) : IEquatable<ServiceKey>
     /// <returns>
     /// The requested <see cref="ServiceKey" /> object.
     /// </returns>
-    internal static ServiceKey GetServiceKey<T>(string key = EmptyKey) where T : class
+    internal static ServiceKey GetServiceKey<T>(string key) where T : class
         => new(typeof(T), key);
 
     /// <summary>
@@ -74,7 +74,7 @@ internal sealed class ServiceKey(Type type, string key) : IEquatable<ServiceKey>
     /// <returns>
     /// The requested <see cref="ServiceKey" /> object.
     /// </returns>
-    internal static ServiceKey GetServiceKey(Type type, string key = EmptyKey)
+    internal static ServiceKey GetServiceKey(Type type, string key)
         => new(type, key);
 
     /// <summary>

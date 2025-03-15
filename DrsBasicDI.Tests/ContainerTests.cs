@@ -58,6 +58,29 @@ public class ContainerTests
     }
 
     [Fact]
+    public void Dispose_ShouldCallDependencyResolverDispose()
+    {
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Mock<IDependencyResolver> mockDependencyResolver = mockServiceLocater.GetMock<IDependencyResolver>(NonScoped);
+        mockDependencyResolver
+            .Setup(m => m.Dispose())
+            .Verifiable(Times.Once);
+        Mock<IResolvingObjectsService> mockResolvingObjectsService = mockServiceLocater.GetMock<IResolvingObjectsService>(NonScoped);
+        mockResolvingObjectsService
+            .Setup(m => m.Add<IContainer>(It.IsAny<Container>(), EmptyKey))
+            .Returns(It.IsAny<IContainer>())
+            .Verifiable(Times.Once);
+        Container container = new(mockServiceLocater);
+
+        // Act
+        container.Dispose();
+
+        // Assert
+        mockServiceLocater.VerifyMocks();
+    }
+
+    [Fact]
     public void GetDependency_ShouldCallDependencyResolver()
     {
         // Arrange
