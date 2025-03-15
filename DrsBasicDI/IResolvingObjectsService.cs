@@ -1,7 +1,6 @@
 ﻿namespace DrsBasicDI;
 
 using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// The <see cref="IResolvingObjectsService" /> interface defines the methods used for maintaining the list
@@ -9,14 +8,6 @@ using System.Collections.Generic;
 /// </summary>
 internal interface IResolvingObjectsService : IDisposable
 {
-    /// <summary>
-    /// Get the dictionary of resolving objects.
-    /// </summary>
-    public Dictionary<ServiceKey, object> ResolvingObjects
-    {
-        get;
-    }
-
     /// <summary>
     /// Add the given <paramref name="resolvingObject" /> to the list of resolving objects if no
     /// object currently exists for the given dependency type <typeparamref name="T" />.
