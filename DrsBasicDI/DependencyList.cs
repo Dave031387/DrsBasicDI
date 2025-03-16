@@ -11,7 +11,7 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
     /// <summary>
     /// Create a new instance of the <see cref="DependencyList" /> class.
     /// </summary>
-    public DependencyList()
+    internal DependencyList()
     {
     }
 

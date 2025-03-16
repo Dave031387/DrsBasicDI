@@ -3,43 +3,22 @@
 public class DependencyResolverTests
 {
     [Fact]
-    public void ConstructUsingNullDependencies_ShouldThrowException()
+    public void ConstructUsingValidDependencies_ShouldConstructObject()
     {
-        //// Arrange
-        //Mock<IObjectConstructor> mockObjectConstructor = GetMockObjectConstructor();
-        //Mock<IResolvingObjectsService> mockNonScopedService = GetMockResolvingObjectsService();
-        //string parameterName = "dependencies";
-        //string expected = string.Format(MsgInvalidNullArgument, parameterName);
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        mockServiceLocater.CreateMock<IDependencyListConsumer>();
+        mockServiceLocater.CreateMock<IObjectConstructor>();
+        mockServiceLocater.CreateMock<IResolvingObjectsService>(NonScoped);
 
-        //// Act
-        //Action action = () => _ = new DependencyResolver(null!, mockObjectConstructor.Object, mockNonScopedService.Object);
+        // Act
+        DependencyResolver actual = new(mockServiceLocater);
 
-        //// Assert
-        //action
-        //    .Should()
-        //    .ThrowExactly<ArgumentNullException>()
-        //    .WithMessage(expected);
-        //VerifyMocks(mockObjectConstructor, mockNonScopedService);
-    }
-
-    [Fact]
-    public void ConstructUsingNullNonScopedService_ShouldThrowException()
-    {
-        //// Arrange
-        //Mock<IObjectConstructor> mockObjectConstructor = GetMockObjectConstructor();
-        //Dictionary<Type, IDependency> dependencies = [];
-        //string parameterName = "nonScoped";
-        //string expected = string.Format(MsgInvalidNullArgument, parameterName);
-
-        //// Act
-        //Action action = () => _ = new DependencyResolver(dependencies, mockObjectConstructor.Object, null!);
-
-        //// Assert
-        //action
-        //    .Should()
-        //    .ThrowExactly<ArgumentNullException>()
-        //    .WithMessage(expected);
-        //VerifyMocks(mockObjectConstructor);
+        // Assert
+        actual
+            .Should()
+            .NotBeNull();
+        mockServiceLocater.VerifyMocks();
     }
 
     [Fact]
@@ -588,130 +567,5 @@ public class DependencyResolverTests
         }
 
         return mock;
-    }
-
-    private static Mock<IObjectConstructor> GetMockObjectConstructor()
-        => new(MockBehavior.Strict);
-
-    private static Mock<IResolvingObjectsService> GetMockResolvingObjectsService()
-        => new(MockBehavior.Strict);
-
-    private static Mock<IResolvingObjectsService> GetMockResolvingObjectsService<T>(T? getObject = null,
-                                                                                    bool isFound = false,
-                                                                                    T addObject = null!,
-                                                                                    bool anyAddedObject = false,
-                                                                                    T returnedObject = null!,
-                                                                                    T capturedObject = null!) where T : class
-    {
-        Mock<IResolvingObjectsService> mock = GetMockResolvingObjectsService();
-
-        SetupMockResolvingObjectsService(mock,
-                                         getObject,
-                                         isFound,
-                                         addObject,
-                                         anyAddedObject,
-                                         returnedObject,
-                                         capturedObject);
-
-        return mock;
-    }
-
-    private static void SetupMockResolvingObjectsService<T>(Mock<IResolvingObjectsService> mock,
-                                                            T? getObject,
-                                                            bool isFound = false,
-                                                            T addObject = null!,
-                                                            bool anyAddedObject = false,
-                                                            T returnedObject = null!,
-                                                            T capturedObject = null!) where T : class
-    {
-        //mock
-        //    .Setup(m => m.TryGetResolvingObject(out getObject))
-        //    .Returns(isFound)
-        //    .Verifiable(Times.Once);
-
-        //if (addObject is not null)
-        //{
-        //    if (returnedObject is not null)
-        //    {
-        //        mock
-        //            .Setup(m => m.Add(addObject))
-        //            .Returns(returnedObject)
-        //            .Verifiable(Times.Once);
-        //    }
-        //    else
-        //    {
-        //        mock
-        //            .Setup(m => m.Add(addObject))
-        //            .Returns(addObject)
-        //            .Verifiable(Times.Once);
-        //    }
-        //}
-        //else if (anyAddedObject)
-        //{
-        //    if (returnedObject is not null)
-        //    {
-        //        mock
-        //            .Setup(m => m.Add(It.IsAny<T>()))
-        //            .Returns(returnedObject)
-        //            .Verifiable(Times.Once);
-        //    }
-        //    else
-        //    {
-        //        capturedObject
-        //            .Should()
-        //            .NotBeNull("capturedObject must not be null when anyAddedObject is true and returnedObject is null");
-        //        mock
-        //            .Setup(m => m.Add(It.IsAny<T>()))
-        //            .Callback<T>(obj => capturedObject = obj)
-        //            .Returns(() => capturedObject)
-        //            .Verifiable(Times.Once);
-        //    }
-        //}
-    }
-
-    private static void VerifyMocks(Mock<IObjectConstructor>? mockObjectConstructor = null,
-                                    Mock<IResolvingObjectsService>? mockNonScopedService = null,
-                                    Mock<IResolvingObjectsService>? mockScopedService = null,
-                                    params Mock<IDependency>[] mockDependencies)
-    {
-        if (mockObjectConstructor is not null)
-        {
-            if (mockObjectConstructor.Setups.Any())
-            {
-                mockObjectConstructor.VerifyAll();
-            }
-
-            mockObjectConstructor.VerifyNoOtherCalls();
-        }
-
-        if (mockNonScopedService is not null)
-        {
-            if (mockNonScopedService.Setups.Any())
-            {
-                mockNonScopedService.VerifyAll();
-            }
-
-            mockNonScopedService.VerifyNoOtherCalls();
-        }
-
-        if (mockScopedService is not null)
-        {
-            if (mockScopedService.Setups.Any())
-            {
-                mockScopedService.VerifyAll();
-            }
-
-            mockScopedService.VerifyNoOtherCalls();
-        }
-
-        foreach (Mock<IDependency> mockDependency in mockDependencies)
-        {
-            if (mockDependency.Setups.Any())
-            {
-                mockDependency.VerifyAll();
-            }
-
-            mockDependency.VerifyNoOtherCalls();
-        }
     }
 }

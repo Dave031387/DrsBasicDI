@@ -79,7 +79,8 @@ internal sealed class ServiceLocater : IServiceLocater
             if (serviceDescriptor is not null)
             {
                 serviceKey = ServiceKey.GetServiceKey(serviceDescriptor.ImplementationType, key);
-                ConstructorInfo? constructorInfo = serviceDescriptor.ImplementationType.GetConstructor(Type.EmptyTypes);
+                BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                ConstructorInfo? constructorInfo = serviceDescriptor.ImplementationType.GetConstructor(bindingFlags, null, Type.EmptyTypes, null);
 
                 if (serviceDescriptor.Lifetime == DependencyLifetime.Singleton)
                 {
@@ -106,7 +107,8 @@ internal sealed class ServiceLocater : IServiceLocater
             }
         }
 
-        throw new InvalidOperationException($"No service for type {typeof(T)} has been registered.");
+        string msg = string.Format(MsgServiceNotRegistered, typeof(T).GetFriendlyName());
+        throw new InvalidOperationException(msg);
     }
 
     /// <summary>
@@ -123,7 +125,7 @@ internal sealed class ServiceLocater : IServiceLocater
     /// </param>
     private void RegisterSingleton<TInterface, TImplementation>(string key = EmptyKey)
         where TInterface : class
-        where TImplementation : TInterface, new()
+        where TImplementation : TInterface
     {
         ServiceKey serviceKey = ServiceKey.GetServiceKey<TInterface>(key);
         _serviceDescriptors[serviceKey] = new ServiceDescriptor(typeof(TInterface),
@@ -145,7 +147,7 @@ internal sealed class ServiceLocater : IServiceLocater
     /// </param>
     private void RegisterTransient<TInterface, TImplementation>(string key = EmptyKey)
         where TInterface : class
-        where TImplementation : TInterface, new()
+        where TImplementation : TInterface
     {
         ServiceKey serviceKey = ServiceKey.GetServiceKey<TInterface>(key);
         _serviceDescriptors[serviceKey] = new ServiceDescriptor(typeof(TInterface),

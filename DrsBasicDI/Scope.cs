@@ -8,7 +8,7 @@ internal sealed class Scope : IScope
     /// <summary>
     /// Create a new instance of the <see cref="Scope" /> class.
     /// </summary>
-    public Scope() : this(ServiceLocater.Instance)
+    internal Scope() : this(ServiceLocater.Instance)
     {
     }
 

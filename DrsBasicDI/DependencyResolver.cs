@@ -23,7 +23,7 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <summary>
     /// Create a new instance of the <see cref="DependencyResolver" /> class.
     /// </summary>
-    public DependencyResolver() : this(ServiceLocater.Instance)
+    internal DependencyResolver() : this(ServiceLocater.Instance)
     {
     }
 
@@ -115,7 +115,16 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <param name="resolvingObjectsService">
     /// The scoped <see cref="IResolvingObjectsService" /> instance to be set.
     /// </param>
-    public void SetScopedResolver(IResolvingObjectsService resolvingObjectsService) => ScopedResolver = resolvingObjectsService;
+    /// <exception cref="DependencyInjectionException" />
+    public void SetScopedResolver(IResolvingObjectsService resolvingObjectsService)
+    {
+        if (ReferenceEquals(resolvingObjectsService, NonScoped))
+        {
+            throw new DependencyInjectionException(MsgInvalidScopedResolvingObjectsService);
+        }
+
+        ScopedResolver = resolvingObjectsService;
+    }
 
     /// <summary>
     /// Construct the resolving object for the given dependency type <typeparamref name="T" />.

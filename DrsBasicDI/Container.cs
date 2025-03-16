@@ -8,7 +8,7 @@ internal sealed class Container : IContainer
     /// <summary>
     /// Create a new instance of the <see cref="Container" /> class.
     /// </summary>
-    public Container() : this(DrsBasicDI.ServiceLocater.Instance)
+    internal Container() : this(DrsBasicDI.ServiceLocater.Instance)
     {
     }
 

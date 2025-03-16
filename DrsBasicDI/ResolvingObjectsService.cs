@@ -20,7 +20,7 @@ internal sealed class ResolvingObjectsService : IResolvingObjectsService
     /// <summary>
     /// Create an instance of the <see cref="ResolvingObjectsService" /> class.
     /// </summary>
-    public ResolvingObjectsService() : this(ServiceLocater.Instance)
+    internal ResolvingObjectsService() : this(ServiceLocater.Instance)
     {
     }
 
