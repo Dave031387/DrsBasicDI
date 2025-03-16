@@ -138,6 +138,7 @@ public class ResolvingObjectsServiceTests
         resolvingObject
             .Should()
             .BeNull();
+        mockServiceLocater.VerifyMocks();
     }
 
     [Fact]
@@ -170,6 +171,7 @@ public class ResolvingObjectsServiceTests
         resolvingObject
             .Should()
             .BeSameAs(expected);
+        mockServiceLocater.VerifyMocks();
     }
 
     [Fact]
@@ -201,5 +203,6 @@ public class ResolvingObjectsServiceTests
         resolvingObject
             .Should()
             .BeNull();
+        mockServiceLocater.VerifyMocks();
     }
 }

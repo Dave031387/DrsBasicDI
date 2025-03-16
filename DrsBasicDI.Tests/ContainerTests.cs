@@ -17,7 +17,7 @@ public class ContainerTests
             .Verifiable(Times.Once);
 
         // Act
-        Container container = new Container(mockServiceLocater);
+        Container container = new(mockServiceLocater);
 
         // Assert
         container
