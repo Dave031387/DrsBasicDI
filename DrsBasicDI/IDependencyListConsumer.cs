@@ -1,5 +1,7 @@
 ﻿namespace DrsBasicDI;
 
+using System;
+
 /// <summary>
 /// The <see cref="IDependencyListConsumer" /> interface defines the properties and methods needed
 /// for retrieving information from the dependency list.
@@ -22,4 +24,21 @@ internal interface IDependencyListConsumer
     /// <typeparamref name="T" /> and <paramref name="key" /> value.
     /// </returns>
     public IDependency Get<T>(string key) where T : class;
+
+    /// <summary>
+    /// Get the <see cref="IDependency" /> object for the given <paramref name="dependencyType" />
+    /// and <paramref name="key" /> value.
+    /// </summary>
+    /// <param name="dependencyType">
+    /// The type of dependency to be retrieved.
+    /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific <see cref="IDependency" /> object to be
+    /// retrieved.
+    /// </param>
+    /// <returns>
+    /// The <see cref="IDependency" /> instance corresponding to the given
+    /// <paramref name="dependencyType" /> and <paramref name="key" /> value.
+    /// </returns>
+    public IDependency Get(Type dependencyType, string key);
 }

@@ -9,6 +9,12 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
     private readonly Dictionary<ServiceKey, IDependency> _dependencies = [];
 
     /// <summary>
+    /// A lock object used to ensure thread safety when accessing or saving
+    /// <see cref="IDependency" /> objects.
+    /// </summary>
+    private readonly object _lock = new();
+
+    /// <summary>
     /// Create a new instance of the <see cref="DependencyList" /> class.
     /// </summary>
     internal DependencyList()
@@ -31,13 +37,17 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
     {
         ServiceKey serviceKey = ServiceKey.GetServiceDependencyKey(dependency);
 
-        if (_dependencies.ContainsKey(serviceKey))
+        lock (_lock)
         {
-            string msg = string.Format(MsgDuplicateDependency, dependency.DependencyType.GetFriendlyName());
-            throw new ContainerBuildException(msg);
-        }
+            if (_dependencies.ContainsKey(serviceKey))
+            {
+                string dependencyName = GetDependencyName(dependency.DependencyType.GetFriendlyName(), dependency.Key);
+                string msg = string.Format(MsgDuplicateDependency, dependencyName);
+                throw new ContainerBuildException(msg);
+            }
 
-        _dependencies[serviceKey] = dependency;
+            _dependencies[serviceKey] = dependency;
+        }
     }
 
     /// <summary>
@@ -56,25 +66,46 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
     /// <typeparamref name="T" /> and <paramref name="key" /> value.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    public IDependency Get<T>(string key = EmptyKey) where T : class
-    {
-        ServiceKey serviceKey = ServiceKey.GetServiceKey<T>(key);
-        string dependencyTypeName = typeof(T).GetFriendlyName();
+    public IDependency Get<T>(string key) where T : class
+        => Get(typeof(T), key);
 
-        if (_dependencies.TryGetValue(serviceKey, out IDependency? dependency))
+    /// <summary>
+    /// Get the <see cref="IDependency" /> object for the given <paramref name="dependencyType" />
+    /// and <paramref name="key" /> value.
+    /// </summary>
+    /// <param name="dependencyType">
+    /// The type of dependency to be retrieved.
+    /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific <see cref="IDependency" /> object to be
+    /// retrieved.
+    /// </param>
+    /// <returns>
+    /// The <see cref="IDependency" /> instance corresponding to the given
+    /// <paramref name="dependencyType" /> and <paramref name="key" /> value.
+    /// </returns>
+    /// <exception cref="DependencyInjectionException" />
+    public IDependency Get(Type dependencyType, string key)
+    {
+        ServiceKey serviceKey = ServiceKey.GetServiceKey(dependencyType, key);
+        string dependencyName = GetDependencyName(dependencyType.GetFriendlyName(), key);
+
+        lock (_lock)
         {
-            if (dependency is null)
+            if (_dependencies.TryGetValue(serviceKey, out IDependency? dependency))
             {
-                string msg = string.Format(MsgNullDependencyObject, dependencyTypeName);
+                if (dependency is null)
+                {
+                    string msg = string.Format(MsgNullDependencyObject, dependencyName);
+                    throw new DependencyInjectionException(msg);
+                }
+                return dependency;
+            }
+            else
+            {
+                string msg = string.Format(MsgDependencyMappingNotFound, dependencyName);
                 throw new DependencyInjectionException(msg);
             }
-
-            return dependency;
-        }
-        else
-        {
-            string msg = string.Format(MsgDependencyMappingNotFound, dependencyTypeName);
-            throw new DependencyInjectionException(msg);
         }
     }
 }

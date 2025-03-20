@@ -4,6 +4,37 @@ using System.Reflection;
 
 public class TypeExtensionsTests
 {
+    [Fact]
+    public void GetDIConstructorInfoForClassType_ShouldReturnConstructorInfoWithMostParameters()
+    {
+        // Arrange
+        Type type = typeof(Class1);
+        ConstructorInfo expected = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, [typeof(int), typeof(string)])!;
+
+        // Act
+        ConstructorInfo actual = type.GetDIConstructorInfo();
+
+        // Assert
+        actual
+            .Should()
+            .BeSameAs(expected);
+    }
+
+    [Fact]
+    public void GetDIConstructorInfoForValueType_ShouldThrowException()
+    {
+        // Arrange
+        Type type = typeof(int);
+        string typeName = GetResolvingName("int");
+        string expected = string.Format(MsgNoSuitableConstructors, typeName);
+
+        // Act
+        void action() => type.GetDIConstructorInfo();
+
+        // Assert
+        TestHelper.AssertException<DependencyInjectionException>(action, expected);
+    }
+
     [Theory]
     [MemberData(nameof(TestDataGenerator.GetArrayTypes), MemberType = typeof(TestDataGenerator))]
     public void GetFriendlyNameForArrayTypes_ShouldGenerateFriendlyName(Type type, string expected)
@@ -70,36 +101,5 @@ public class TypeExtensionsTests
         actual
             .Should()
             .Be(expected);
-    }
-
-    [Fact]
-    public void GetPrimaryConstructorInfoForClassType_ShouldReturnConstructorInfoWithMostParameters()
-    {
-        // Arrange
-        Type type = typeof(Class1);
-        ConstructorInfo expected = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, [typeof(int), typeof(string)])!;
-
-        // Act
-        ConstructorInfo actual = type.GetPrimaryConstructorInfo();
-
-        // Assert
-        actual
-            .Should()
-            .BeSameAs(expected);
-    }
-
-    [Fact]
-    public void GetPrimaryConstructorInfoForValueType_ShouldThrowException()
-    {
-        // Arrange
-        Type type = typeof(int);
-        string typeName = "int";
-        string expected = string.Format(MsgNoSuitableConstructors, typeName);
-
-        // Act
-        void action() => type.GetPrimaryConstructorInfo();
-
-        // Assert
-        TestHelper.AssertException<DependencyInjectionException>(action, expected);
     }
 }

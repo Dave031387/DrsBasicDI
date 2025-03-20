@@ -22,8 +22,11 @@ internal interface IObjectConstructor
     /// <param name="parameterValues">
     /// The constructor parameter values to be used for constructing the resolving type.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be constructed.
+    /// </param>
     /// <returns>
     /// The resolving object cast to the dependency type <typeparamref name="T" />.
     /// </returns>
-    public T Construct<T>(ConstructorInfo constructorInfo, object[] parameterValues) where T : class;
+    public T Construct<T>(ConstructorInfo constructorInfo, object[] parameterValues, string key) where T : class;
 }

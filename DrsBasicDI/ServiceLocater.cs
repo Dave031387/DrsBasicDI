@@ -10,6 +10,11 @@ using System.Reflection;
 internal sealed class ServiceLocater : IServiceLocater
 {
     /// <summary>
+    /// The <see cref="BindingFlags" /> used to find constructors for the implementation types.
+    /// </summary>
+    private const BindingFlags ConstructorBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+    /// <summary>
     /// A lazy initializer for the <see cref="ServiceLocater" /> class that creates a singleton
     /// instance of the class.
     /// </summary>
@@ -79,8 +84,10 @@ internal sealed class ServiceLocater : IServiceLocater
             if (serviceDescriptor is not null)
             {
                 serviceKey = ServiceKey.GetServiceKey(serviceDescriptor.ImplementationType, key);
-                BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-                ConstructorInfo? constructorInfo = serviceDescriptor.ImplementationType.GetConstructor(bindingFlags, null, Type.EmptyTypes, null);
+                ConstructorInfo? constructorInfo = serviceDescriptor.ImplementationType.GetConstructor(ConstructorBindingFlags,
+                                                                                                       null,
+                                                                                                       Type.EmptyTypes,
+                                                                                                       null);
 
                 if (serviceDescriptor.Lifetime == DependencyLifetime.Singleton)
                 {

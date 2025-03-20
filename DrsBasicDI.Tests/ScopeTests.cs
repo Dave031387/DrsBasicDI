@@ -10,7 +10,7 @@ public class ScopeTests
         Mock<IResolvingObjectsService> mockResolvingObjectsService = mockServiceLocater.GetMock<IResolvingObjectsService>(Scoped);
         Mock<IDependencyResolver> mockDependencyResolver = mockServiceLocater.GetMock<IDependencyResolver>(Scoped);
         mockDependencyResolver
-            .Setup(m => m.SetScopedResolver(mockResolvingObjectsService.Object))
+            .Setup(m => m.SetScopedService(mockResolvingObjectsService.Object))
             .Verifiable(Times.Once);
 
         // Act
@@ -24,17 +24,17 @@ public class ScopeTests
     }
 
     [Fact]
-    public void Dispose_ShouldCallDisposeOnResolvingObjectsService()
+    public void Dispose_ShouldCallDisposeOnDependencyResolver()
     {
         // Arrange
         MockServiceLocater mockServiceLocater = new();
         Mock<IResolvingObjectsService> mockResolvingObjectsService = mockServiceLocater.GetMock<IResolvingObjectsService>(Scoped);
-        mockResolvingObjectsService
-            .Setup(m => m.Dispose())
-            .Verifiable(Times.Once);
         Mock<IDependencyResolver> mockDependencyResolver = mockServiceLocater.GetMock<IDependencyResolver>(Scoped);
         mockDependencyResolver
-            .Setup(m => m.SetScopedResolver(mockResolvingObjectsService.Object))
+            .Setup(m => m.SetScopedService(mockResolvingObjectsService.Object))
+            .Verifiable(Times.Once);
+        mockDependencyResolver
+            .Setup(m => m.Dispose())
             .Verifiable(Times.Once);
         Scope scope = new(mockServiceLocater);
 
@@ -53,7 +53,7 @@ public class ScopeTests
         Mock<IResolvingObjectsService> mockResolvingObjectsService = mockServiceLocater.GetMock<IResolvingObjectsService>(Scoped);
         Mock<IDependencyResolver> mockDependencyResolver = mockServiceLocater.GetMock<IDependencyResolver>(Scoped);
         mockDependencyResolver
-            .Setup(m => m.SetScopedResolver(mockResolvingObjectsService.Object))
+            .Setup(m => m.SetScopedService(mockResolvingObjectsService.Object))
             .Verifiable(Times.Once);
         Class1 expected = new();
         string resolvingKey = "test";

@@ -20,9 +20,9 @@ internal sealed class Scope : IScope
     /// </param>
     internal Scope(IServiceLocater serviceLocater)
     {
-        ResolvingObjectsService = serviceLocater.Get<IResolvingObjectsService>(Scoped);
         DependencyResolver = serviceLocater.Get<IDependencyResolver>(Scoped);
-        DependencyResolver.SetScopedResolver(ResolvingObjectsService);
+        IResolvingObjectsService resolvingObjectsService = serviceLocater.Get<IResolvingObjectsService>(Scoped);
+        DependencyResolver.SetScopedService(resolvingObjectsService);
     }
 
     /// <summary>
@@ -34,18 +34,10 @@ internal sealed class Scope : IScope
     }
 
     /// <summary>
-    /// Get a reference to the <see cref="IResolvingObjectsService" /> object.
-    /// </summary>
-    private IResolvingObjectsService ResolvingObjectsService
-    {
-        get;
-    }
-
-    /// <summary>
     /// Dispose of any resources owned by any scoped dependency objects that have been built in this
     /// scope.
     /// </summary>
-    public void Dispose() => ResolvingObjectsService.Dispose();
+    public void Dispose() => DependencyResolver.Dispose();
 
     /// <summary>
     /// Gets an instance of the resolving type that is mapped to the given dependency type

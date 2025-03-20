@@ -27,5 +27,5 @@ internal interface IDependencyResolver : IDisposable
     /// <param name="resolvingObjectsService">
     /// The scoped <see cref="IResolvingObjectsService" /> instance to be set.
     /// </param>
-    public void SetScopedResolver(IResolvingObjectsService resolvingObjectsService);
+    public void SetScopedService(IResolvingObjectsService resolvingObjectsService);
 }

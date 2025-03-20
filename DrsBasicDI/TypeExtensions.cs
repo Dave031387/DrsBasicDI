@@ -9,28 +9,77 @@ using System.Reflection;
 internal static class TypeExtensions
 {
     /// <summary>
+    /// The <see cref="BindingFlags" /> used to find constructors for the implementation types.
+    /// </summary>
+    private const BindingFlags ConstructorBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+    /// <summary>
     /// A dictionary of predefined types whose key is the predefined type and whose value is the
     /// friendly name for the predefined type.
     /// </summary>
     private static readonly Dictionary<Type, string> _typeTranslationDictionary = new()
     {
-        {typeof(bool), "bool"},
-        {typeof(byte), "byte"},
-        {typeof(char), "char"},
-        {typeof(decimal), "decimal"},
-        {typeof(double), "double"},
-        {typeof(float), "float"},
-        {typeof(int), "int"},
-        {typeof(long), "long"},
-        {typeof(object), "object"},
-        {typeof(sbyte), "sbyte"},
-        {typeof(short), "short"},
-        {typeof(string), "string"},
-        {typeof(uint), "uint"},
-        {typeof(ulong), "ulong"},
-        {typeof(ushort), "ushort"},
-        {typeof(void), "void"}
+        {typeof(bool), BoolFriendlyName},
+        {typeof(byte), ByteFriendlyName},
+        {typeof(char), CharFriendlyName},
+        {typeof(decimal), DecimalFriendlyName},
+        {typeof(double), DoubleFriendlyName},
+        {typeof(float), FloatFriendlyName},
+        {typeof(int), IntFriendlyName},
+        {typeof(long), LongFriendlyName},
+        {typeof(object), ObjectFriendlyName},
+        {typeof(sbyte), SByteFriendlyName},
+        {typeof(short), ShortFriendlyName},
+        {typeof(string), StringFriendlyName},
+        {typeof(uint), UIntFriendlyName},
+        {typeof(ulong), ULongFriendlyName},
+        {typeof(ushort), UShortFriendlyName},
+        {typeof(void), VoidFriendlyName}
     };
+
+    /// <summary>
+    /// An extension method for the <see cref="Type" /> class that returns the constructor info for
+    /// the given <see cref="Type" />. <br /> If there is more than one constructor for the given
+    /// class type, then the info for the constructor having the most parameters will be returned.
+    /// </summary>
+    /// <param name="type">
+    /// The class type for which we want to retrieve the constructor info.
+    /// </param>
+    /// <returns>
+    /// The <see cref="ConstructorInfo" /> object for the given class type.
+    /// </returns>
+    /// <remarks>
+    /// All parameters on the constructor must match dependency types that have been previously
+    /// registered with the dependency injection container.
+    /// </remarks>
+    /// <exception cref="DependencyInjectionException" />
+    internal static ConstructorInfo GetDIConstructorInfo(this Type type)
+    {
+        ConstructorInfo[] constructorInfo = type.GetConstructors(ConstructorBindingFlags);
+
+        if (constructorInfo.Length < 1)
+        {
+            string resolvingName = GetResolvingName(type.GetFriendlyName());
+            string msg = string.Format(MsgNoSuitableConstructors, resolvingName);
+            throw new DependencyInjectionException(msg);
+        }
+
+        int maxParameterCount = -1;
+        int constructorIndex = -1;
+
+        for (int i = 0; i < constructorInfo.Length; i++)
+        {
+            int parameterCount = constructorInfo[i].GetParameters().Length;
+
+            if (parameterCount > maxParameterCount)
+            {
+                maxParameterCount = parameterCount;
+                constructorIndex = i;
+            }
+        }
+
+        return constructorInfo[constructorIndex];
+    }
 
     /// <summary>
     /// An extension method for the <see cref="Type" /> class that returns a user-friendly name for
@@ -56,9 +105,8 @@ internal static class TypeExtensions
         else if (type.IsArray)
         {
             int rank = type.GetArrayRank();
-            char comma = ',';
             string commas = rank > 1
-                ? new string(comma, rank - 1)
+                ? new string(Comma, rank - 1)
                 : string.Empty;
             Type arrayElementType = type.GetElementType()!;
             string arrayElementTypeName = arrayElementType.GetFriendlyName();
@@ -74,11 +122,9 @@ internal static class TypeExtensions
         // Handle generic types.
         else if (type.IsGenericType)
         {
-            char genericSeparator = '`';
-            string listSeparator = ", ";
-            string genericTypeName = type.Name.Split(genericSeparator)[0];
+            string genericTypeName = type.Name.Split(GenericSeparator)[0];
             Type[] genericParameterTypes = type.GetGenericArguments();
-            string genericParameterTypeNames = string.Join(listSeparator, genericParameterTypes.Select(GetFriendlyName));
+            string genericParameterTypeNames = string.Join(ListSeparator, genericParameterTypes.Select(GetFriendlyName));
             return $"{genericTypeName}<{genericParameterTypeNames}>";
         }
         // Everything else is a simple class type.
@@ -86,48 +132,5 @@ internal static class TypeExtensions
         {
             return type.Name;
         }
-    }
-
-    /// <summary>
-    /// An extension method for the <see cref="Type" /> class that returns the primary constructor
-    /// info for the <see cref="Type" />.
-    /// </summary>
-    /// <param name="type">
-    /// The class type for which we want to retrieve the constructor info.
-    /// </param>
-    /// <returns>
-    /// The <see cref="ConstructorInfo" /> object for the given class type.
-    /// </returns>
-    /// <remarks>
-    /// If there is more than one constructor for the given class type, then the info for the
-    /// constructor having the most parameters will be returned.
-    /// </remarks>
-    /// <exception cref="DependencyInjectionException" />
-    internal static ConstructorInfo GetPrimaryConstructorInfo(this Type type)
-    {
-        BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-        ConstructorInfo[] constructorInfo = type.GetConstructors(bindingFlags);
-
-        if (constructorInfo.Length < 1)
-        {
-            string msg = string.Format(MsgNoSuitableConstructors, type.GetFriendlyName());
-            throw new DependencyInjectionException(msg);
-        }
-
-        int maxParameterCount = -1;
-        int constructorIndex = -1;
-
-        for (int i = 0; i < constructorInfo.Length; i++)
-        {
-            int parameterCount = constructorInfo[i].GetParameters().Length;
-
-            if (parameterCount > maxParameterCount)
-            {
-                maxParameterCount = parameterCount;
-                constructorIndex = i;
-            }
-        }
-
-        return constructorInfo[constructorIndex];
     }
 }

@@ -29,20 +29,25 @@ internal sealed class ObjectConstructor : IObjectConstructor
     /// <param name="parameterValues">
     /// The constructor parameter values to be used for constructing the resolving type.
     /// </param>
+    /// <param name="key">
+    /// An optional key used to identify the specific resolving object to be constructed.
+    /// </param>
     /// <returns>
     /// The resolving object cast to the dependency type <typeparamref name="T" />.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    public T Construct<T>(ConstructorInfo constructorInfo, object[] parameterValues) where T : class
+    public T Construct<T>(ConstructorInfo constructorInfo, object[] parameterValues, string key) where T : class
     {
         string typeName = typeof(T).GetFriendlyName();
+        string dependencyName = GetDependencyName(typeName, key);
+        string resolvingName = GetResolvingName(constructorInfo.DeclaringType!.GetFriendlyName());
         T resolvingObject;
 
         try
         {
             if (constructorInfo.Invoke(parameterValues) is not T resolvingInstance)
             {
-                string msg = string.Format(MsgResolvingObjectNotCreated, typeName);
+                string msg = string.Format(MsgResolvingObjectNotCreated, resolvingName, dependencyName);
                 throw new DependencyInjectionException(msg);
             }
 
@@ -50,7 +55,7 @@ internal sealed class ObjectConstructor : IObjectConstructor
         }
         catch (Exception ex)
         {
-            string msg = string.Format(MsgErrorDuringConstruction, typeName);
+            string msg = string.Format(MsgErrorDuringConstruction, resolvingName, dependencyName);
             throw new DependencyInjectionException(msg, ex);
         }
 
