@@ -13,6 +13,7 @@ internal static class Messages
     internal const string MsgErrorDuringConstruction = "An exception was thrown while trying to construct an instance of {0} for {1}.";
     internal const string MsgFactoryAlreadySpecified = "Invalid attempt to assign factory more than once to {0}.";
     internal const string MsgFactoryInvocationError = "An exception was thrown when invoking the Factory method for {0}.";
+    internal const string MsgFactoryShouldNotReturnNull = "The factory for {0} must not return null.";
     internal const string MsgGenericDependencyTypeIsOpen = "Generic {0} must be fully constructed.";
     internal const string MsgIncompatibleFactory = "The {0} returned from the factory is not assignable to {1}.";
     internal const string MsgIncompatibleResolvingType = "The {0} is not assignable to {1}.";

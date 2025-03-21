@@ -22,14 +22,40 @@ public class DependencyResolverTests
     }
 
     [Fact]
+    public void DependencyFactoryReturnsNull_ShouldThrowException()
+    {
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Class1? expected = null;
+        IClass1 factory() => expected!;
+        Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Transient, factory: factory);
+        Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
+        SetupDependencyList<IClass1>(mockDependencyList, mockDependency.Object, EmptyKey);
+        mockServiceLocater.CreateMock<IObjectConstructor>();
+        mockServiceLocater.CreateMock<IResolvingObjectsService>(NonScoped);
+        Mock<IResolvingObjectsService> mockScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(Scoped);
+        DependencyResolver resolver = new(mockServiceLocater);
+        resolver.SetScopedService(mockScopedService.Object);
+        string dependencyName = GetDependencyName(typeof(IClass1).Name, EmptyKey);
+        string msg = string.Format(MsgFactoryShouldNotReturnNull, dependencyName);
+
+        // Act
+        void action() => resolver.Resolve<IClass1>(EmptyKey);
+
+        // Assert
+        TestHelper.AssertException<DependencyInjectionException>(action, msg);
+        mockServiceLocater.VerifyMocks();
+    }
+
+    [Fact]
     public void DependencyFactoryThrowsException_ShouldThrowExceptionAgain()
     {
         // Arrange
         MockServiceLocater mockServiceLocater = new();
         static IClass1 factory() => throw new Exception("Factory exception");
         Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Transient, factory: factory);
-        Mock<IDependencyListConsumer> dependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
-        SetupDependencyList<IClass1>(dependencyList, mockDependency.Object, EmptyKey);
+        Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
+        SetupDependencyList<IClass1>(mockDependencyList, mockDependency.Object, EmptyKey);
         mockServiceLocater.CreateMock<IObjectConstructor>();
         mockServiceLocater.CreateMock<IResolvingObjectsService>(NonScoped);
         DependencyResolver resolver = new(mockServiceLocater);
@@ -243,6 +269,68 @@ public class DependencyResolverTests
     }
 
     [Fact]
+    public void ScopedDependencyFactoryReturnsValidValueAndScopedServiceIsNotSet_ShouldReturnValueAndSaveItInNonScopedService()
+    {
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        string resolvingKey = "test";
+        Class1 expected = new("Factory");
+        IClass1 factory() => expected;
+        Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Scoped, factory: factory);
+        Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
+        SetupDependencyList<IClass1>(mockDependencyList, mockDependency.Object, resolvingKey);
+        mockServiceLocater.CreateMock<IObjectConstructor>();
+        Mock<IResolvingObjectsService> mockNonScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(NonScoped);
+        SetupResolvingObjectsService<IClass1>(mockNonScopedService, expected, resolvingKey, addObject: true);
+        DependencyResolver resolver = new(mockServiceLocater);
+
+        // Act
+        IClass1 actual = resolver.Resolve<IClass1>(resolvingKey);
+
+        // Assert
+        actual
+            .Should()
+            .NotBeNull()
+            .And
+            .BeOfType<Class1>()
+            .And
+            .BeSameAs(expected);
+        mockServiceLocater.VerifyMocks();
+    }
+
+    [Fact]
+    public void ScopedDependencyFactoryReturnsValidValueAndScopedServiceIsSet_ShouldReturnValueAndSaveItInScopedService()
+    {
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        string resolvingKey = "test";
+        Class1 expected = new("Factory");
+        IClass1 factory() => expected;
+        Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Scoped, factory: factory);
+        Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
+        SetupDependencyList<IClass1>(mockDependencyList, mockDependency.Object, resolvingKey);
+        mockServiceLocater.CreateMock<IObjectConstructor>();
+        Mock<IResolvingObjectsService> mockNonScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(NonScoped);
+        Mock<IResolvingObjectsService> mockScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(Scoped);
+        SetupResolvingObjectsService<IClass1>(mockScopedService, expected, resolvingKey, addObject: true);
+        DependencyResolver resolver = new(mockServiceLocater);
+        resolver.SetScopedService(mockScopedService.Object);
+
+        // Act
+        IClass1 actual = resolver.Resolve<IClass1>(resolvingKey);
+
+        // Assert
+        actual
+            .Should()
+            .NotBeNull()
+            .And
+            .BeOfType<Class1>()
+            .And
+            .BeSameAs(expected);
+        mockServiceLocater.VerifyMocks();
+    }
+
+    [Fact]
     public void SetScopedService_ShouldSetScopedService()
     {
         // Arrange
@@ -324,6 +412,68 @@ public class DependencyResolverTests
         mockServiceLocater.VerifyMocks();
     }
 
+    [Fact]
+    public void SingletonDependencyFactoryReturnsValidValue_ShouldReturnValueAndSaveItInNonScopedService()
+    {
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        string resolvingKey = "test";
+        Class1 expected = new("Factory");
+        IClass1 factory() => expected;
+        Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Singleton, factory: factory);
+        Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
+        SetupDependencyList<IClass1>(mockDependencyList, mockDependency.Object, resolvingKey);
+        mockServiceLocater.CreateMock<IObjectConstructor>();
+        Mock<IResolvingObjectsService> mockNonScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(NonScoped);
+        SetupResolvingObjectsService<IClass1>(mockNonScopedService, expected, resolvingKey, addObject: true);
+        Mock<IResolvingObjectsService> mockScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(Scoped);
+        DependencyResolver resolver = new(mockServiceLocater);
+        resolver.SetScopedService(mockScopedService.Object);
+
+        // Act
+        IClass1 actual = resolver.Resolve<IClass1>(resolvingKey);
+
+        // Assert
+        actual
+            .Should()
+            .NotBeNull()
+            .And
+            .BeOfType<Class1>()
+            .And
+            .BeSameAs(expected);
+        mockServiceLocater.VerifyMocks();
+    }
+
+    [Fact]
+    public void TransientDependencyFactoryReturnsValidValue_ShouldReturnValueButNotSaveIt()
+    {
+        // Arrange
+        MockServiceLocater mockServiceLocater = new();
+        Class1 expected = new("Factory");
+        IClass1 factory() => expected;
+        Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Transient, factory: factory);
+        Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
+        SetupDependencyList<IClass1>(mockDependencyList, mockDependency.Object, EmptyKey);
+        mockServiceLocater.CreateMock<IObjectConstructor>();
+        mockServiceLocater.CreateMock<IResolvingObjectsService>(NonScoped);
+        Mock<IResolvingObjectsService> mockScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(Scoped);
+        DependencyResolver resolver = new(mockServiceLocater);
+        resolver.SetScopedService(mockScopedService.Object);
+
+        // Act
+        IClass1 actual = resolver.Resolve<IClass1>(EmptyKey);
+
+        // Assert
+        actual
+            .Should()
+            .NotBeNull()
+            .And
+            .BeOfType<Class1>()
+            .And
+            .BeSameAs(expected);
+        mockServiceLocater.VerifyMocks();
+    }
+
     private static Mock<IDependency> GetMockDependency(DependencyLifetime? lifetime = null,
                                                        Type? resolvingType = null,
                                                        Func<object>? factory = null,
@@ -381,11 +531,28 @@ public class DependencyResolverTests
 
     private static void SetupResolvingObjectsService<T>(Mock<IResolvingObjectsService> mockResolvingObjectsService,
                                                         T? resolvingObject,
-                                                        string resolvingKey) where T : class
+                                                        string resolvingKey,
+                                                        bool addObject = false) where T : class
     {
-        mockResolvingObjectsService
-            .Setup(m => m.TryGetResolvingObject(out resolvingObject, resolvingKey))
-            .Returns(resolvingObject is not null)
-            .Verifiable(Times.Once);
+        if (addObject)
+        {
+            T? nullObject = null;
+
+            mockResolvingObjectsService
+                .Setup(m => m.TryGetResolvingObject(out nullObject, resolvingKey))
+                .Returns(false)
+                .Verifiable(Times.Once);
+            mockResolvingObjectsService
+                .Setup(m => m.Add(resolvingObject!, resolvingKey))
+                .Returns(resolvingObject!)
+                .Verifiable(Times.Once);
+        }
+        else
+        {
+            mockResolvingObjectsService
+                .Setup(m => m.TryGetResolvingObject(out resolvingObject, resolvingKey))
+                .Returns(resolvingObject is not null)
+                .Verifiable(Times.Once);
+        }
     }
 }

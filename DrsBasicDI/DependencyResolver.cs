@@ -317,6 +317,7 @@ internal sealed class DependencyResolver : IDependencyResolver
     private bool TryGetFactoryValue<T>(out T? factoryValue, string key) where T : class
     {
         IDependency dependency = DependencyList.Get<T>(key);
+        string dependencyName = GetDependencyName(typeof(T).GetFriendlyName(), key);
 
         if (dependency.Factory is not null)
         {
@@ -326,9 +327,8 @@ internal sealed class DependencyResolver : IDependencyResolver
             }
             catch (Exception ex)
             {
-                string dependencyName = GetDependencyName(typeof(T).GetFriendlyName(), key);
-                string msg = string.Format(MsgFactoryInvocationError, dependencyName);
-                throw new DependencyInjectionException(msg, ex);
+                string msg1 = string.Format(MsgFactoryInvocationError, dependencyName);
+                throw new DependencyInjectionException(msg1, ex);
             }
 
             if (factoryValue is not null)
@@ -336,6 +336,9 @@ internal sealed class DependencyResolver : IDependencyResolver
                 factoryValue = SaveResolvedDependency(factoryValue, key);
                 return true;
             }
+
+            string msg2 = string.Format(MsgFactoryShouldNotReturnNull, dependencyName);
+            throw new DependencyInjectionException(msg2);
         }
 
         factoryValue = default;
