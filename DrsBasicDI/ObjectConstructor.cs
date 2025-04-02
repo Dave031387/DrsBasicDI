@@ -38,16 +38,13 @@ internal sealed class ObjectConstructor : IObjectConstructor
     /// <exception cref="DependencyInjectionException" />
     public T Construct<T>(ConstructorInfo constructorInfo, object[] parameterValues, string key) where T : class
     {
-        string typeName = typeof(T).GetFriendlyName();
-        string dependencyName = GetDependencyName(typeName, key);
-        string resolvingName = GetResolvingName(constructorInfo.DeclaringType!.GetFriendlyName());
         T resolvingObject;
 
         try
         {
             if (constructorInfo.Invoke(parameterValues) is not T resolvingInstance)
             {
-                string msg = string.Format(MsgResolvingObjectNotCreated, resolvingName, dependencyName);
+                string msg = FormatMessage<T>(MsgResolvingObjectNotCreated, key, constructorInfo.DeclaringType);
                 throw new DependencyInjectionException(msg);
             }
 
@@ -55,7 +52,7 @@ internal sealed class ObjectConstructor : IObjectConstructor
         }
         catch (Exception ex)
         {
-            string msg = string.Format(MsgErrorDuringConstruction, resolvingName, dependencyName);
+            string msg = FormatMessage<T>(MsgErrorDuringConstruction, key, constructorInfo.DeclaringType);
             throw new DependencyInjectionException(msg, ex);
         }
 

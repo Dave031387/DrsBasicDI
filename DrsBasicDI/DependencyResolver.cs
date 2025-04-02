@@ -215,10 +215,7 @@ internal sealed class DependencyResolver : IDependencyResolver
             ResolvingKeyAttribute? attribute = parameter.GetCustomAttribute<ResolvingKeyAttribute>();
             string resolvingKey = attribute?.Key ?? EmptyKey;
             Type parameterType = parameter.ParameterType;
-            string parameterTypeName = parameterType.GetFriendlyName();
             MethodInfo resolveMethodInfo;
-            string dependencyName = GetDependencyName(parameterTypeName, resolvingKey);
-            string resolvingName = GetResolvingName(parameterTypeName);
 
             try
             {
@@ -228,7 +225,7 @@ internal sealed class DependencyResolver : IDependencyResolver
             }
             catch (Exception ex)
             {
-                string msg = string.Format(MsgUnableToMakeGenericResolveMethod, dependencyName);
+                string msg = FormatMessage(MsgUnableToMakeGenericResolveMethod, parameterType, resolvingKey);
                 throw new DependencyInjectionException(msg, ex);
             }
 
@@ -241,14 +238,14 @@ internal sealed class DependencyResolver : IDependencyResolver
             }
             catch (Exception ex)
             {
-                string msg = string.Format(MsgResolveMethodInvocationError, dependencyName);
+                string msg = FormatMessage(MsgResolveMethodInvocationError, parameterType, resolvingKey);
                 throw new DependencyInjectionException(msg, ex);
             }
 
             // We should not get a null value returned from the generic Resolve<T>() method.
             if (resolvedParameter is null)
             {
-                string msg = string.Format(MsgResolvingObjectNotCreated, resolvingName, dependencyName);
+                string msg = FormatMessage(MsgResolvingObjectCouldNotBeCreated, parameterType, resolvingKey);
                 throw new DependencyInjectionException(msg);
             }
 
@@ -317,7 +314,6 @@ internal sealed class DependencyResolver : IDependencyResolver
     private bool TryGetFactoryValue<T>(out T? factoryValue, string key) where T : class
     {
         IDependency dependency = DependencyList.Get<T>(key);
-        string dependencyName = GetDependencyName(typeof(T).GetFriendlyName(), key);
 
         if (dependency.Factory is not null)
         {
@@ -327,7 +323,7 @@ internal sealed class DependencyResolver : IDependencyResolver
             }
             catch (Exception ex)
             {
-                string msg1 = string.Format(MsgFactoryInvocationError, dependencyName);
+                string msg1 = FormatMessage<T>(MsgFactoryInvocationError, key);
                 throw new DependencyInjectionException(msg1, ex);
             }
 
@@ -337,7 +333,7 @@ internal sealed class DependencyResolver : IDependencyResolver
                 return true;
             }
 
-            string msg2 = string.Format(MsgFactoryShouldNotReturnNull, dependencyName);
+            string msg2 = FormatMessage<T>(MsgFactoryShouldNotReturnNull, key);
             throw new DependencyInjectionException(msg2);
         }
 

@@ -1,5 +1,8 @@
 ﻿namespace DrsBasicDI;
 
+/// <summary>
+/// The <see cref="Globals" /> class is a static class containing global constants.
+/// </summary>
 internal static class Globals
 {
     /// <summary>

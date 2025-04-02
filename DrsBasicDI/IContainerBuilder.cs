@@ -16,7 +16,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddDependency(Func<DependencyBuilder, DependencyBuilder> builder);
+    public IContainerBuilder AddDependency(Func<DependencyBuilder, DependencyBuilder> builder);
 
     /// <summary>
     /// Construct a new <see cref="IDependency" /> object having the specified dependency type
@@ -32,7 +32,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddDependency<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
+    public IContainerBuilder AddDependency<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
 
     /// <summary>
     /// Construct a new <see cref="IDependency" /> object having the specified dependency type
@@ -53,7 +53,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddDependency<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
+    public IContainerBuilder AddDependency<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency;
 
@@ -67,7 +67,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddScoped(Func<DependencyBuilder, DependencyBuilder> builder);
+    public IContainerBuilder AddScoped(Func<DependencyBuilder, DependencyBuilder> builder);
 
     /// <summary>
     /// Construct a new scoped <see cref="IDependency" /> object having the specified dependency
@@ -83,7 +83,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddScoped<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
+    public IContainerBuilder AddScoped<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
 
     /// <summary>
     /// Construct a new scoped <see cref="IDependency" /> object having the specified dependency
@@ -100,7 +100,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddScoped<TDependency, TResolving>()
+    public IContainerBuilder AddScoped<TDependency, TResolving>()
         where TDependency : class
         where TResolving : class, TDependency;
 
@@ -123,7 +123,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddScoped<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
+    public IContainerBuilder AddScoped<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency;
 
@@ -137,7 +137,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddSingleton(Func<DependencyBuilder, DependencyBuilder> builder);
+    public IContainerBuilder AddSingleton(Func<DependencyBuilder, DependencyBuilder> builder);
 
     /// <summary>
     /// Construct a new singleton <see cref="IDependency" /> object having the specified dependency
@@ -153,7 +153,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddSingleton<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
+    public IContainerBuilder AddSingleton<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
 
     /// <summary>
     /// Construct a new singleton <see cref="IDependency" /> object having the specified dependency
@@ -170,7 +170,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddSingleton<TDependency, TResolving>()
+    public IContainerBuilder AddSingleton<TDependency, TResolving>()
         where TDependency : class
         where TResolving : class, TDependency;
 
@@ -193,7 +193,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddSingleton<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
+    public IContainerBuilder AddSingleton<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency;
 
@@ -207,7 +207,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddTransient(Func<DependencyBuilder, DependencyBuilder> builder);
+    public IContainerBuilder AddTransient(Func<DependencyBuilder, DependencyBuilder> builder);
 
     /// <summary>
     /// Construct a new transient <see cref="IDependency" /> object having the specified dependency
@@ -223,7 +223,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddTransient<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
+    public IContainerBuilder AddTransient<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
 
     /// <summary>
     /// Construct a new transient <see cref="IDependency" /> object having the specified dependency
@@ -240,7 +240,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddTransient<TDependency, TResolving>()
+    public IContainerBuilder AddTransient<TDependency, TResolving>()
         where TDependency : class
         where TResolving : class, TDependency;
 
@@ -263,7 +263,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    IContainerBuilder AddTransient<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
+    public IContainerBuilder AddTransient<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency;
 
@@ -274,5 +274,5 @@ public interface IContainerBuilder
     /// A new <see cref="IContainer" /> object containing all the <see cref="IDependency" /> objects
     /// that were added.
     /// </returns>
-    IContainer Build();
+    public IContainer Build();
 }

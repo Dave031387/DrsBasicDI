@@ -1,6 +1,6 @@
 ﻿namespace DrsBasicDI.Shared;
 
-public class Class3(IClass2 class2) : IClass3
+public class Class3([ResolvingKey("Test")] IClass2 class2) : IClass3
 {
     private readonly IClass2 _class2 = class2;
 

@@ -19,7 +19,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -166,7 +166,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -209,7 +209,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -273,7 +273,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -298,7 +298,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -321,7 +321,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -343,7 +343,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -366,7 +366,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -391,7 +391,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -413,7 +413,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -435,7 +435,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -456,7 +456,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -475,7 +475,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -495,7 +495,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -517,7 +517,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -539,7 +539,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -562,7 +562,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Fact]
@@ -587,7 +587,7 @@ public class DependencyBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<DependencyBuildException>(buildAction, msg);
+        AssertException<DependencyBuildException>(buildAction, msg);
     }
 
     [Theory]

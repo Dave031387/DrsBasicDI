@@ -32,7 +32,7 @@ public class TypeExtensionsTests
         void action() => type.GetDIConstructorInfo();
 
         // Assert
-        TestHelper.AssertException<DependencyInjectionException>(action, expected);
+        AssertException<DependencyInjectionException>(action, expected);
     }
 
     [Theory]

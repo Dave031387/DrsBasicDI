@@ -235,7 +235,7 @@ public class ContainerBuilderTests
                 .WithResolvingType<Class2>());
 
         // Assert
-        TestHelper.AssertException<ContainerBuildException>(action, msg);
+        AssertException<ContainerBuildException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 
@@ -264,7 +264,7 @@ public class ContainerBuilderTests
             .Build();
 
         // Assert
-        TestHelper.AssertException<ContainerBuildException>(action, msg);
+        AssertException<ContainerBuildException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 
@@ -285,7 +285,7 @@ public class ContainerBuilderTests
         void action() => builder.Build();
 
         // Assert
-        TestHelper.AssertException<ContainerBuildException>(action, msg);
+        AssertException<ContainerBuildException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 

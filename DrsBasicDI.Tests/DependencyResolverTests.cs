@@ -45,7 +45,7 @@ public class DependencyResolverTests
         void action() => resolver.Resolve<IClass1>(EmptyKey);
 
         // Assert
-        TestHelper.AssertException<DependencyInjectionException>(action, msg);
+        AssertException<DependencyInjectionException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 
@@ -68,7 +68,7 @@ public class DependencyResolverTests
         void action() => resolver.Resolve<IClass1>(EmptyKey);
 
         // Assert
-        TestHelper.AssertException<DependencyInjectionException>(action, msg);
+        AssertException<DependencyInjectionException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 
@@ -167,6 +167,7 @@ public class DependencyResolverTests
         Type dependencyType = typeof(Class2);
         ConstructorInfo class2ConstructorInfo = dependencyType.GetConstructor(Type.EmptyTypes)!;
         object[] class2ParameterValues = [];
+        string dependencyKey = "Test";
         Mock<IDependency> mockClass2Dependency = GetMockDependency(lifetime: DependencyLifetime.Singleton,
                                                                    resolvingType: dependencyType,
                                                                    factory: null,
@@ -180,15 +181,15 @@ public class DependencyResolverTests
                                                                    factory: null,
                                                                    checkFactory: true);
         Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
-        SetupDependencyList<IClass2>(mockDependencyList, mockClass2Dependency.Object, EmptyKey);
+        SetupDependencyList<IClass2>(mockDependencyList, mockClass2Dependency.Object, dependencyKey);
         SetupDependencyList<IClass3>(mockDependencyList, mockClass3Dependency.Object, EmptyKey);
         Mock<IObjectConstructor> mockObjectConstructor = mockServiceLocater.GetMock<IObjectConstructor>();
-        SetupObjectConstructor(mockObjectConstructor, class2ConstructorInfo, class2ParameterValues, EmptyKey, dependency);
+        SetupObjectConstructor(mockObjectConstructor, class2ConstructorInfo, class2ParameterValues, dependencyKey, dependency);
         SetupObjectConstructor(mockObjectConstructor, class3ConstructorInfo, class3ParameterValues, EmptyKey, expected);
         Mock<IResolvingObjectsService> mockScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(Scoped);
         SetupResolvingObjectsService(mockScopedService, expected, EmptyKey, addObject: true);
         Mock<IResolvingObjectsService> mockNonScopedService = mockServiceLocater.GetMock<IResolvingObjectsService>(NonScoped);
-        SetupResolvingObjectsService(mockNonScopedService, dependency, EmptyKey, addObject: true);
+        SetupResolvingObjectsService(mockNonScopedService, dependency, dependencyKey, addObject: true);
         DependencyResolver resolver = new(mockServiceLocater);
         resolver.SetScopedService(mockScopedService.Object);
 
@@ -565,7 +566,7 @@ public class DependencyResolverTests
         void action() => resolver.SetScopedService(mockScopedService.Object);
 
         // Assert
-        TestHelper.AssertException<DependencyInjectionException>(action, msg);
+        AssertException<DependencyInjectionException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 
@@ -584,7 +585,7 @@ public class DependencyResolverTests
         void action() => resolver.SetScopedService(mockNonScopedService.Object);
 
         // Assert
-        TestHelper.AssertException<DependencyInjectionException>(action, msg);
+        AssertException<DependencyInjectionException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 
@@ -603,7 +604,7 @@ public class DependencyResolverTests
         void action() => resolver.SetScopedService(null!);
 
         // Assert
-        TestHelper.AssertException<DependencyInjectionException>(action, msg);
+        AssertException<DependencyInjectionException>(action, msg);
         mockServiceLocater.VerifyMocks();
     }
 
@@ -667,56 +668,6 @@ public class DependencyResolverTests
             .And
             .BeSameAs(expected);
         mockServiceLocater.VerifyMocks();
-    }
-
-    private static Mock<IDependency> GetMockDependency(DependencyLifetime? lifetime = null,
-                                                       Type? resolvingType = null,
-                                                       Func<object>? factory = null,
-                                                       Type? dependencyType = null,
-                                                       bool checkFactory = false)
-    {
-        Mock<IDependency> mock = new(MockBehavior.Strict);
-
-        if (dependencyType is not null)
-        {
-            mock
-                .SetupGet(m => m.DependencyType)
-                .Returns(dependencyType)
-                .Verifiable(Times.AtLeastOnce);
-        }
-
-        if (factory is not null)
-        {
-            mock
-                .SetupGet(m => m.Factory)
-                .Returns(factory)
-                .Verifiable(Times.AtLeastOnce);
-        }
-        else if (checkFactory)
-        {
-            mock
-                .SetupGet(m => m.Factory)
-                .Returns(null!)
-                .Verifiable(Times.AtLeastOnce);
-        }
-
-        if (lifetime is not null)
-        {
-            mock
-                .SetupGet(m => m.Lifetime)
-                .Returns((DependencyLifetime)lifetime)
-                .Verifiable(Times.AtLeastOnce);
-        }
-
-        if (resolvingType is not null)
-        {
-            mock
-                .SetupGet(m => m.ResolvingType)
-                .Returns(resolvingType)
-                .Verifiable(Times.AtLeastOnce);
-        }
-
-        return mock;
     }
 
     private static void SetupDependencyList<T>(Mock<IDependencyListConsumer> mockDependencyListConsumer,

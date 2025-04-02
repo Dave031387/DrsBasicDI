@@ -59,8 +59,7 @@ internal static class TypeExtensions
 
         if (constructorInfo.Length < 1)
         {
-            string resolvingName = GetResolvingName(type.GetFriendlyName());
-            string msg = string.Format(MsgNoSuitableConstructors, resolvingName);
+            string msg = FormatMessage(MsgNoSuitableConstructors, resolvingType: type);
             throw new DependencyInjectionException(msg);
         }
 

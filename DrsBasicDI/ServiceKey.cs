@@ -43,7 +43,7 @@ internal sealed class ServiceKey(Type type, string key) : IEquatable<ServiceKey>
     /// <paramref name="dependency" />
     /// </returns>
     internal static ServiceKey GetServiceDependencyKey(IDependency dependency)
-        => new(dependency.DependencyType, dependency.Key);
+        => GetServiceKey(dependency.DependencyType, dependency.Key);
 
     /// <summary>
     /// Get the <see cref="ServiceKey" /> corresponding to the given type <typeparamref name="T" />
@@ -59,7 +59,7 @@ internal sealed class ServiceKey(Type type, string key) : IEquatable<ServiceKey>
     /// The requested <see cref="ServiceKey" /> object.
     /// </returns>
     internal static ServiceKey GetServiceKey<T>(string key) where T : class
-        => new(typeof(T), key);
+        => GetServiceKey(typeof(T), key);
 
     /// <summary>
     /// Get the <see cref="ServiceKey" /> corresponding to the given <paramref name="type" /> and
@@ -90,7 +90,7 @@ internal sealed class ServiceKey(Type type, string key) : IEquatable<ServiceKey>
     /// <paramref name="dependency" />
     /// </returns>
     internal static ServiceKey GetServiceResolvingKey(IDependency dependency)
-        => new(dependency.ResolvingType, dependency.Key);
+        => GetServiceKey(dependency.ResolvingType, dependency.Key);
 
     /// <summary>
     /// Determine whether the given <paramref name="other" /> <see cref="ServiceKey" /> object is

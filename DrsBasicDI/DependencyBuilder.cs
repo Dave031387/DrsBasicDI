@@ -51,28 +51,6 @@ public sealed class DependencyBuilder
     public static DependencyBuilder CreateNew => new();
 
     /// <summary>
-    /// Gets the dependency name used in messages.
-    /// </summary>
-    private string DependencyName => GetDependencyName(DependencyTypeName, _resolvingKey ?? EmptyKey);
-
-    /// <summary>
-    /// Gets the friendly name of the dependency type, or "N/A" if the dependency type hasn't yet
-    /// been given.
-    /// </summary>
-    private string DependencyTypeName => _dependencyType is null ? NA : _dependencyType.GetFriendlyName();
-
-    /// <summary>
-    /// Get the name of the resolving object.
-    /// </summary>
-    private string ResolvingName => GetResolvingName(ResolvingTypeName);
-
-    /// <summary>
-    /// Gets the friendly name of the resolving type, or "N/A" if the resolving type hasn't yet been
-    /// given.
-    /// </summary>
-    private string ResolvingTypeName => _resolvingType is null ? NA : _resolvingType.GetFriendlyName();
-
-    /// <summary>
     /// Build the <see cref="IDependency" /> object after verifying that the supplied information is
     /// valid.
     /// </summary>
@@ -127,7 +105,7 @@ public sealed class DependencyBuilder
 
         if (_dependencyType is not null)
         {
-            string msg = string.Format(MsgDependencyTypeAlreadySpecified, DependencyName);
+            string msg = FormatMessage(MsgDependencyTypeAlreadySpecified, _dependencyType, _resolvingKey);
             throw new DependencyBuildException(msg);
         }
 
@@ -152,13 +130,13 @@ public sealed class DependencyBuilder
     {
         if (factory is null)
         {
-            string msg = string.Format(MsgNullFactory, DependencyName);
+            string msg = FormatMessage(MsgNullFactory, _dependencyType, _resolvingKey, forceDependencyName: true);
             throw new DependencyBuildException(msg);
         }
 
         if (_factory is not null)
         {
-            string msg = string.Format(MsgFactoryAlreadySpecified, DependencyName);
+            string msg = FormatMessage(MsgFactoryAlreadySpecified, _dependencyType, _resolvingKey, forceDependencyName: true);
             throw new DependencyBuildException(msg);
         }
 
@@ -182,13 +160,13 @@ public sealed class DependencyBuilder
     {
         if (lifetime is DependencyLifetime.Undefined)
         {
-            string msg = string.Format(MsgUndefinedLifetime, DependencyName);
+            string msg = FormatMessage(MsgUndefinedLifetime, _dependencyType, _resolvingKey, forceDependencyName: true);
             throw new DependencyBuildException(msg);
         }
 
         if (_lifetime is not DependencyLifetime.Undefined)
         {
-            string msg = string.Format(MsgLifetimeAlreadySpecified, DependencyName);
+            string msg = FormatMessage(MsgLifetimeAlreadySpecified, _dependencyType, _resolvingKey, forceDependencyName: true);
             throw new DependencyBuildException(msg);
         }
 
@@ -212,13 +190,13 @@ public sealed class DependencyBuilder
     {
         if (resolvingKey is null)
         {
-            string msg = string.Format(MsgNullResolvingKey, DependencyName);
+            string msg = FormatMessage(MsgNullResolvingKey, _dependencyType, _resolvingKey, forceDependencyName: true);
             throw new DependencyBuildException(msg);
         }
 
         if (_resolvingKey is not null)
         {
-            string msg = string.Format(MsgResolvingKeyAlreadySpecified, DependencyName);
+            string msg = FormatMessage(MsgResolvingKeyAlreadySpecified, _dependencyType, _resolvingKey, forceDependencyName: true);
             throw new DependencyBuildException(msg);
         }
 
@@ -255,13 +233,13 @@ public sealed class DependencyBuilder
     {
         if (resolvingType is null)
         {
-            string msg = string.Format(MsgNullResolvingType, DependencyName);
+            string msg = FormatMessage(MsgNullResolvingType, _dependencyType, _resolvingKey, forceDependencyName: true);
             throw new DependencyBuildException(msg);
         }
 
         if (_resolvingType is not null)
         {
-            string msg = string.Format(MsgResolvingTypeAlreadySpecified, DependencyName);
+            string msg = FormatMessage(MsgResolvingTypeAlreadySpecified, _dependencyType, _resolvingKey, forceDependencyName: true);
             throw new DependencyBuildException(msg);
         }
 
@@ -301,7 +279,7 @@ public sealed class DependencyBuilder
         // The dependency type must be a class type or interface type.
         if (!_dependencyType.IsClass && !_dependencyType.IsInterface)
         {
-            string msg = string.Format(MsgInvalidDependencyType, DependencyName);
+            string msg = FormatMessage(MsgInvalidDependencyType, _dependencyType, _resolvingKey);
             throw new DependencyBuildException(msg);
         }
 
@@ -309,7 +287,7 @@ public sealed class DependencyBuilder
         // constructed.
         if (_dependencyType.IsGenericType && !_dependencyType.IsConstructedGenericType)
         {
-            string msg = string.Format(MsgGenericDependencyTypeIsOpen, DependencyName);
+            string msg = FormatMessage(MsgGenericDependencyTypeIsOpen, _dependencyType, _resolvingKey);
             throw new DependencyBuildException(msg);
         }
     }
@@ -328,8 +306,7 @@ public sealed class DependencyBuilder
             // specified dependency type.
             if (!returnType.IsAssignableTo(_dependencyType))
             {
-                string resolvingName = GetResolvingName(returnType.GetFriendlyName());
-                string msg = string.Format(MsgIncompatibleFactory, resolvingName, DependencyName);
+                string msg = FormatMessage(MsgIncompatibleFactory, _dependencyType, _resolvingKey, returnType);
                 throw new DependencyBuildException(msg);
             }
         }
@@ -344,7 +321,7 @@ public sealed class DependencyBuilder
         // The lifetime must not be undefined.
         if (_lifetime is DependencyLifetime.Undefined)
         {
-            string msg = string.Format(MsgUndefinedLifetime, DependencyName);
+            string msg = FormatMessage(MsgUndefinedLifetime, _dependencyType, _resolvingKey);
             throw new DependencyBuildException(msg);
         }
     }
@@ -358,35 +335,35 @@ public sealed class DependencyBuilder
         // The resolving type must not be null.
         if (_resolvingType is null)
         {
-            string msg = string.Format(MsgUnspecifiedResolvingType, DependencyName);
+            string msg = FormatMessage(MsgUnspecifiedResolvingType, _dependencyType, _resolvingKey);
             throw new DependencyBuildException(msg);
         }
 
         // The resolving type must be a class type.
         if (!_resolvingType.IsClass)
         {
-            string msg = string.Format(MsgInvalidResolvingType, ResolvingName, DependencyName);
+            string msg = FormatMessage(MsgInvalidResolvingType, _dependencyType, _resolvingKey, _resolvingType);
             throw new DependencyBuildException(msg);
         }
 
         // The resolving type must not be an abstract type.
         if (_resolvingType.IsAbstract)
         {
-            string msg = string.Format(MsgAbstractResolvingType, ResolvingName, DependencyName);
+            string msg = FormatMessage(MsgAbstractResolvingType, _dependencyType, _resolvingKey, _resolvingType);
             throw new DependencyBuildException(msg);
         }
 
         // If the resolving type is generic, then it must be a fully constructed generic type.
         if (_resolvingType.IsGenericType && !_resolvingType.IsConstructedGenericType)
         {
-            string msg = string.Format(MsgResolvingGenericTypeIsOpen, ResolvingName, DependencyName);
+            string msg = FormatMessage(MsgResolvingGenericTypeIsOpen, _dependencyType, _resolvingKey, _resolvingType);
             throw new DependencyBuildException(msg);
         }
 
         // The resolving type must be assignable to the specified dependency type.
         if (!_resolvingType.IsAssignableTo(_dependencyType))
         {
-            string msg = string.Format(MsgIncompatibleResolvingType, ResolvingName, DependencyName);
+            string msg = FormatMessage(MsgIncompatibleResolvingType, _dependencyType, _resolvingKey, _resolvingType);
             throw new DependencyBuildException(msg);
         }
     }

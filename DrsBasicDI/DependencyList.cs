@@ -1,12 +1,16 @@
 ﻿namespace DrsBasicDI;
 
+/// <summary>
+/// The <see cref="DependencyList" /> class is used to storing and retrieving
+/// <see cref="IDependency" /> objects.
+/// </summary>
 internal sealed class DependencyList : IDependencyListBuilder, IDependencyListConsumer
 {
     /// <summary>
     /// A list of <see cref="IDependency" /> objects that have been added to the dependency
     /// injection container.
     /// </summary>
-    private readonly Dictionary<ServiceKey, IDependency> _dependencies = [];
+    internal readonly Dictionary<ServiceKey, IDependency> _dependencies = [];
 
     /// <summary>
     /// A lock object used to ensure thread safety when accessing or saving
@@ -41,8 +45,7 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
         {
             if (_dependencies.ContainsKey(serviceKey))
             {
-                string dependencyName = GetDependencyName(dependency.DependencyType.GetFriendlyName(), dependency.Key);
-                string msg = string.Format(MsgDuplicateDependency, dependencyName);
+                string msg = FormatMessage(MsgDuplicateDependency, dependency.DependencyType, dependency.Key);
                 throw new ContainerBuildException(msg);
             }
 
@@ -88,7 +91,6 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
     public IDependency Get(Type dependencyType, string key)
     {
         ServiceKey serviceKey = ServiceKey.GetServiceKey(dependencyType, key);
-        string dependencyName = GetDependencyName(dependencyType.GetFriendlyName(), key);
 
         lock (_lock)
         {
@@ -96,14 +98,14 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
             {
                 if (dependency is null)
                 {
-                    string msg = string.Format(MsgNullDependencyObject, dependencyName);
+                    string msg = FormatMessage(MsgNullDependencyObject, dependencyType, key);
                     throw new DependencyInjectionException(msg);
                 }
                 return dependency;
             }
             else
             {
-                string msg = string.Format(MsgDependencyMappingNotFound, dependencyName);
+                string msg = FormatMessage(MsgDependencyMappingNotFound, dependencyType, key);
                 throw new DependencyInjectionException(msg);
             }
         }
