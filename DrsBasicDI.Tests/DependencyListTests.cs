@@ -7,7 +7,7 @@ public class DependencyListTests
     {
         // Arrange
         DependencyList dependencyList = new();
-        Mock<IDependency> mockDependency = GetMockDependency(dependencyType: typeof(IClass1), resolvingKey: EmptyKey);
+        Mock<IDependency> mockDependency = GetMockDependency<IClass1>(resolvingKey: EmptyKey);
         ServiceKey serviceKey = new(typeof(IClass1), EmptyKey);
 
         // Act
@@ -33,8 +33,8 @@ public class DependencyListTests
         // Arrange
         DependencyList dependencyList = new();
         string testKey = "test";
-        Mock<IDependency> mockDependency1 = GetMockDependency(dependencyType: typeof(IClass1), resolvingKey: EmptyKey);
-        Mock<IDependency> mockDependency2 = GetMockDependency(dependencyType: typeof(IClass1), resolvingKey: testKey);
+        Mock<IDependency> mockDependency1 = GetMockDependency<IClass1>(resolvingKey: EmptyKey);
+        Mock<IDependency> mockDependency2 = GetMockDependency<IClass1>(resolvingKey: testKey);
         ServiceKey serviceKey1 = new(typeof(IClass1), EmptyKey);
         ServiceKey serviceKey2 = new(typeof(IClass1), testKey);
 
@@ -64,7 +64,7 @@ public class DependencyListTests
     {
         // Arrange
         DependencyList dependencyList = new();
-        Mock<IDependency> mockDependency = GetMockDependency(dependencyType: typeof(IClass1), resolvingKey: EmptyKey);
+        Mock<IDependency> mockDependency = GetMockDependency<IClass1>(resolvingKey: EmptyKey);
         ServiceKey serviceKey = new(typeof(IClass1), EmptyKey);
         dependencyList.Add(mockDependency.Object);
         string dependencyName = GetDependencyName(nameof(IClass1), EmptyKey);

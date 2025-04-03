@@ -171,7 +171,7 @@ public class DependencyResolverTests
         Mock<IDependency> mockClass2Dependency = GetMockDependency(lifetime: DependencyLifetime.Singleton,
                                                                    resolvingType: dependencyType,
                                                                    factory: null,
-                                                                   checkFactory: true);
+                                                                   factoryReturnsNull: true);
         IClass3 expected = new Class3(dependency);
         Type resolvingType = typeof(Class3);
         ConstructorInfo class3ConstructorInfo = resolvingType.GetConstructor([dependencyType])!;
@@ -179,7 +179,7 @@ public class DependencyResolverTests
         Mock<IDependency> mockClass3Dependency = GetMockDependency(lifetime: DependencyLifetime.Scoped,
                                                                    resolvingType: resolvingType,
                                                                    factory: null,
-                                                                   checkFactory: true);
+                                                                   factoryReturnsNull: true);
         Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
         SetupDependencyList<IClass2>(mockDependencyList, mockClass2Dependency.Object, dependencyKey);
         SetupDependencyList<IClass3>(mockDependencyList, mockClass3Dependency.Object, EmptyKey);
@@ -219,7 +219,7 @@ public class DependencyResolverTests
         Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Scoped,
                                                              resolvingType: resolvingType,
                                                              factory: null,
-                                                             checkFactory: true);
+                                                             factoryReturnsNull: true);
         Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
         SetupDependencyList<IClass2>(mockDependencyList, mockDependency.Object, EmptyKey);
         Mock<IObjectConstructor> mockObjectConstructor = mockServiceLocater.GetMock<IObjectConstructor>();
@@ -254,7 +254,7 @@ public class DependencyResolverTests
         Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Scoped,
                                                              resolvingType: resolvingType,
                                                              factory: null,
-                                                             checkFactory: true);
+                                                             factoryReturnsNull: true);
         Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
         SetupDependencyList<IClass2>(mockDependencyList, mockDependency.Object, EmptyKey);
         Mock<IObjectConstructor> mockObjectConstructor = mockServiceLocater.GetMock<IObjectConstructor>();
@@ -365,7 +365,7 @@ public class DependencyResolverTests
         Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Singleton,
                                                              resolvingType: resolvingType,
                                                              factory: null,
-                                                             checkFactory: true);
+                                                             factoryReturnsNull: true);
         Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
         SetupDependencyList<IClass2>(mockDependencyList, mockDependency.Object, EmptyKey);
         Mock<IObjectConstructor> mockObjectConstructor = mockServiceLocater.GetMock<IObjectConstructor>();
@@ -440,7 +440,7 @@ public class DependencyResolverTests
         Mock<IDependency> mockDependency = GetMockDependency(lifetime: DependencyLifetime.Transient,
                                                              resolvingType: resolvingType,
                                                              factory: null,
-                                                             checkFactory: true);
+                                                             factoryReturnsNull: true);
         Mock<IDependencyListConsumer> mockDependencyList = mockServiceLocater.GetMock<IDependencyListConsumer>();
         SetupDependencyList<IClass2>(mockDependencyList, mockDependency.Object, EmptyKey);
         Mock<IObjectConstructor> mockObjectConstructor = mockServiceLocater.GetMock<IObjectConstructor>();
