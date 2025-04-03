@@ -101,6 +101,7 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
                     string msg = FormatMessage(MsgNullDependencyObject, dependencyType, key);
                     throw new DependencyInjectionException(msg);
                 }
+
                 return dependency;
             }
             else
