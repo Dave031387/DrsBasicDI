@@ -126,24 +126,6 @@ internal static class Messages
     }
 
     /// <summary>
-    /// Get the dependency name string for the given dependency type and resolving key.
-    /// </summary>
-    /// <param name="dependencyType">
-    /// The dependency type.
-    /// </param>
-    /// <param name="resolvingKey">
-    /// The resolving key.
-    /// </param>
-    /// <returns>
-    /// The generated dependency name string.
-    /// </returns>
-    internal static string GetDependencyName(Type? dependencyType, string? resolvingKey)
-    {
-        string dependencyTypeName = dependencyType is null ? NA : dependencyType.GetFriendlyName();
-        return GetDependencyName(dependencyTypeName, resolvingKey);
-    }
-
-    /// <summary>
     /// Get the dependency name string for the given dependency type name and resolving key.
     /// </summary>
     /// <param name="dependencyTypeName">
@@ -164,21 +146,6 @@ internal static class Messages
     }
 
     /// <summary>
-    /// Get the resolving name string for the given resolving type.
-    /// </summary>
-    /// <param name="resolvingType">
-    /// The resolving type.
-    /// </param>
-    /// <returns>
-    /// The generated resolving name string.
-    /// </returns>
-    internal static string GetResolvingName(Type resolvingType)
-    {
-        string resolvingTypeName = resolvingType.GetFriendlyName();
-        return GetResolvingName(resolvingTypeName);
-    }
-
-    /// <summary>
     /// Get the resolving name string for the given resolving type name.
     /// </summary>
     /// <param name="resolvingTypeName">
@@ -189,4 +156,37 @@ internal static class Messages
     /// </returns>
     internal static string GetResolvingName(string resolvingTypeName)
         => $"resolving type {resolvingTypeName}";
+
+    /// <summary>
+    /// Get the dependency name string for the given dependency type and resolving key.
+    /// </summary>
+    /// <param name="dependencyType">
+    /// The dependency type.
+    /// </param>
+    /// <param name="resolvingKey">
+    /// The resolving key.
+    /// </param>
+    /// <returns>
+    /// The generated dependency name string.
+    /// </returns>
+    private static string GetDependencyName(Type? dependencyType, string? resolvingKey)
+    {
+        string dependencyTypeName = dependencyType is null ? NA : dependencyType.GetFriendlyName();
+        return GetDependencyName(dependencyTypeName, resolvingKey);
+    }
+
+    /// <summary>
+    /// Get the resolving name string for the given resolving type.
+    /// </summary>
+    /// <param name="resolvingType">
+    /// The resolving type.
+    /// </param>
+    /// <returns>
+    /// The generated resolving name string.
+    /// </returns>
+    private static string GetResolvingName(Type resolvingType)
+    {
+        string resolvingTypeName = resolvingType.GetFriendlyName();
+        return GetResolvingName(resolvingTypeName);
+    }
 }
