@@ -49,7 +49,7 @@ public class ContainerBuilderTests
             .Build();
 
         // Assert
-        AssertValidDependencies(container, mockServiceLocater);
+        AssertValidContainer(container, mockServiceLocater);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class ContainerBuilderTests
             .Build();
 
         // Assert
-        AssertValidDependencies(container, mockServiceLocater);
+        AssertValidContainer(container, mockServiceLocater);
     }
 
     [Fact]
@@ -143,7 +143,7 @@ public class ContainerBuilderTests
             .Build();
 
         // Assert
-        AssertValidDependencies(container, mockServiceLocater);
+        AssertValidContainer(container, mockServiceLocater);
     }
 
     [Fact]
@@ -190,7 +190,7 @@ public class ContainerBuilderTests
             .Build();
 
         // Assert
-        AssertValidDependencies(container, mockServiceLocater);
+        AssertValidContainer(container, mockServiceLocater);
     }
 
     [Fact]
@@ -289,7 +289,7 @@ public class ContainerBuilderTests
         mockServiceLocater.VerifyMocks();
     }
 
-    private static void AssertValidDependencies(IContainer container, MockServiceLocater mockServiceLocater)
+    private static void AssertValidContainer(IContainer container, MockServiceLocater mockServiceLocater)
     {
         container
             .Should()
@@ -300,7 +300,7 @@ public class ContainerBuilderTests
         mockServiceLocater.VerifyMocks();
     }
 
-    private void SetupMockDependencyList(Mock<IDependencyListBuilder> mockDependencyList, IDependency[] dependencies)
+    private static void SetupMockDependencyList(Mock<IDependencyListBuilder> mockDependencyList, IDependency[] dependencies)
     {
         foreach (IDependency dependency in dependencies)
         {
@@ -309,9 +309,6 @@ public class ContainerBuilderTests
                 .Verifiable(Times.Once);
         }
 
-        mockDependencyList
-            .Setup(m => m.Add(_containerDependency))
-            .Verifiable(Times.Once);
         mockDependencyList
             .SetupGet(m => m.Count)
             .Returns(dependencies.Length)

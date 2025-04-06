@@ -23,6 +23,13 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
     /// </summary>
     internal DependencyList()
     {
+        IDependency containerDependency = new Dependency(typeof(IContainer),
+                                                         typeof(Container),
+                                                         DependencyLifetime.Singleton,
+                                                         null,
+                                                         EmptyKey);
+        ServiceKey serviceKey = ServiceKey.GetServiceDependencyKey(containerDependency);
+        _dependencies[serviceKey] = containerDependency;
     }
 
     /// <summary>

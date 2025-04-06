@@ -503,9 +503,6 @@ public sealed class ContainerBuilder : IContainerBuilder
             throw new ContainerBuildException(msg);
         }
 
-        AddSingleton<IContainer>(builder => builder
-            .WithResolvingType<Container>());
-
         IContainer container = ServiceLocater.Get<IContainer>();
 
         _containerHasBeenBuilt = true;

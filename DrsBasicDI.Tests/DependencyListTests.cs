@@ -16,10 +16,10 @@ public class DependencyListTests
         // Assert
         dependencyList.Count
             .Should()
-            .Be(1);
+            .Be(2);
         dependencyList._dependencies
             .Should()
-            .ContainSingle()
+            .HaveCount(2)
             .And
             .ContainKey(serviceKey);
         dependencyList._dependencies[serviceKey]
@@ -45,10 +45,10 @@ public class DependencyListTests
         AssertException<ContainerBuildException>(action, msg);
         dependencyList.Count
             .Should()
-            .Be(1);
+            .Be(2);
         dependencyList._dependencies
             .Should()
-            .ContainSingle()
+            .HaveCount(2)
             .And
             .ContainKey(serviceKey);
         dependencyList._dependencies[serviceKey]
@@ -74,10 +74,10 @@ public class DependencyListTests
         // Assert
         dependencyList.Count
             .Should()
-            .Be(2);
+            .Be(3);
         dependencyList._dependencies
             .Should()
-            .HaveCount(2)
+            .HaveCount(3)
             .And
             .ContainKeys(serviceKey1, serviceKey2);
         dependencyList._dependencies[serviceKey1]
@@ -86,6 +86,31 @@ public class DependencyListTests
         dependencyList._dependencies[serviceKey2]
             .Should()
             .BeSameAs(mockDependency2.Object);
+    }
+
+    [Fact]
+    public void ConstructNewDependencyList_ShouldContainContainerDependency()
+    {
+        // Arrange / Act
+        DependencyList dependencyList = new();
+        ServiceKey serviceKey = new(typeof(IContainer), EmptyKey);
+        IDependency containerDependency = new Dependency(typeof(IContainer),
+                                                         typeof(Container),
+                                                         DependencyLifetime.Singleton,
+                                                         null,
+                                                         EmptyKey);
+
+        // Assert
+        dependencyList._dependencies
+            .Should()
+            .ContainSingle()
+            .And
+            .ContainKey(serviceKey);
+        dependencyList._dependencies[serviceKey]
+            .Should()
+            .NotBeNull()
+            .And
+            .Be(containerDependency);
     }
 
     [Fact]

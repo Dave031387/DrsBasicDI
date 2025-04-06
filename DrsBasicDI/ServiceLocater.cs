@@ -86,7 +86,7 @@ internal sealed class ServiceLocater : IServiceLocater
                 serviceKey = ServiceKey.GetServiceKey(serviceDescriptor.ImplementationType, key);
                 ConstructorInfo? constructorInfo = serviceDescriptor.ImplementationType.GetConstructor(ConstructorBindingFlags,
                                                                                                        null,
-                                                                                                       Type.EmptyTypes,
+                                                                                                       [],
                                                                                                        null);
 
                 if (serviceDescriptor.Lifetime == DependencyLifetime.Singleton)
@@ -101,7 +101,7 @@ internal sealed class ServiceLocater : IServiceLocater
 
                     if (constructorInfo is not null)
                     {
-                        instance = constructorInfo.Invoke(null);
+                        instance = constructorInfo.Invoke([]);
                         _singletonInstances[serviceKey] = instance;
                         return (T)instance;
                     }
