@@ -22,7 +22,7 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// </summary>
     /// <remarks>
     /// This constructor is declared <see langword="private" />. Use the static
-    /// <see cref="Current" /> property to create a new, empty <see cref="ContainerBuilder" />
+    /// <see cref="Instance" /> property to create a new, empty <see cref="ContainerBuilder" />
     /// object.
     /// </remarks>
     private ContainerBuilder() : this(DrsBasicDI.ServiceLocater.Instance)
@@ -49,12 +49,12 @@ public sealed class ContainerBuilder : IContainerBuilder
     }
 
     /// <summary>
-    /// Get the current <see cref="IContainerBuilder" /> instance.
+    /// Get the <see cref="IContainerBuilder" /> instance.
     /// </summary>
     /// <remarks>
     /// This returns a thread safe singleton instance of the <see cref="ContainerBuilder" /> class.
     /// </remarks>
-    public static IContainerBuilder Current => _lazy.Value;
+    public static IContainerBuilder Instance => _lazy.Value;
 
     /// <summary>
     /// Get a reference to the <see cref="IDependencyListBuilder" /> object.

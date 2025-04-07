@@ -197,9 +197,9 @@ public class ContainerBuilderTests
     public void GetContainerBuilderMoreThanOnce_ReturnsSameInstanceEachTime()
     {
         // Arrange/Act
-        IContainerBuilder builder1 = ContainerBuilder.Current;
-        IContainerBuilder builder2 = ContainerBuilder.Current;
-        IContainerBuilder builder3 = ContainerBuilder.Current;
+        IContainerBuilder builder1 = ContainerBuilder.Instance;
+        IContainerBuilder builder2 = ContainerBuilder.Instance;
+        IContainerBuilder builder3 = ContainerBuilder.Instance;
 
         // Assert
         builder1
