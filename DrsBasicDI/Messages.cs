@@ -39,7 +39,8 @@ internal static class Messages
     internal const string MsgScopedServiceAlreadySet = "The scoped resolving objects service has already been set in the scoped dependency resolver object.";
     internal const string MsgScopedServiceIsNull = "Invalid attempt to assign a null value to the scoped resolving objects service.";
     internal const string MsgScopedServiceSameAsNonScopedService = "The scoped resolving objects service must not be the same as the non-scoped service.";
-    internal const string MsgServiceNotRegistered = "No service has been registered for type {0}.";
+    internal const string MsgServiceNotRegistered = "No service has been registered in the Service Locater for {0}.";
+    internal const string MsgUnableToConstructService = "The Service Locater was unable to construct the service for {0}.";
     internal const string MsgUnableToMakeGenericResolveMethod = "Unable to create a generic Resolve method for {0}";
     internal const string MsgUndefinedLifetime = "The {0} must not have an undefined lifetime.";
     internal const string MsgUnspecifiedDependencyType = "Unable to build a dependency having an unspecified dependency type.";

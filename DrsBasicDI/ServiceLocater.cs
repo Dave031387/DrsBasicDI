@@ -74,7 +74,7 @@ internal sealed class ServiceLocater : IServiceLocater
     /// An instance of the implementation type that has been mapped to the given interface type
     /// <typeparamref name="T" />.
     /// </returns>
-    /// <exception cref="InvalidOperationException" />
+    /// <exception cref="ServiceLocaterException" />
     public T Get<T>(string key = EmptyKey) where T : class
     {
         ServiceKey serviceKey = ServiceKey.GetServiceKey<T>(key);
@@ -83,39 +83,50 @@ internal sealed class ServiceLocater : IServiceLocater
         {
             if (serviceDescriptor is not null)
             {
-                serviceKey = ServiceKey.GetServiceKey(serviceDescriptor.ImplementationType, key);
-                ConstructorInfo? constructorInfo = serviceDescriptor.ImplementationType.GetConstructor(ConstructorBindingFlags,
-                                                                                                       null,
-                                                                                                       [],
-                                                                                                       null);
-
-                if (serviceDescriptor.Lifetime == DependencyLifetime.Singleton)
+                try
                 {
-                    if (_singletonInstances.TryGetValue(serviceKey, out object? instance))
+                    serviceKey = ServiceKey.GetServiceKey(serviceDescriptor.ImplementationType, key);
+                    ConstructorInfo? constructorInfo = serviceDescriptor.ImplementationType.GetConstructor(ConstructorBindingFlags,
+                                                                                                           null,
+                                                                                                           [],
+                                                                                                           null);
+
+                    if (serviceDescriptor.Lifetime == DependencyLifetime.Singleton)
                     {
-                        if (instance is not null)
+                        if (_singletonInstances.TryGetValue(serviceKey, out object? instance))
                         {
+                            if (instance is not null)
+                            {
+                                return (T)instance;
+                            }
+                        }
+
+                        if (constructorInfo is not null)
+                        {
+                            instance = constructorInfo.Invoke([]);
+                            _singletonInstances[serviceKey] = instance;
                             return (T)instance;
                         }
                     }
 
                     if (constructorInfo is not null)
                     {
-                        instance = constructorInfo.Invoke([]);
-                        _singletonInstances[serviceKey] = instance;
-                        return (T)instance;
+                        return (T)constructorInfo.Invoke(null);
                     }
                 }
-
-                if (constructorInfo is not null)
+                catch (Exception ex)
                 {
-                    return (T)constructorInfo.Invoke(null);
+                    string msg = FormatMessage<T>(MsgUnableToConstructService, key);
+                    throw new ServiceLocaterException(msg, ex);
                 }
+
+                string msg1 = FormatMessage<T>(MsgUnableToConstructService, key);
+                throw new ServiceLocaterException(msg1);
             }
         }
 
-        string msg = string.Format(MsgServiceNotRegistered, typeof(T).GetFriendlyName());
-        throw new InvalidOperationException(msg);
+        string msg2 = FormatMessage<T>(MsgServiceNotRegistered, key);
+        throw new ServiceLocaterException(msg2);
     }
 
     /// <summary>
