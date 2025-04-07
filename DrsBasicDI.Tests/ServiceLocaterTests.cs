@@ -201,7 +201,8 @@ public class ServiceLocaterTests
     public void TryToGetInvalidDependency_ShouldThrowException()
     {
         // Arrange
-        string msg = FormatMessage<IObjectConstructor>(MsgServiceNotRegistered, Scoped);
+        string dependencyName = GetDependencyName(nameof(IObjectConstructor), Scoped);
+        string msg = string.Format(MsgServiceNotRegistered, dependencyName);
 
         // Act
         void action() => _serviceLocater.Get<IObjectConstructor>(Scoped);

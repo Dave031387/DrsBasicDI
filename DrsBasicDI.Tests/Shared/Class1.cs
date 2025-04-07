@@ -11,7 +11,7 @@ public class Class1 : IClass1
     {
     }
 
-    internal Class1(string builtBy)
+    public Class1(string builtBy)
     {
         BuiltBy = builtBy;
     }
