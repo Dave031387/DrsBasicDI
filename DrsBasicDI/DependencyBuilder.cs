@@ -74,7 +74,7 @@ public sealed class DependencyBuilder
     /// <summary>
     /// Specify the dependency type of the <see cref="IDependency" /> object that is to be built.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The dependency type.
     /// </typeparam>
     /// <returns>
@@ -82,8 +82,8 @@ public sealed class DependencyBuilder
     /// type information.
     /// </returns>
     /// <exception cref="DependencyBuildException" />
-    internal DependencyBuilder WithDependencyType<T>() where T : class
-        => WithDependencyType(typeof(T));
+    internal DependencyBuilder WithDependencyType<TDependency>() where TDependency : class
+        => WithDependencyType(typeof(TDependency));
 
     /// <summary>
     /// Specify the dependency type of the <see cref="IDependency" /> object that is to be built.
@@ -207,7 +207,7 @@ public sealed class DependencyBuilder
     /// <summary>
     /// Specify the resolving type of the <see cref="IDependency" /> object that is to be built.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TResolving">
     /// The resolving type.
     /// </typeparam>
     /// <returns>
@@ -215,8 +215,8 @@ public sealed class DependencyBuilder
     /// type information.
     /// </returns>
     /// <exception cref="DependencyBuildException" />
-    internal DependencyBuilder WithResolvingType<T>() where T : class
-        => WithResolvingType(typeof(T));
+    internal DependencyBuilder WithResolvingType<TResolving>() where TResolving : class
+        => WithResolvingType(typeof(TResolving));
 
     /// <summary>
     /// Specify the resolving type of the <see cref="IDependency" /> object that is to be built.

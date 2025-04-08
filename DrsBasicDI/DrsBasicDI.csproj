@@ -6,10 +6,10 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>A basic dependency injection container that handles constructor and property injection.</Title>
+    <Title>Basic dependency injection container for .NET</Title>
     <Version>0.1.0</Version>
     <Authors>David R Slocum</Authors>
-    <Description>A basic dependency injection container that handles constructor and property injection.</Description>
+    <Description>A basic dependency injection container that supports constructor injection of transient, singleton, and scoped services as well as keyed services (multiple implementations of the same service type) within a small- to medium-sized .NET project.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Dave031387/DrsBasicDI</RepositoryUrl>
     <PackageTags>c#; csharp; DI; IoC; dependency; injection</PackageTags>

@@ -102,9 +102,10 @@ internal sealed class DependencyResolver : IDependencyResolver
     }
 
     /// <summary>
-    /// Retrieve the resolving object for the given dependency type <typeparamref name="T" />.
+    /// Retrieve the resolving object for the given dependency type
+    /// <typeparamref name="TDependency" />.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The dependency type that is to be resolved.
     /// </typeparam>
     /// <param name="key">
@@ -117,23 +118,23 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// This method will be called recursively until all nested dependency types have been resolved.
     /// </remarks>
     /// <exception cref="DependencyInjectionException" />
-    public T Resolve<T>(string key) where T : class
+    public TDependency Resolve<TDependency>(string key) where TDependency : class
     {
-        if (TryGetResolvedDependency(out T? resolvedDependency, key))
+        if (TryGetResolvedDependency(out TDependency? resolvedDependency, key))
         {
             // The only way we will get to this point is if the resolvedDependency value is not
             // null.
             return resolvedDependency!;
         }
 
-        if (TryGetFactoryValue(out T? factoryValue, key))
+        if (TryGetFactoryValue(out TDependency? factoryValue, key))
         {
             // The only way we will get to this point is if the factoryValue is not null.
             return factoryValue!;
         }
 
         // If we get here the dependency hasn't been resolved yet, so go resolve it.
-        return ConstructResolvingInstance<T>(key);
+        return ConstructResolvingInstance<TDependency>(key);
     }
 
     /// <summary>
@@ -167,25 +168,27 @@ internal sealed class DependencyResolver : IDependencyResolver
     }
 
     /// <summary>
-    /// Construct the resolving object for the given dependency type <typeparamref name="T" />.
+    /// Construct the resolving object for the given dependency type
+    /// <typeparamref name="TDependency" />.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The dependency type whose resolving object is being constructed.
     /// </typeparam>
     /// <param name="key">
     /// An optional key used to identify the specific resolving object to be constructed.
     /// </param>
     /// <returns>
-    /// An instance of the resolving object for the given dependency type <typeparamref name="T" />.
+    /// An instance of the resolving object for the given dependency type
+    /// <typeparamref name="TDependency" />.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    private T ConstructResolvingInstance<T>(string key) where T : class
+    private TDependency ConstructResolvingInstance<TDependency>(string key) where TDependency : class
     {
-        IDependency dependency = DependencyList.Get<T>(key);
+        IDependency dependency = DependencyList.Get<TDependency>(key);
         Type resolvingType = dependency.ResolvingType;
         ConstructorInfo constructorInfo = resolvingType.GetDIConstructorInfo();
         object[] resolvedParameters = ResolveNestedDependencies(constructorInfo);
-        T resolvingObject = ObjectConstructor.Construct<T>(constructorInfo, resolvedParameters, key);
+        TDependency resolvingObject = ObjectConstructor.Construct<TDependency>(constructorInfo, resolvedParameters, key);
         return SaveResolvedDependency(resolvingObject, key);
     }
 
@@ -258,12 +261,12 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <summary>
     /// Save the given resolved dependency object for later use if applicable.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency that was resolved.
     /// </typeparam>
     /// <param name="resolvedDependency">
     /// An instance of the resolving type that was mapped to the dependency type
-    /// <typeparamref name="T" />.
+    /// <typeparamref name="TDependency" />.
     /// </param>
     /// <param name="key">
     /// An optional key used to identify the specific resolving object to be saved.
@@ -276,9 +279,9 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// Only scoped and singleton dependencies are saved. Transient dependencies by definition are
     /// created new every time they're requested.
     /// </remarks>
-    private T SaveResolvedDependency<T>(T resolvedDependency, string key) where T : class
+    private TDependency SaveResolvedDependency<TDependency>(TDependency resolvedDependency, string key) where TDependency : class
     {
-        IDependency dependency = DependencyList.Get<T>(key);
+        IDependency dependency = DependencyList.Get<TDependency>(key);
 
         if (dependency.Lifetime is DependencyLifetime.Scoped && ScopedService is not null)
         {
@@ -296,12 +299,12 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// Retrieve the resolving object from the factory method if one was defined for the given
     /// <see cref="Dependency" /> object.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency that is being resolved.
     /// </typeparam>
     /// <param name="factoryValue">
     /// The resolving object that is returned from the <see cref="Dependency.Factory" /> method for
-    /// the dependency type <typeparamref name="T" /> that is being resolved.
+    /// the dependency type <typeparamref name="TDependency" /> that is being resolved.
     /// </param>
     /// <param name="key">
     /// An optional key used to identify the specific resolving object to be retrieved.
@@ -311,19 +314,19 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <see cref="Dependency.Factory" /> method. Otherwise, returns <see langword="false" />.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    private bool TryGetFactoryValue<T>(out T? factoryValue, string key) where T : class
+    private bool TryGetFactoryValue<TDependency>(out TDependency? factoryValue, string key) where TDependency : class
     {
-        IDependency dependency = DependencyList.Get<T>(key);
+        IDependency dependency = DependencyList.Get<TDependency>(key);
 
         if (dependency.Factory is not null)
         {
             try
             {
-                factoryValue = (T?)dependency.Factory();
+                factoryValue = (TDependency?)dependency.Factory();
             }
             catch (Exception ex)
             {
-                string msg1 = FormatMessage<T>(MsgFactoryInvocationError, key);
+                string msg1 = FormatMessage<TDependency>(MsgFactoryInvocationError, key);
                 throw new DependencyInjectionException(msg1, ex);
             }
 
@@ -333,7 +336,7 @@ internal sealed class DependencyResolver : IDependencyResolver
                 return true;
             }
 
-            string msg2 = FormatMessage<T>(MsgFactoryShouldNotReturnNull, key);
+            string msg2 = FormatMessage<TDependency>(MsgFactoryShouldNotReturnNull, key);
             throw new DependencyInjectionException(msg2);
         }
 
@@ -345,12 +348,13 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// Try to retrieve the resolving object for the given dependency type if one was previously
     /// saved.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency that is being resolved.
     /// </typeparam>
     /// <param name="resolvedDependency">
     /// The resolving object that is returned for the given dependency type
-    /// <typeparamref name="T" /> if one was previously saved. Otherwise, <see langword="null" />.
+    /// <typeparamref name="TDependency" /> if one was previously saved. Otherwise,
+    /// <see langword="null" />.
     /// </param>
     /// <param name="key">
     /// An optional key used to identify the specific resolving object to be retrieved.
@@ -359,9 +363,9 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// <see langword="true" /> if a valid resolving object is successfully retrieved. Otherwise,
     /// <see langword="false" />.
     /// </returns>
-    private bool TryGetResolvedDependency<T>(out T? resolvedDependency, string key) where T : class
+    private bool TryGetResolvedDependency<TDependency>(out TDependency? resolvedDependency, string key) where TDependency : class
     {
-        IDependency dependency = DependencyList.Get<T>(key);
+        IDependency dependency = DependencyList.Get<TDependency>(key);
 
         if (ScopedService is not null)
         {

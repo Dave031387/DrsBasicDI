@@ -7,9 +7,10 @@
 internal interface IDependencyResolver : IDisposable
 {
     /// <summary>
-    /// Retrieve the resolving object for the given dependency type <typeparamref name="T" />.
+    /// Retrieve the resolving object for the given dependency type
+    /// <typeparamref name="TDependency" />.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The dependency type that is to be resolved.
     /// </typeparam>
     /// <param name="key">
@@ -18,7 +19,7 @@ internal interface IDependencyResolver : IDisposable
     /// <returns>
     /// An instance of the resolving class type.
     /// </returns>
-    public T Resolve<T>(string key) where T : class;
+    public TDependency Resolve<TDependency>(string key) where TDependency : class;
 
     /// <summary>
     /// Set the scoped <see cref="IResolvingObjectsService" /> to the specified

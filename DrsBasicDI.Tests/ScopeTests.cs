@@ -64,7 +64,7 @@ public class ScopeTests
         Scope scope = new(mockServiceLocater);
 
         // Act
-        IClass1 actual = scope.GetDependency<IClass1>(resolvingKey);
+        IClass1 actual = scope.Resolve<IClass1>(resolvingKey);
 
         // Assert
         actual

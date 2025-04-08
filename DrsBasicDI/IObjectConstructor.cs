@@ -9,15 +9,15 @@ using System.Reflection;
 internal interface IObjectConstructor
 {
     /// <summary>
-    /// Constructs an object of type <typeparamref name="T" /> using the specified
+    /// Constructs an object of type <typeparamref name="TDependency" /> using the specified
     /// <paramref name="constructorInfo" /> and <paramref name="parameterValues" />.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The dependency type to be constructed.
     /// </typeparam>
     /// <param name="constructorInfo">
     /// The constructor information for the resolving type that was mapped to the dependency type
-    /// <typeparamref name="T" />.
+    /// <typeparamref name="TDependency" />.
     /// </param>
     /// <param name="parameterValues">
     /// The constructor parameter values to be used for constructing the resolving type.
@@ -26,7 +26,7 @@ internal interface IObjectConstructor
     /// An optional key used to identify the specific resolving object to be constructed.
     /// </param>
     /// <returns>
-    /// The resolving object cast to the dependency type <typeparamref name="T" />.
+    /// The resolving object cast to the dependency type <typeparamref name="TDependency" />.
     /// </returns>
-    public T Construct<T>(ConstructorInfo constructorInfo, object[] parameterValues, string key) where T : class;
+    public TDependency Construct<TDependency>(ConstructorInfo constructorInfo, object[] parameterValues, string key) where TDependency : class;
 }

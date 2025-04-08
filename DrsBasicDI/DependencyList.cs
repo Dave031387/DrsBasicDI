@@ -62,9 +62,9 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
 
     /// <summary>
     /// Get the <see cref="IDependency" /> object for the given dependency type
-    /// <typeparamref name="T" /> and <paramref name="key" /> value.
+    /// <typeparamref name="TDependency" /> and <paramref name="key" /> value.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of dependency to be retrieved.
     /// </typeparam>
     /// <param name="key">
@@ -73,11 +73,11 @@ internal sealed class DependencyList : IDependencyListBuilder, IDependencyListCo
     /// </param>
     /// <returns>
     /// The <see cref="IDependency" /> instance corresponding to the given dependency type
-    /// <typeparamref name="T" /> and <paramref name="key" /> value.
+    /// <typeparamref name="TDependency" /> and <paramref name="key" /> value.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    public IDependency Get<T>(string key) where T : class
-        => Get(typeof(T), key);
+    public IDependency Get<TDependency>(string key) where TDependency : class
+        => Get(typeof(TDependency), key);
 
     /// <summary>
     /// Get the <see cref="IDependency" /> object for the given <paramref name="dependencyType" />

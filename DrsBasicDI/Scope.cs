@@ -41,20 +41,20 @@ internal sealed class Scope : IScope
 
     /// <summary>
     /// Gets an instance of the resolving type that is mapped to the given dependency type
-    /// <typeparamref name="T" /> and resolving <paramref name="key" />.
+    /// <typeparamref name="TDependency" /> and resolving <paramref name="key" />.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The dependency type that is to be retrieved.
     /// </typeparam>
     /// <param name="key">
     /// An optional key used to identify the specific resolving object to be retrieved.
     /// </param>
     /// <returns>
-    /// The resolving object for the given dependency type <typeparamref name="T" /> and resolving
-    /// <paramref name="key" />, or <see langword="null" /> if the resolving object can't be
-    /// determined.
+    /// The resolving object for the given dependency type <typeparamref name="TDependency" /> and
+    /// resolving <paramref name="key" />, or <see langword="null" /> if the resolving object can't
+    /// be determined.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    public T GetDependency<T>(string key = EmptyKey) where T : class
-        => DependencyResolver.Resolve<T>(key);
+    public TDependency Resolve<TDependency>(string key = EmptyKey) where TDependency : class
+        => DependencyResolver.Resolve<TDependency>(key);
 }

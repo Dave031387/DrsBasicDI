@@ -100,7 +100,7 @@ public class ContainerTests
         Container container = new(mockServiceLocater);
 
         // Act
-        IClass1 actual = container.GetDependency<IClass1>();
+        IClass1 actual = container.Resolve<IClass1>();
 
         // Assert
         actual

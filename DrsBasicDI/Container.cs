@@ -58,9 +58,9 @@ internal sealed class Container : IContainer
 
     /// <summary>
     /// Get an instance of the resolving class that is mapped to the given dependency type
-    /// <typeparamref name="T" />.
+    /// <typeparamref name="TDependency" />.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The dependency type that is to be resolved.
     /// </typeparam>
     /// <param name="key">
@@ -68,9 +68,9 @@ internal sealed class Container : IContainer
     /// </param>
     /// <returns>
     /// An instance of the resolving object corresponding to the given dependency type
-    /// <typeparamref name="T" /> and resolving <paramref name="key" />.
+    /// <typeparamref name="TDependency" /> and resolving <paramref name="key" />.
     /// </returns>
     /// <exception cref="DependencyInjectionException" />
-    public T GetDependency<T>(string key = EmptyKey) where T : class
-        => DependencyResolver.Resolve<T>(key);
+    public TDependency Resolve<TDependency>(string key = EmptyKey) where TDependency : class
+        => DependencyResolver.Resolve<TDependency>(key);
 }

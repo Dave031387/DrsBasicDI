@@ -20,9 +20,9 @@ public interface IContainerBuilder
 
     /// <summary>
     /// Construct a new <see cref="IDependency" /> object having the specified dependency type
-    /// <typeparamref name="T" /> and add it to the container.
+    /// <typeparamref name="TDependency" /> and add it to the container.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency.
     /// </typeparam>
     /// <param name="builder">
@@ -32,7 +32,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    public IContainerBuilder AddDependency<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
+    public IContainerBuilder AddDependency<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class;
 
     /// <summary>
     /// Construct a new <see cref="IDependency" /> object having the specified dependency type
@@ -71,9 +71,9 @@ public interface IContainerBuilder
 
     /// <summary>
     /// Construct a new scoped <see cref="IDependency" /> object having the specified dependency
-    /// type <typeparamref name="T" /> and add it to the container.
+    /// type <typeparamref name="TDependency" /> and add it to the container.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency.
     /// </typeparam>
     /// <param name="builder">
@@ -83,7 +83,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    public IContainerBuilder AddScoped<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
+    public IContainerBuilder AddScoped<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class;
 
     /// <summary>
     /// Construct a new scoped <see cref="IDependency" /> object having the specified dependency
@@ -141,9 +141,9 @@ public interface IContainerBuilder
 
     /// <summary>
     /// Construct a new singleton <see cref="IDependency" /> object having the specified dependency
-    /// type <typeparamref name="T" /> and add it to the container.
+    /// type <typeparamref name="TDependency" /> and add it to the container.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency.
     /// </typeparam>
     /// <param name="builder">
@@ -153,7 +153,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    public IContainerBuilder AddSingleton<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
+    public IContainerBuilder AddSingleton<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class;
 
     /// <summary>
     /// Construct a new singleton <see cref="IDependency" /> object having the specified dependency
@@ -211,9 +211,9 @@ public interface IContainerBuilder
 
     /// <summary>
     /// Construct a new transient <see cref="IDependency" /> object having the specified dependency
-    /// type <typeparamref name="T" /> and add it to the container.
+    /// type <typeparamref name="TDependency" /> and add it to the container.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of the dependency.
     /// </typeparam>
     /// <param name="builder">
@@ -223,7 +223,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
-    public IContainerBuilder AddTransient<T>(Func<DependencyBuilder, DependencyBuilder> builder) where T : class;
+    public IContainerBuilder AddTransient<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class;
 
     /// <summary>
     /// Construct a new transient <see cref="IDependency" /> object having the specified dependency

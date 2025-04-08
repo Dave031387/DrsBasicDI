@@ -10,9 +10,9 @@ internal interface IDependencyListConsumer
 {
     /// <summary>
     /// Get the <see cref="IDependency" /> object for the given dependency type
-    /// <typeparamref name="T" /> and <paramref name="key" /> value.
+    /// <typeparamref name="TDependency" /> and <paramref name="key" /> value.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The type of dependency to be retrieved.
     /// </typeparam>
     /// <param name="key">
@@ -21,9 +21,9 @@ internal interface IDependencyListConsumer
     /// </param>
     /// <returns>
     /// The <see cref="IDependency" /> instance corresponding to the given dependency type
-    /// <typeparamref name="T" /> and <paramref name="key" /> value.
+    /// <typeparamref name="TDependency" /> and <paramref name="key" /> value.
     /// </returns>
-    public IDependency Get<T>(string key) where T : class;
+    public IDependency Get<TDependency>(string key) where TDependency : class;
 
     /// <summary>
     /// Get the <see cref="IDependency" /> object for the given <paramref name="dependencyType" />

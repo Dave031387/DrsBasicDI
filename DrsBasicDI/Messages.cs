@@ -49,7 +49,7 @@ internal static class Messages
     /// <summary>
     /// Format the given message with the given dependency type, resolving key and resolving type.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam name="TDependency">
     /// The dependency type to be inserted into the message.
     /// </typeparam>
     /// <param name="message">
@@ -64,10 +64,10 @@ internal static class Messages
     /// <returns>
     /// The formatted message.
     /// </returns>
-    internal static string FormatMessage<T>(string message,
-                                            string? resolvingKey = null,
-                                            Type? resolvingType = null) where T : class
-        => FormatMessage(message, typeof(T), resolvingKey, resolvingType);
+    internal static string FormatMessage<TDependency>(string message,
+                                                      string? resolvingKey = null,
+                                                      Type? resolvingType = null) where TDependency : class
+        => FormatMessage(message, typeof(TDependency), resolvingKey, resolvingType);
 
     /// <summary>
     /// Format the given message with the given dependency type, resolving key and resolving type.
