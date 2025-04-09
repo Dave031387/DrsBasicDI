@@ -35,6 +35,7 @@ readable syntax when configuring the container, as developers can chain method c
 > code and the internals of the **DrsBasicDI** class library.*
 
 Example:
+
 ```csharp
 using DrsBasicDI;
 IContainerBuilder builder = ContainerBuilder.Instance;
@@ -57,6 +58,7 @@ the *TResolving* type parameter represents the actual implementation of that typ
 dependencies, making it easier to swap out implementations or create mock objects for testing purposes.
 
 The following code snippet illustrates the use of these methods:
+
 ```csharp
 using DrsBasicDI;
 IContainer container = ContainerBuilder.Instance
@@ -103,6 +105,7 @@ the service has been registered. This helps to maintain the integrity of the con
 has been set up.
 
 The following code snippet illustrates the use of these methods:
+
 ```csharp
 using DrsBasicDI;
 
@@ -150,6 +153,7 @@ implementation of the service.
 ### Other Methods for Registering Services
 The methods mentioned above should be able to meet most all of your service registration needs. However, there are a few other methods that are
 provided for convenience. These methods are not as commonly used, but they can be helpful in certain situations. The following methods are available:
+
 - ***AddDependency(Func<DependencyBuilder, DependencyBuilder> builder)***
 - ***AddDependency\<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder)***
 - ***AddDependency\<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)***
@@ -162,6 +166,7 @@ provided for convenience. These methods are not as commonly used, but they can b
 
 In addition, the ***DependencyBuilder*** class provides additional methods for defining the properties of the service being registered. The complete
 list of methods includes:
+
 - ***WithDependencyType(Type dependencyType)***: Specifies the dependency type (service type) for the service being registered.
 - ***WithDependencyType\<TDependency>()***: Specifies the dependency type (service type) for the service being registered. (Same as the previous
   method, but using a generic type parameter.)
@@ -178,6 +183,7 @@ list of methods includes:
   as the previous method, but using a generic type parameter.)
 
 The following example illustrates the use of these methods:
+
 ```csharp
 using DrsBasicDI;
 
@@ -212,10 +218,12 @@ IContainer container = ContainerBuilder.Instance
 
 ### Dependency Build Rules
 Each dependency (service) that is registered must conform to the following rules:
+
 - Each service must have a defined dependency type, resolving type, and lifetime. Optionally, they may also specify a factory method and/or a
   resolving key.
 - Each property of a service must be specified only once. For example, the following code would result in an exception because the dependency type is
   specified both by the generic type parameter on the ***AddSingleton*** method and by the ***WithDependencyType*** method:
+
   ```csharp
     using DrsBasicDI;
     IContainer container = ContainerBuilder.Instance
@@ -224,6 +232,7 @@ Each dependency (service) that is registered must conform to the following rules
             .WithResolvingType<MyService>())
         .Build();
   ```
+
 - No two services can have the same dependency type and resolving key.
 - The dependency type of the service must be an interface type, a concrete class type, or a fully-constructed generic type (valid type values must be
   assigned to all generic type parameters). Abstract class types are not supported.
@@ -250,11 +259,12 @@ to resolve dependencies. The class consists of only three public methods:
   needed.
 
 ### The ***Resolve*** Method
-The ***Resolve*** method is the primary method used to resolve dependencies from the container. It takes a generic type parameter that specifies the
+The ***Resolve*** method is the method used to resolve dependencies from the container. It takes a generic type parameter that specifies the
 dependency type to be resolved. The method also takes an optional *key* parameter that can be used to specify a resolving key for the service. If no
 key is specified, the empty string will be used as the default key. The method returns an instance of the specified dependency type.
 
 The following steps are taken when resolving a dependency:
+
 1. The method checks if the requested dependency type is registered in the container with the specified resolving key (or empty string if no key was
    specified). If not, a ***DependencyInjectionException*** is thrown.
 1. If the dependency type is registered, the method checks if the dependency is a singleton. If it is, the method returns the cached instance of the
@@ -273,6 +283,7 @@ The following steps are taken when resolving a dependency:
 > *Any errors detected while resolving a dependency will result in a **DependencyInjectionException** being thrown.*
 
 The following example illustrates the use of the ***Resolve*** method:
+
 ```csharp
 using DrsBasicDI;
 
@@ -324,7 +335,8 @@ In this example, we register two services: ***IService1*** and ***IService2***. 
 ***IService2*** service is registered as a transient. When we resolve the ***IService2*** service, the container automatically resolves the
 ***IService1*** dependency and injects it into the constructor of the ***Service2*** class. The ***DoSomething*** method of the ***IService2*** class
 is then called, which in turn calls the ***DoSomething*** method of the ***IService1*** class. The output of the program will be:
-```
+
+```plaintext
 Service2 calling Service1.DoSomething()...
 Service1 doing something...
 ```
@@ -346,6 +358,7 @@ ensure that the scope is properly disposed of when it is no longer needed. This 
 scope, and disposing of the scope will also dispose of any scoped services that were created within that scope.
 
 The following example illustrates the use of the ***CreateScope*** method:
+
 ```csharp
 using DrsBasicDI;
 
@@ -401,3 +414,171 @@ ensuring that they are properly disposed of when the scope is no longer needed. 
   can be used to specify a resolving key for the service. If no key is specified, the empty string will be used as the default key.
 - ***Dispose()***: Disposes of the scope and releases any resources held by it. Normally, this method is called automatically at the end of the
   using statement that creates the scope. However, it can also be called explicitly if needed.
+
+### The ***Resolve*** Method
+The ***Resolve*** method is similar to the ***Resolve*** method of the ***Container*** class, but it is specifically designed for resolving scoped
+dependencies within the scope. The method takes a generic type parameter that specifies the dependency type to be resolved. The method also takes an
+optional *key* parameter that can be used to specify a resolving key for the service. If no key is specified, the empty string will be used as the
+default key. The method returns an instance of the specified dependency type.
+
+The ***Resolve*** method of the ***Scope*** class can resolve transient and singleton dependencies in addition to scoped dependencies. This is
+necessary because a scoped dependency may have a constructor that contains dependencies that are not scoped. In this case, the ***Scope*** class will
+resolve the transient and singleton dependencies as needed. The following steps are taken to resolve a dependency within a scope:
+
+1. The method checks if the requested dependency type is registered in the container with the specified resolving key (or empty string if no key was
+   specified). If not, a ***DependencyInjectionException*** is thrown.
+1. If the dependency is registered, the method checks if the dependency is scoped or a singleton.
+1. If the dependency is scoped, it checks the scoped cache to see if the dependency has already been resolved within the scope. If it has, the cached
+   instance is returned.
+1. If the dependency is a singleton, it checks the container cache to see if the dependency has already been resolved. If it has, the cached instance
+   is returned.
+1. If no cached instance was found, or if the dependency was a transient, the method checks if a factory method was specified for the dependency. If a
+   factory method was specified, it is invoked to create the instance of the resolving type and the instance is returned. (For singleton dependencies,
+   the resolving instance is also saved to the container cache for future use. For scoped dependencies, the resolving instance is saved to the scoped
+   cache for future use.)
+1. If no factory method was specified, the method uses reflection to create an instance of the resolving type using its constructor. Any dependencies 
+   required by the constructor are resolved recursively using the same process. The instance is then returned. (For singleton dependencies, the resolving
+   instance is also saved to the container cache for future use. For scoped dependencies, the resolving instance is saved to the scoped cache for future
+   use.)
+
+As with the ***Resolve*** method of the ***Container*** class, the resolving instance is always cast to the dependency type before being returned.
+Also, any errors detected while resolving a dependency will result in a ***DependencyInjectionException*** being thrown.
+
+> [!NOTE]
+> *Each **Scope** class instance has its own scoped cache. Only scoped dependencies resolved by that specific **Scope** instance are saved to that
+> cache.*
+
+The following example is similar to the example given for the ***Resolve*** method of the ***Container*** class, but it has been modified slightly to
+show how things work when resolving scoped dependencies:
+
+```csharp
+using DrsBasicDI;
+
+public interface IService1
+{
+    void DoSomething();
+}
+
+public class Service1 : IService1
+{
+    public void DoSomething()
+    {
+        Console.WriteLine("Service1 doing something...");
+    }
+}
+
+public interface IService2
+{
+    void DoSomething();
+}
+
+public class Service2 : IService2
+{
+    private readonly IService1 _service1;
+
+    public Service2(IService1 service1)
+    {
+        _service1 = service1;
+    }
+
+    public void DoSomething()
+    {
+        Console.WriteLine("Service2 calling Service1.DoSomething()...");
+        _service1.DoSomething();
+    }
+}
+
+
+IContainer container = ContainerBuilder.Instance
+    .AddSingleton<IService1, Service1>()
+    .AddScoped<IService2, Service2>()
+    .Build();
+
+using (IScope scope = container.CreateScope())
+{
+    IService2 service = scope.Resolve<IService2>();
+    service.DoSomething();
+}
+```
+
+In this example, we register two services: ***IService1*** and ***IService2***. The ***IService1*** service is registered as a singleton, while the
+***IService2*** service is registered as a scoped dependency. When we create a new scope using the ***CreateScope*** method and resolve the
+***IService2*** dependency within that scope, the container automatically resolves the ***IService1*** dependency and injects it into the constructor
+of the ***Service2*** class. The ***DoSomething*** method of the ***IService2*** object is then called, which in turn calls the ***DoSomething***
+method of the ***IService1*** class. The output will be identical to the output given in the example of the ***Resolve*** method of the
+***Container*** class.
+
+It is important to note in the above example that when the ***IService1*** dependency is resolved within the scope, the resolving instance will get
+saved to the container's cache since it is a singleton. The ***IService2*** dependency, on the other hand, will be saved to the scoped cache since it
+is a scoped dependency. At the end of the using block the ***Dispose*** method of the ***Scope*** class will be called automatically, which will
+dispose of the ***IService2*** dependency and release any resources held by it. The ***IService1*** dependency will not be disposed of, as it is a
+singleton and is managed by the container. Future requests for the ***IService1*** dependency will return the value that was saved to the container's
+cache whether the request is made through the container instance or some other scope instance.
+
+### The ***Dispose*** Method
+The ***Dispose*** method is used to dispose of the scope and release any resources held by it. Everything that was said about the ***Dispose*** method
+of the ***Container*** class applies to the ***Dispose*** method of the ***Scope*** class as well. The only difference is that only scoped
+dependencies created within the scope will be disposed of when the ***Dispose*** method is called. Normally, this would be done automatically at the
+end of a using block, but it can also be called explicitly if needed.
+
+## The ***ResolvingKeyAttribute*** Class
+We've already shown how we can specify a resolving key on the ***Resolve*** methods of the ***Container*** class and ***Scope*** class. But what about
+a dependency that gets resolved because it is a constructor parameter of another dependency? How do we specify a resolving key in this case? Well,
+that's where the ***ResolvingKeyAttribute*** class comes in. This class is an attribute that can be applied to a constructor parameter of a
+dependency. The ***ResolvingKeyAttribute*** class is a simple attribute class that contains a single property called ***Key***. This property is used
+to specify the resolving key for the dependency.
+
+The following example illustrates the use of the ***ResolvingKey*** attribute:
+
+```csharp
+using DrsBasicDI;
+
+public interface IService1
+{
+    void DoSomething();
+}
+
+public class Service1 : IService1
+{
+    public void DoSomething()
+    {
+        Console.WriteLine("Service1 doing something...");
+    }
+}
+
+public interface IService2
+{
+    void DoSomething();
+}
+
+public class Service2 : IService2
+{
+    private readonly IService1 _service1;
+
+    public Service2([ResolvingKey("Test")] IService1 service1)
+    {
+        _service1 = service1;
+    }
+
+    public void DoSomething()
+    {
+        Console.WriteLine("Service2 calling Service1.DoSomething()...");
+        _service1.DoSomething();
+    }
+}
+
+
+IContainer container = ContainerBuilder.Instance
+    .AddSingleton<IService1, Service1>()
+        .WithResolvingKey("Test")
+    .AddTransient<IService2, Service2>()
+    .Build();
+
+IService2 service = container.Resolve<IService2>();
+service.DoSomething();
+```
+
+In this example, we register two services: ***IService1*** and ***IService2***. The ***IService1*** service is registered as a singleton with a
+resolving key of "Test", while the ***IService2*** service is registered as a transient. Also, the ***ResolvingKey*** attribute is applied to the
+***IService1*** parameter in the constructor of the ***IService2*** class. When we resolve the ***IService2*** service, the container automatically
+resolves the ***IService1*** dependency using the specified resolving key and injects it into the constructor of the ***Service2*** class.
