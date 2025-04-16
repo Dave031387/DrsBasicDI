@@ -28,5 +28,6 @@ public interface IContainer : IDisposable
     /// An instance of the resolving object corresponding to the given dependency type
     /// <typeparamref name="TDependency" /> and resolving <paramref name="key" />.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     public TDependency Resolve<TDependency>(string key = EmptyKey) where TDependency : class;
 }

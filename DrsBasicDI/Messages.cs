@@ -1,5 +1,7 @@
 ﻿namespace DrsBasicDI;
 
+using System.Globalization;
+
 /// <summary>
 /// The <see cref="Messages" /> class is a static class responsible for supplying all messages to
 /// the other components of the <see cref="DrsBasicDI" /> class library.
@@ -108,17 +110,17 @@ internal static class Messages
             if (resolvingType is not null)
             {
                 string resolvingTypeName = GetResolvingName(resolvingType);
-                return string.Format(message, resolvingTypeName, dependencyTypeName);
+                return string.Format(CultureInfo.InvariantCulture, message, resolvingTypeName, dependencyTypeName);
             }
             else
             {
-                return string.Format(message, dependencyTypeName);
+                return string.Format(CultureInfo.InvariantCulture, message, dependencyTypeName);
             }
         }
         else if (resolvingType is not null)
         {
             string resolvingTypeName = GetResolvingName(resolvingType);
-            return string.Format(message, resolvingTypeName);
+            return string.Format(CultureInfo.InvariantCulture, message, resolvingTypeName);
         }
         else
         {
@@ -142,7 +144,7 @@ internal static class Messages
     {
         string part1 = $"dependency type {dependencyTypeName}";
         string key = resolvingKey ?? EmptyKey;
-        string part2 = key == EmptyKey ? string.Empty : $" having resolving key \"{key}\"";
+        string part2 = string.IsNullOrEmpty(key) ? string.Empty : $" having resolving key \"{key}\"";
         return part1 + part2;
     }
 

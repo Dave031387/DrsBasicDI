@@ -116,17 +116,17 @@ internal sealed class ServiceLocater : IServiceLocater
                 }
                 catch (Exception ex)
                 {
-                    string msg = FormatMessage<T>(MsgUnableToConstructService, key);
-                    throw new ServiceLocaterException(msg, ex);
+                    string msg1 = FormatMessage<T>(MsgUnableToConstructService, key);
+                    throw new ServiceLocaterException(msg1, ex);
                 }
 
-                string msg1 = FormatMessage<T>(MsgUnableToConstructService, key);
-                throw new ServiceLocaterException(msg1);
+                string msg2 = FormatMessage<T>(MsgUnableToConstructService, key);
+                throw new ServiceLocaterException(msg2);
             }
         }
 
-        string msg2 = FormatMessage<T>(MsgServiceNotRegistered, key);
-        throw new ServiceLocaterException(msg2);
+        string msg3 = FormatMessage<T>(MsgServiceNotRegistered, key);
+        throw new ServiceLocaterException(msg3);
     }
 
     /// <summary>

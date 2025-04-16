@@ -19,6 +19,7 @@ internal interface IDependencyResolver : IDisposable
     /// <returns>
     /// An instance of the resolving class type.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     public TDependency Resolve<TDependency>(string key) where TDependency : class;
 
     /// <summary>
@@ -28,5 +29,6 @@ internal interface IDependencyResolver : IDisposable
     /// <param name="resolvingObjectsService">
     /// The scoped <see cref="IResolvingObjectsService" /> instance to be set.
     /// </param>
+    /// <exception cref="DependencyInjectionException" />
     public void SetScopedService(IResolvingObjectsService resolvingObjectsService);
 }

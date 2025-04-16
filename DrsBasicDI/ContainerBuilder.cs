@@ -15,7 +15,7 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// A boolean flag that gets set to <see langword="true" /> once the <see cref="IContainer" />
     /// object has been built.
     /// </summary>
-    private bool _containerHasBeenBuilt = false;
+    private bool _containerHasBeenBuilt;
 
     /// <summary>
     /// Default constructor for the <see cref="ContainerBuilder" /> class.
@@ -82,9 +82,11 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddDependency(Func<DependencyBuilder, DependencyBuilder> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew).Build();
         DependencyList.Add(dependency);
@@ -105,9 +107,11 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddDependency<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithDependencyType<TDependency>()
@@ -135,11 +139,13 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddDependency<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithDependencyType<TDependency>()
@@ -159,9 +165,11 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddScoped(Func<DependencyBuilder, DependencyBuilder> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithLifetime(DependencyLifetime.Scoped)
@@ -184,9 +192,11 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddScoped<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithDependencyType<TDependency>()
@@ -246,11 +256,13 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddScoped<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithDependencyType<TDependency>()
@@ -271,9 +283,11 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddSingleton(Func<DependencyBuilder, DependencyBuilder> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithLifetime(DependencyLifetime.Singleton)
@@ -296,9 +310,11 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddSingleton<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithDependencyType<TDependency>()
@@ -358,11 +374,13 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddSingleton<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithDependencyType<TDependency>()
@@ -383,9 +401,11 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddTransient(Func<DependencyBuilder, DependencyBuilder> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithLifetime(DependencyLifetime.Transient)
@@ -408,9 +428,11 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddTransient<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithDependencyType<TDependency>()
@@ -470,11 +492,13 @@ public sealed class ContainerBuilder : IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
     /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddTransient<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency
     {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         CheckForContainerAlreadyBuilt();
         IDependency dependency = builder(DependencyBuilder.CreateNew)
             .WithDependencyType<TDependency>()

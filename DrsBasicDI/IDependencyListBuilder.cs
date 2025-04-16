@@ -20,5 +20,6 @@ internal interface IDependencyListBuilder
     /// <param name="dependency">
     /// The <see cref="IDependency" /> object to be added to the list of dependencies.
     /// </param>
+    /// <exception cref="ContainerBuildException" />
     public void Add(IDependency dependency);
 }

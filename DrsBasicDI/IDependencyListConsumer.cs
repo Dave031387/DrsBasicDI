@@ -23,6 +23,7 @@ internal interface IDependencyListConsumer
     /// The <see cref="IDependency" /> instance corresponding to the given dependency type
     /// <typeparamref name="TDependency" /> and <paramref name="key" /> value.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     public IDependency Get<TDependency>(string key) where TDependency : class;
 
     /// <summary>
@@ -40,5 +41,6 @@ internal interface IDependencyListConsumer
     /// The <see cref="IDependency" /> instance corresponding to the given
     /// <paramref name="dependencyType" /> and <paramref name="key" /> value.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     public IDependency Get(Type dependencyType, string key);
 }

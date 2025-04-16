@@ -16,6 +16,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddDependency(Func<DependencyBuilder, DependencyBuilder> builder);
 
     /// <summary>
@@ -32,6 +34,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddDependency<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class;
 
     /// <summary>
@@ -53,6 +57,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddDependency<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency;
@@ -67,6 +73,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddScoped(Func<DependencyBuilder, DependencyBuilder> builder);
 
     /// <summary>
@@ -83,6 +91,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddScoped<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class;
 
     /// <summary>
@@ -100,6 +110,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddScoped<TDependency, TResolving>()
         where TDependency : class
         where TResolving : class, TDependency;
@@ -123,6 +134,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddScoped<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency;
@@ -137,6 +150,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddSingleton(Func<DependencyBuilder, DependencyBuilder> builder);
 
     /// <summary>
@@ -153,6 +168,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddSingleton<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class;
 
     /// <summary>
@@ -170,6 +187,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddSingleton<TDependency, TResolving>()
         where TDependency : class
         where TResolving : class, TDependency;
@@ -193,6 +211,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddSingleton<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency;
@@ -207,6 +227,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddTransient(Func<DependencyBuilder, DependencyBuilder> builder);
 
     /// <summary>
@@ -223,6 +245,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddTransient<TDependency>(Func<DependencyBuilder, DependencyBuilder> builder) where TDependency : class;
 
     /// <summary>
@@ -240,6 +264,7 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddTransient<TDependency, TResolving>()
         where TDependency : class
         where TResolving : class, TDependency;
@@ -263,6 +288,8 @@ public interface IContainerBuilder
     /// <returns>
     /// The updated <see cref="IContainerBuilder" /> object.
     /// </returns>
+    /// <exception cref="ArgumentNullException" />
+    /// <exception cref="ContainerBuildException" />
     public IContainerBuilder AddTransient<TDependency, TResolving>(Func<DependencyBuilder, DependencyBuilder> builder)
         where TDependency : class
         where TResolving : class, TDependency;
@@ -274,5 +301,6 @@ public interface IContainerBuilder
     /// A new <see cref="IContainer" /> object containing all the <see cref="IDependency" /> objects
     /// that were added.
     /// </returns>
+    /// <exception cref="ContainerBuildException" />
     public IContainer Build();
 }

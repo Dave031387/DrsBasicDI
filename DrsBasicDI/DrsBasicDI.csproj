@@ -7,20 +7,20 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Basic dependency injection container for .NET</Title>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>David R Slocum</Authors>
     <Description>A basic dependency injection container that supports constructor injection of transient, singleton, and scoped services as well as keyed services (multiple implementations of the same service type) within a small- to medium-sized .NET project.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Dave031387/DrsBasicDI</RepositoryUrl>
     <PackageTags>c#; csharp; DI; IoC; dependency; injection</PackageTags>
     <PackageReleaseNotes>This is the initial release of this package.</PackageReleaseNotes>
-    <PackageOutputPath>$(SolutionDir.Replace("Source\Repos\DrsBasicDI\", "Packages"))</PackageOutputPath>
+    <PackageOutputPath>$(UserProfile)\Packages\</PackageOutputPath>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisLevel>latest-all</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>

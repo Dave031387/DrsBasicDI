@@ -21,5 +21,6 @@ public interface IScope : IDisposable
     /// resolving <paramref name="key" />, or <see langword="null" /> if the resolving object can't
     /// be determined.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     public TDependency Resolve<TDependency>(string key = EmptyKey) where TDependency : class;
 }

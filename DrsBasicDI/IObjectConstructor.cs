@@ -28,5 +28,6 @@ internal interface IObjectConstructor
     /// <returns>
     /// The resolving object cast to the dependency type <typeparamref name="TDependency" />.
     /// </returns>
+    /// <exception cref="DependencyInjectionException" />
     public TDependency Construct<TDependency>(ConstructorInfo constructorInfo, object[] parameterValues, string key) where TDependency : class;
 }

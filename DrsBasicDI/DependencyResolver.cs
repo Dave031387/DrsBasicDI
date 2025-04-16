@@ -23,7 +23,7 @@ internal sealed class DependencyResolver : IDependencyResolver
     /// This flag is used to prevent multiple calls to the <see cref="Dispose()" /> method from
     /// causing any unforeseen issues.
     /// </remarks>
-    private bool _isDisposed = false;
+    private bool _isDisposed;
 
     /// <summary>
     /// Create a new instance of the <see cref="DependencyResolver" /> class.
